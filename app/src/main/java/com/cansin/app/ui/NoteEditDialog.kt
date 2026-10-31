@@ -117,7 +117,7 @@ fun NoteEditDialog(
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun TimePickerDialog(initial: Long, reference: Long, onPicked: (Long) -> Unit, onDismiss: () -> Unit) {
+internal fun TimePickerDialog(initial: Long, reference: Long, onPicked: (Long) -> Unit, onDismiss: () -> Unit) {
     val zone = ZoneId.systemDefault()
     val start = Instant.ofEpochMilli(initial).atZone(zone)
     val state = rememberTimePickerState(

@@ -60,6 +60,7 @@ fun CounterScreen(
     defaultSize: BeerSize,
     onOpenSettings: () -> Unit,
     onOpenTab: () -> Unit,
+    promilleCard: @Composable () -> Unit,
 ) {
     val state by viewModel.state.collectAsState()
     var pickingSize by rememberSaveable { mutableStateOf(false) }
@@ -111,6 +112,7 @@ fun CounterScreen(
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.spacedBy(24.dp, Alignment.CenterVertically),
         ) {
+            promilleCard()
             Text(
                 text = stringResource(if (state.sessionActive) R.string.counter_label else R.string.no_session),
                 style = MaterialTheme.typography.titleMedium,

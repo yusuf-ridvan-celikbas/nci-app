@@ -9,15 +9,31 @@ import androidx.compose.material3.dynamicDarkColorScheme
 import androidx.compose.material3.dynamicLightColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.Immutable
+import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import com.cansin.app.prefs.Accent
 
 val dynamicColorAvailable = Build.VERSION.SDK_INT >= Build.VERSION_CODES.S
 
+@Immutable
+data class AlertColors(val danger: Color, val onDanger: Color, val caution: Color, val onCaution: Color)
+
+val LocalAlertColors = staticCompositionLocalOf { alertColors(dark = false) }
+
+fun alertColors(dark: Boolean): AlertColors {
+    val danger = if (dark) Palettes.danger.dark else Palettes.danger.light
+    val caution = if (dark) Palettes.caution.dark else Palettes.caution.light
+    return AlertColors(Color(danger.primary), Color(danger.onPrimary), Color(caution.container), Color(caution.onContainer))
+}
+
 @Composable
 fun CansinTheme(dark: Boolean, accent: Accent, content: @Composable () -> Unit) {
-    MaterialTheme(colorScheme = colorScheme(LocalContext.current, accent, dark), content = content)
+    CompositionLocalProvider(LocalAlertColors provides alertColors(dark)) {
+        MaterialTheme(colorScheme = colorScheme(LocalContext.current, accent, dark), content = content)
+    }
 }
 
 fun colorScheme(context: Context, accent: Accent, dark: Boolean): ColorScheme =

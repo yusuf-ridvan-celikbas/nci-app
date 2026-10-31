@@ -1,6 +1,6 @@
 # Progress
 
-Current phase: **P6 done (P5+P6 not yet tested on device) → awaiting review before P7**
+Current phase: **P7 done (installed on device, awaiting user check) → awaiting review before P8**
 
 ## Phases
 - [x] Setup (project, wrapper, git, CLAUDE.md)
@@ -10,7 +10,7 @@ Current phase: **P6 done (P5+P6 not yet tested on device) → awaiting review be
 - [x] P4 Reminder
 - [x] P5 Notes / tab
 - [x] P6 Beer size
-- [ ] P7 Promil estimator
+- [x] P7 Promil estimator
 - [ ] P8 Versus
 - [ ] P9 Water reminder
 - [ ] P10 History & stats
@@ -31,6 +31,8 @@ Current phase: **P6 done (P5+P6 not yet tested on device) → awaiting review be
 - `domain/NoteRules.kt` (text/person caps, amount parse/format in minor units, pickTime across midnight); NoteDao; repository addNote/updateNote/deleteNote
 - `ui/NotesScreen.kt` (Tab screen: list, total, quick-add text+amount), `ui/NoteEditDialog.kt` (text/person/amount/time picker, delete), NotesViewModel; MainActivity Screen enum COUNTER/TAB/SETTINGS
 - `domain/BeerSize.kt` (BeerSize, BeerRules: presets 33/50 cl, cl/ABV parse+format, clamp); `ui/BeerSizeDialog.kt` (shared by Settings default + long-press +1); repository `addBeer(size)` falls back to `defaultSize` lambda (Settings)
+- `domain/BodyProfile.kt` (Sex, License, ranges, parse), `domain/Promille.kt` (PromilleModel: grams, Watson TBW, drinkEnd, 1-min simulation → current/peak/zeroAt), `domain/Warnings.kt` (TrDrivingLaw config, WarningRules → Warning list)
+- `ui/PromilleScreen.kt` (PromilleTicker, PromilleCard on counter, PromilleScreen with beer list, BeerEditDialog, WarningBanner + taxi/112 intents), `ui/PromilleViewModel.kt`, `ui/ProfileDialog.kt`; `ui/theme/Theme.kt` LocalAlertColors (fixed danger=RED, caution=AMBER palettes)
 - `ui/ReminderSection.kt` settings section incl. POST_NOTIFICATIONS rationale + request
 - `CansinApp` = manual DI (appScope, db, SettingsStore, Reminders, SessionRepository with SessionListener → widget refresh + reminders)
 - Tests: app/src/test (fake DAOs, SessionRepositoryTest, SessionRulesTest, SettingsTest, PaletteContrastTest, WidgetLayoutTest, ReminderPolicyTest, NoteRepositoryTest, NoteRulesTest)
@@ -57,6 +59,12 @@ Current phase: **P6 done (P5+P6 not yet tested on device) → awaiting review be
 - P5: Amount = Long minor units (cents/kuruş), no currency; input accepts "12.5"/"12,50", max 1,000,000.00, ≤2 decimals; shown with locale decimal separator. (Chosen while user away – confirm.)
 - P5: A note with no open session starts one. Session is "empty" only with 0 beers AND 0 notes (undo/−1/delete/end use this). Notes count as activity for 6 h auto-close.
 - P5: Edited time stored in editedTime (createdAt kept); picker time resolves to the date closest to createdAt (handles midnight). Notes list ordered by COALESCE(editedTime, createdAt). Note delete added (not in spec, needed for typos).
+- P7: BodyProfile in DataStore (profile_* keys, invalid/incomplete → null); prompt card on counter until "Not now" (profile_prompt_dismissed); editable in Settings → Blood alcohol estimate, or from the estimate screen; "Remove profile" clears keys.
+- P7: Model per spec. finishedAt missing → min(at+20 min, next beer's at) (conservative). finishedAt < at treated as at. Peak/zeroAt are over the projected curve (incl. still-absorbing drinks); simulation capped at 72 h. ‰ rounded up with 1e-9 guard.
+- P7: Recompute on every beers/profile change and on a 1-min ticker that runs only while the activity is resumed (onResume/onPause flag) and the counter or estimate screen is showing. No background work.
+- P7: Warnings decided by the app's effective language (Configuration locale == tr), user choice. EN shows only the generic line (incl. no health cautions – per spec; flag). Evening greeting changed to neutral "İyi akşamlar! Su içmeyi unutma." (user choice, store policy). Over-limit "Taksi/ulaşım" = ACTION_VIEW geo:0,0?q=taksi; poisoning = ACTION_DIAL tel:112 (no CALL_PHONE). Both catch ActivityNotFoundException.
+- P7: TrDrivingLaw: lawVersion "TR-KTK-48", lastVerified "unverified"; limits CANDIDATE 0.20, COMMERCIAL 0.20, NORMAL 0.50 — must verify before release.
+- P7: Beer edit (start, finish, size/ABV) validated in repository: at ≤ now, finishedAt clamped to [at, now], size clamped.
 - P6: Size stored in ml (cl input, ≤1 decimal, 10–200 cl); ABV 0–20 %, ≤1 decimal. Prefs default_size_ml/default_abv, clamped on read and in repository. Widget and reminder "another" use the default size. Long-press +1 → dialog (33/50/custom + ABV prefilled with default) → adds that beer (normal undo snackbar). +1 is now a Box+combinedClickable (M3 Button has no long-press), with a11y long-click label.
 - P4: Repository emits events via SessionListener (onBeerAdded, onSessionClosed, onChanged), dispatched after the write lock is released, in order.
 - P4: Scheduling = AlarmManager.setAndAllowWhileIdle(RTC_WAKEUP), inexact; no WorkManager, no SCHEDULE_EXACT_ALARM. One alarm PendingIntent (same action/request code) → reschedule replaces, no duplicates.
@@ -65,6 +73,10 @@ Current phase: **P6 done (P5+P6 not yet tested on device) → awaiting review be
 - P4: Notification: title = chosen app name, text localized; VISIBILITY_PRIVATE with public version "Reminder"; two channels (default, silent = IMPORTANCE_LOW) since channel sound can't change later. Actions verify session_id == open session, else ignored.
 - P4: "Yes, got another" sets finishedAt on the latest beer (only if unset) and adds a beer. Interval changes apply from the next scheduling.
 - P3: updatePeriodMillis=0 (no periodic wakeups). Widget picker label is static ("Counter"/"Sayaç"); in-widget title follows app name.
+
+## P7 report
+- Release APK 1.51 MB (+38 KB). Permissions unchanged (dial/maps via intents, no CALL_PHONE, no INTERNET). Lint clean except version notices. Tests: 78/78.
+- Security/privacy: BodyProfile is sensitive, stays in app-private DataStore (backup already excluded). Export/"Delete all data" not built yet (later phase) – must include profile wipe.
 
 ## P6 report
 - Release APK 1.47 MB (+1.4 KB). Permissions unchanged. Lint clean except version notices. Tests: 62/62. No new security surface (input validated + clamped). Not tested on device.
@@ -94,4 +106,6 @@ Current phase: **P6 done (P5+P6 not yet tested on device) → awaiting review be
 ## Open questions
 - Widget label/theme (P3) and notification title (P4) must read SettingsStore; on API 26–32 notifications need AppLocale.wrap(appContext) for language.
 - androidx.profileinstaller ProfileInstallReceiver is exported (DUMP-permission, adb-only). Keep or remove via manifest merge?
+- P7: EN locale shows no health cautions (spec says EN → generic only). Add EN "slow down / poisoning" without numbers?
+- P7: Verify TR limits (2026 bill may lower NORMAL to 0.20) and set lastVerified before release.
 - Release signing: no keystore yet; will use untracked signing.properties.

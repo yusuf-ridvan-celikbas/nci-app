@@ -14,6 +14,9 @@ import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
 import com.cansin.app.domain.BeerRules
 import com.cansin.app.domain.BeerSize
+import com.cansin.app.domain.BodyProfile
+import com.cansin.app.domain.License
+import com.cansin.app.domain.Sex
 import com.cansin.app.reminder.ReminderPolicy
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
@@ -33,6 +36,12 @@ private val REMINDER_INTERVAL = intPreferencesKey("reminder_interval_min")
 private val REMINDER_SILENT = booleanPreferencesKey("reminder_silent")
 private val DEFAULT_SIZE_ML = intPreferencesKey("default_size_ml")
 private val DEFAULT_ABV = doublePreferencesKey("default_abv")
+private val PROFILE_SEX = stringPreferencesKey("profile_sex")
+private val PROFILE_AGE = intPreferencesKey("profile_age")
+private val PROFILE_HEIGHT = intPreferencesKey("profile_height_cm")
+private val PROFILE_WEIGHT = intPreferencesKey("profile_weight_kg")
+private val PROFILE_LICENSE = stringPreferencesKey("profile_license")
+private val PROFILE_PROMPT_DISMISSED = booleanPreferencesKey("profile_prompt_dismissed")
 private val REMINDER_NEXT_AT = longPreferencesKey("reminder_next_at")
 private val REMINDER_SESSION = longPreferencesKey("reminder_session")
 private val REMINDER_STOPPED_SESSION = longPreferencesKey("reminder_stopped_session")
@@ -51,7 +60,20 @@ class SettingsStore(private val context: Context) {
             beerSize = BeerRules.clamp(
                 BeerSize(p[DEFAULT_SIZE_ML] ?: BeerSize.DEFAULT.sizeMl, p[DEFAULT_ABV] ?: BeerSize.DEFAULT.abv),
             ),
+            profile = readProfile(p),
+            profilePromptDismissed = p[PROFILE_PROMPT_DISMISSED] == true,
         )
+    }
+
+    private fun readProfile(p: Preferences): BodyProfile? {
+        val profile = BodyProfile(
+            sex = enumOr(p[PROFILE_SEX], Sex.UNSPECIFIED),
+            age = p[PROFILE_AGE] ?: return null,
+            heightCm = p[PROFILE_HEIGHT] ?: return null,
+            weightKg = p[PROFILE_WEIGHT] ?: return null,
+            license = enumOr(p[PROFILE_LICENSE], License.NONE),
+        )
+        return profile.takeIf { it.isValid }
     }
 
     val reminderState: Flow<ReminderState> = context.dataStore.data.map { p ->
@@ -72,6 +94,24 @@ class SettingsStore(private val context: Context) {
         it[DEFAULT_SIZE_ML] = clamped.sizeMl
         it[DEFAULT_ABV] = clamped.abv
     }
+
+    suspend fun setProfile(value: BodyProfile?) = edit {
+        if (value == null || !value.isValid) {
+            it.remove(PROFILE_SEX)
+            it.remove(PROFILE_AGE)
+            it.remove(PROFILE_HEIGHT)
+            it.remove(PROFILE_WEIGHT)
+            it.remove(PROFILE_LICENSE)
+        } else {
+            it[PROFILE_SEX] = value.sex.name
+            it[PROFILE_AGE] = value.age
+            it[PROFILE_HEIGHT] = value.heightCm
+            it[PROFILE_WEIGHT] = value.weightKg
+            it[PROFILE_LICENSE] = value.license.name
+        }
+    }
+
+    suspend fun dismissProfilePrompt() = edit { it[PROFILE_PROMPT_DISMISSED] = true }
 
     suspend fun setScheduledReminder(at: Long?, sessionId: Long?) = edit {
         it.putOrRemove(REMINDER_NEXT_AT, at)

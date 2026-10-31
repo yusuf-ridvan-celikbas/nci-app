@@ -72,5 +72,8 @@ object Palettes {
         inverseSurface = 0xFFE5E2E1, inverseOnSurface = 0xFF303030,
     )
 
+    val danger: AccentPalette get() = accents.getValue(Accent.RED)
+    val caution: AccentPalette get() = accents.getValue(Accent.AMBER)
+
     fun of(accent: Accent): AccentPalette = accents[accent] ?: accents.getValue(Accent.AMBER)
 }

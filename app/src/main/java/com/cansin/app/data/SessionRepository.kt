@@ -39,6 +39,8 @@ class SessionRepository(
 
     fun notes(sessionId: Long): Flow<List<Note>> = notes.observe(sessionId)
 
+    fun beers(sessionId: Long): Flow<List<BeerEvent>> = beers.observe(sessionId)
+
     suspend fun snapshot(): CounterSnapshot {
         val session = sessions.open() ?: return CounterSnapshot(0, null)
         val latest = beers.latest(session.id)
@@ -94,6 +96,14 @@ class SessionRepository(
                 amountMinor = note.amountMinor?.takeIf { NoteRules.isValidAmount(it) },
             ),
         )
+    }
+
+    suspend fun updateBeer(event: BeerEvent) = write {
+        val now = clock()
+        val size = BeerRules.clamp(BeerSize(event.sizeMl, event.abv))
+        val at = event.at.coerceAtMost(now)
+        val finishedAt = event.finishedAt?.coerceIn(at, now)
+        beers.update(event.id, at, finishedAt, size.sizeMl, size.abv)
     }
 
     suspend fun deleteNote(note: Note) = write {

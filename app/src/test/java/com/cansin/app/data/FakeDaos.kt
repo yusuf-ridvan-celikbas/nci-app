@@ -36,6 +36,13 @@ class FakeBeerDao : BeerDao {
     }
     override suspend fun count(sessionId: Long) = rows.value.count { it.sessionId == sessionId }
     override fun observeCount(sessionId: Long): Flow<Int> = rows.map { list -> list.count { it.sessionId == sessionId } }
+    override fun observe(sessionId: Long): Flow<List<BeerEvent>> =
+        rows.map { list -> list.filter { it.sessionId == sessionId }.sortedWith(compareBy({ it.at }, { it.id })) }
+    override suspend fun update(id: Long, at: Long, finishedAt: Long?, sizeMl: Int, abv: Double): Int {
+        val before = rows.value
+        rows.value = before.map { if (it.id == id) it.copy(at = at, finishedAt = finishedAt, sizeMl = sizeMl, abv = abv) else it }
+        return if (before.any { it.id == id }) 1 else 0
+    }
 }
 
 class FakeNoteDao : NoteDao {

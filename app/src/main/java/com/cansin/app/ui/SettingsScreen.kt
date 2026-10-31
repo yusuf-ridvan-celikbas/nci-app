@@ -37,6 +37,7 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
 import com.cansin.app.R
 import com.cansin.app.domain.BeerSize
+import com.cansin.app.domain.BodyProfile
 import com.cansin.app.prefs.Accent
 import com.cansin.app.prefs.AppName
 import com.cansin.app.prefs.Language
@@ -54,6 +55,7 @@ class SettingsActions(
     val onReminderSilent: (Boolean) -> Unit,
     val onOpenNotificationSettings: () -> Unit,
     val onBeerSize: (BeerSize) -> Unit,
+    val onProfile: (BodyProfile?) -> Unit,
 )
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -96,6 +98,8 @@ fun SettingsScreen(
             HorizontalDivider(Modifier.padding(vertical = 16.dp))
             BeerSection(settings.beerSize, actions.onBeerSize)
             HorizontalDivider(Modifier.padding(vertical = 16.dp))
+            ProfileSection(settings.profile, actions.onProfile)
+            HorizontalDivider(Modifier.padding(vertical = 16.dp))
             ReminderSection(settings, notificationAccess, actions)
         }
     }
@@ -131,6 +135,31 @@ private fun BeerSection(size: BeerSize, onChange: (BeerSize) -> Unit) {
 }
 
 @Composable
+private fun ProfileSection(profile: BodyProfile?, onChange: (BodyProfile?) -> Unit) {
+    var editing by rememberSaveable { mutableStateOf(false) }
+    SectionHeader(R.string.section_estimate)
+    Column(
+        Modifier.fillMaxWidth().heightIn(min = 48.dp).clickable(role = Role.Button) { editing = true }.padding(vertical = 8.dp),
+    ) {
+        Text(stringResource(R.string.profile_title), style = MaterialTheme.typography.titleSmall)
+        Text(
+            if (profile == null) stringResource(R.string.profile_not_set) else stringResource(profile.license.label),
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+        )
+    }
+    if (editing) {
+        ProfileDialog(
+            initial = profile,
+            onSave = {
+                onChange(it)
+                editing = false
+            },
+            onDismiss = { editing = false },
+        )
+    }
+}
+
+@Composable
 internal fun SectionHeader(@StringRes title: Int) {
     Text(
         stringResource(title),
@@ -150,18 +179,21 @@ private fun <T> ChoiceGroup(
 ) {
     Text(stringResource(title), style = MaterialTheme.typography.titleSmall, modifier = Modifier.padding(top = 8.dp))
     Column(Modifier.selectableGroup()) {
-        options.forEach { option ->
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .heightIn(min = 48.dp)
-                    .selectable(selected = option == selected, role = Role.RadioButton, onClick = { onSelect(option) }),
-                verticalAlignment = Alignment.CenterVertically,
-            ) {
-                RadioButton(selected = option == selected, onClick = null)
-                Spacer(Modifier.width(12.dp))
-                Text(stringResource(label(option)))
-            }
-        }
+        options.forEach { option -> RadioRow(stringResource(label(option)), option == selected) { onSelect(option) } }
+    }
+}
+
+@Composable
+internal fun RadioRow(text: String, selected: Boolean, onClick: () -> Unit) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .heightIn(min = 48.dp)
+            .selectable(selected = selected, role = Role.RadioButton, onClick = onClick),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        RadioButton(selected = selected, onClick = null)
+        Spacer(Modifier.width(12.dp))
+        Text(text)
     }
 }

@@ -217,4 +217,14 @@ class SessionRepositoryTest {
         assertEquals(2_000, event.sizeMl)
         assertEquals(20.0, event.abv, 0.0)
     }
+
+    @Test
+    fun updateBeerClampsTimesAndSize() = runBlocking {
+        val beer = repo.addBeer()
+        repo.updateBeer(beer.copy(at = now + 60_000, finishedAt = beer.at - 60_000, sizeMl = 5, abv = 50.0))
+        val stored = beers.rows.value.single()
+        assertEquals(now, stored.at)
+        assertEquals(now, stored.finishedAt)
+        assertEquals(BeerSize(100, 20.0), BeerSize(stored.sizeMl, stored.abv))
+    }
 }

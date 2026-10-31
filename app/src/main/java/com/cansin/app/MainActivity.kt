@@ -36,6 +36,11 @@ import com.cansin.app.ui.CounterViewModel
 import com.cansin.app.ui.NotesScreen
 import com.cansin.app.ui.NotesViewModel
 import com.cansin.app.ui.NotificationAccess
+import com.cansin.app.ui.ProfileDialog
+import com.cansin.app.ui.PromilleCard
+import com.cansin.app.ui.PromilleScreen
+import com.cansin.app.ui.PromilleTicker
+import com.cansin.app.ui.PromilleViewModel
 import com.cansin.app.ui.SettingsActions
 import com.cansin.app.ui.SettingsScreen
 import com.cansin.app.ui.theme.CansinTheme
@@ -45,13 +50,15 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 
-private enum class Screen { COUNTER, TAB, SETTINGS }
+private enum class Screen { COUNTER, TAB, SETTINGS, PROMILLE }
 
 class MainActivity : ComponentActivity() {
     private val app get() = application as CansinApp
     private val store: SettingsStore get() = app.settingsStore
     private val counter: CounterViewModel by viewModels { CounterViewModel.factory(app.sessionRepository) }
     private val notes: NotesViewModel by viewModels { NotesViewModel.factory(app.sessionRepository) }
+    private val promille: PromilleViewModel by viewModels { PromilleViewModel.factory(app.sessionRepository, app.settingsStore) }
+    private var resumed by mutableStateOf(false)
     private var notificationAccess by mutableStateOf(NotificationAccess(permissionGranted = false, enabled = false))
 
     override fun attachBaseContext(newBase: Context) {
@@ -83,6 +90,12 @@ class MainActivity : ComponentActivity() {
             checkSelfPermission(Manifest.permission.POST_NOTIFICATIONS) == PackageManager.PERMISSION_GRANTED
         val enabled = getSystemService(NotificationManager::class.java).areNotificationsEnabled()
         notificationAccess = NotificationAccess(granted, enabled)
+        resumed = true
+    }
+
+    override fun onPause() {
+        resumed = false
+        super.onPause()
     }
 
     @Composable
@@ -113,14 +126,37 @@ class MainActivity : ComponentActivity() {
                     actions = settingsActions(onBack = { screen = Screen.COUNTER }),
                 )
                 screen == Screen.TAB -> NotesScreen(notes, onBack = { screen = Screen.COUNTER })
+                screen == Screen.PROMILLE -> {
+                    PromilleTicker(promille, resumed)
+                    PromilleScreen(promille, onBack = { screen = Screen.COUNTER })
+                }
                 else -> CounterScreen(
                     viewModel = counter,
                     title = stringResource(settings.appName.label),
                     defaultSize = settings.beerSize,
                     onOpenSettings = { screen = Screen.SETTINGS },
                     onOpenTab = { screen = Screen.TAB },
+                    promilleCard = { PromilleSlot(onOpen = { screen = Screen.PROMILLE }) },
                 )
             }
+        }
+    }
+
+    @Composable
+    private fun PromilleSlot(onOpen: () -> Unit) {
+        val state by promille.state.collectAsState()
+        var settingUp by rememberSaveable { mutableStateOf(false) }
+        PromilleTicker(promille, resumed)
+        PromilleCard(state, onOpen, onSetUp = { settingUp = true }, onDismissPrompt = { promille.dismissPrompt() })
+        if (settingUp) {
+            ProfileDialog(
+                initial = null,
+                onSave = {
+                    promille.saveProfile(it)
+                    settingUp = false
+                },
+                onDismiss = { settingUp = false },
+            )
         }
     }
 
@@ -149,6 +185,7 @@ class MainActivity : ComponentActivity() {
             )
         },
         onBeerSize = { size -> update { setBeerSize(size) } },
+        onProfile = { profile -> update { setProfile(profile) } },
     )
 
     private fun update(block: suspend SettingsStore.() -> Unit) {

@@ -64,4 +64,10 @@ interface BeerDao {
 
     @Query("SELECT COUNT(*) FROM beer_event WHERE sessionId = :sessionId")
     fun observeCount(sessionId: Long): Flow<Int>
+
+    @Query("SELECT * FROM beer_event WHERE sessionId = :sessionId ORDER BY at, id")
+    fun observe(sessionId: Long): Flow<List<BeerEvent>>
+
+    @Query("UPDATE beer_event SET at = :at, finishedAt = :finishedAt, sizeMl = :sizeMl, abv = :abv WHERE id = :id")
+    suspend fun update(id: Long, at: Long, finishedAt: Long?, sizeMl: Int, abv: Double): Int
 }
