@@ -25,6 +25,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.staticCompositionLocalOf
@@ -58,6 +59,7 @@ import java.util.Date
 fun NotesScreen(viewModel: NotesViewModel, onBack: () -> Unit) {
     val state by viewModel.state.collectAsState()
     var editing by remember { mutableStateOf<Note?>(null) }
+    var settling by remember { mutableStateOf(false) }
     val format = rememberAmountFormat()
 
     Scaffold(
@@ -68,6 +70,9 @@ fun NotesScreen(viewModel: NotesViewModel, onBack: () -> Unit) {
                     IconButton(onClick = onBack) {
                         Icon(painterResource(R.drawable.ic_arrow_back), stringResource(R.string.back))
                     }
+                },
+                actions = {
+                    TextButton(onClick = { settling = true }, enabled = state.totals.total > 0) { Text(stringResource(R.string.settle_title)) }
                 },
             )
         },
@@ -98,6 +103,8 @@ fun NotesScreen(viewModel: NotesViewModel, onBack: () -> Unit) {
             }
         }
     }
+
+    if (settling) SettleDialog(state, onDismiss = { settling = false })
 
     editing?.let { note ->
         NoteEditDialog(

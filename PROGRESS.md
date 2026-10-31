@@ -1,6 +1,6 @@
 # Progress
 
-Current phase: **P14–P17 done on feature/p14-plus (next P18 PIN lock). Earlier: P12 iOS port on branch feature/p12-ios (64203b3); core logic tested on Linux Swift, app/widget NOT compiled yet (needs a Mac + Xcode). Next: build on a Mac, fix compile issues, device test. P13 = offline result cards (Option A) on branch feature/p13-cards: Android done, iOS core codec done, iOS UI for it not yet.**
+Current phase: **P14–P19 done (feature/p18-pin; next P20 stats extras). Earlier: P12 iOS port on branch feature/p12-ios (64203b3); core logic tested on Linux Swift, app/widget NOT compiled yet (needs a Mac + Xcode). Next: build on a Mac, fix compile issues, device test. P13 = offline result cards (Option A) on branch feature/p13-cards: Android done, iOS core codec done, iOS UI for it not yet.**
 
 ## Phases
 - [x] Setup (project, wrapper, git, CLAUDE.md)
@@ -19,7 +19,7 @@ Current phase: **P14–P17 done on feature/p14-plus (next P18 PIN lock). Earlier
 - [x] P13 Friends, offline (Option A result cards; Android done, iOS core only) (design first)
 - Plan P14–P23 (2026-11-01, user-approved; file ~/.claude/plans/bright-swimming-diffie.md), branch feature/p14-plus:
   - [x] P14 Currency  - [x] P15 Quick tile + shortcuts  - [x] P16 Care messages  - [x] P17 Self-set limits
-  - [ ] P18 PIN lock  - [ ] P19 Settle up  - [ ] P20 Stats extras  - [ ] checkpoint: phone test + merge
+  - [x] P18 PIN lock  - [x] P19 Settle up (branch feature/p18-pin, on top of p14-plus)  - [ ] P20 Stats extras  - [ ] checkpoint: phone test + merge
   - [ ] P21 Restore backup  - [ ] P22 Other drinks (DB v4)  - [ ] P23 Group mode 2–6 (DB v5, no winner/race)
 
 ## Code map
@@ -102,6 +102,11 @@ Current phase: **P14–P17 done on feature/p14-plus (next P18 PIN lock). Earlier
 - P16/P17: `domain/CareRules.kt` + `ui/CareViewModel.kt`, `ui/CareCard.kt` (one card in the promille slot of counter + versus), `ui/CareSection.kt` (Settings → Looking after you). Priority: own beer limit > own budget > late (default 01:00, choices 22–03, until 06:00; "Not now" = 1 h) > slow down (≥5 of my beers; no numbers, also covers EN health caution). Limits work even with kind reminders off. Budget compares my spend (solo: whole tab; versus: my side + shared). "Way home": saved home text → https maps transit directions; none → geo search "bus stop". Taxi = existing geo search. Prefs: care_enabled, care_late_hour, home_place (≤100, no control chars), beer_limit (1–20), budget_minor.
 - Release APK 1.67 MB (+23 KB). Permissions unchanged, no INTERNET. Lint 0 errors. Tests 131/131. Not tested on device.
 - Remote added: origin https://github.com/yusuf-ridvan-celikbas/nci-app.git (nothing pushed yet).
+
+## P18–P19 report (2026-11-01)
+- P18: `domain/PinRules.kt` (4–6 digits, PBKDF2-SHA256 100k iterations, 16-byte salt, constant-time compare; backoff after 5 wrong: 30 s doubling, max 15 min; relock after 1 min in background / cold start / clock back), `system/AppLock.kt` (persisted wrong-try counter, process-level unlocked flag), `ui/LockScreen.kt` (forgot → delete all data, user-approved), `ui/PinSection.kt` (set / change / remove need current PIN). PIN on: recents preview off (API 33+), widget + tile show ••• and only open the app (option, default on), widget actions ignored. It's a privacy screen, not encryption (data already app-private, no backup). Delete-all removes the PIN.
+- P19: `domain/SettleRules.kt` (per-person totals case-insensitive A–Z, unnamed last; versus shared 50/50, odd cent to red; even split rounded up), `ui/SettleDialog.kt` (Tab → Settle up; share as text).
+- Release APK 1.69 MB. Permissions unchanged. Lint 0 errors. Tests 139/139. Not tested on device.
 
 ## P13 report (2026-10-31) — offline result cards, no network
 - User: "no internet, no privacy worries" → Option A. INTERNET permission still absent (verified merged release manifest).

@@ -288,4 +288,17 @@
     <string name="widget_hidden">•••</string>
     <string name="widget_hidden_description">Hidden. Open the app to see.</string>
     <string name="widget_open_app">Open the app</string>
+    <string name="sign_minus" translatable="false">−</string>
+    <string name="sign_plus" translatable="false">+</string>
+    <string name="settle_title">Settle up</string>
+    <string name="settle_unnamed">No name</string>
+    <string name="settle_empty">No amounts on the tab yet.</string>
+    <string name="settle_split_shared">Split shared items 50/50</string>
+    <string name="settle_split_evenly">Split the total evenly</string>
+    <plurals name="settle_people">
+        <item quantity="one">%d person</item>
+        <item quantity="other">%d people</item>
+    </plurals>
+    <string name="settle_each">%s each</string>
+    <string name="settle_share">Share</string>
 </resources>

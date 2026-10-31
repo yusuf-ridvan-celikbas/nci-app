@@ -282,4 +282,15 @@
     <string name="widget_hidden">•••</string>
     <string name="widget_hidden_description">Gizli. Görmek için uygulamayı aç.</string>
     <string name="widget_open_app">Uygulamayı aç</string>
+    <string name="settle_title">Hesaplaş</string>
+    <string name="settle_unnamed">İsimsiz</string>
+    <string name="settle_empty">Hesapta henüz tutar yok.</string>
+    <string name="settle_split_shared">Ortak kalemleri yarı yarıya böl</string>
+    <string name="settle_split_evenly">Toplamı eşit böl</string>
+    <plurals name="settle_people">
+        <item quantity="one">%d kişi</item>
+        <item quantity="other">%d kişi</item>
+    </plurals>
+    <string name="settle_each">kişi başı %s</string>
+    <string name="settle_share">Paylaş</string>
 </resources>
