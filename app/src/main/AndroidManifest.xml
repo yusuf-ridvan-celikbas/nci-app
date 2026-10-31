@@ -7,7 +7,7 @@
         android:allowBackup="false"
         android:dataExtractionRules="@xml/data_extraction_rules"
         android:fullBackupContent="false"
-        android:icon="@mipmap/ic_launcher_soy"
+        android:icon="@mipmap/ic_launcher"
         android:label="@string/name_soy"
         android:localeConfig="@xml/locales_config"
         android:supportsRtl="true"
@@ -21,7 +21,7 @@
             android:name=".LauncherSoy"
             android:enabled="true"
             android:exported="true"
-            android:icon="@mipmap/ic_launcher_soy"
+            android:icon="@mipmap/ic_launcher"
             android:label="@string/name_soy"
             android:targetActivity=".MainActivity">
             <intent-filter>
@@ -34,7 +34,7 @@
             android:name=".LauncherSalgam"
             android:enabled="false"
             android:exported="true"
-            android:icon="@mipmap/ic_launcher_salgam"
+            android:icon="@mipmap/ic_launcher"
             android:label="@string/name_salgam"
             android:targetActivity=".MainActivity">
             <intent-filter>
