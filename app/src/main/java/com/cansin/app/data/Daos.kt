@@ -1,10 +1,18 @@
 package com.cansin.app.data
 
 import androidx.room.Dao
+import androidx.room.Embedded
 import androidx.room.Insert
 import androidx.room.Query
 import androidx.room.Update
 import kotlinx.coroutines.flow.Flow
+
+data class SessionSummary(
+    @Embedded val session: Session,
+    val beers: Int,
+    val notes: Int,
+    val water: Int,
+)
 
 @Dao
 interface SessionDao {
@@ -25,6 +33,21 @@ interface SessionDao {
 
     @Update
     suspend fun update(session: Session)
+
+    @Query(
+        "SELECT s.*, " +
+            "(SELECT COUNT(*) FROM beer_event b WHERE b.sessionId = s.id) AS beers, " +
+            "(SELECT COUNT(*) FROM note n WHERE n.sessionId = s.id) AS notes, " +
+            "(SELECT COUNT(*) FROM water_event w WHERE w.sessionId = s.id) AS water " +
+            "FROM session s WHERE s.endedAt IS NOT NULL ORDER BY s.startedAt DESC",
+    )
+    fun observeHistory(): Flow<List<SessionSummary>>
+
+    @Query("SELECT * FROM session WHERE id = :id")
+    fun observe(id: Long): Flow<Session?>
+
+    @Query("DELETE FROM session WHERE id = :id AND endedAt IS NOT NULL")
+    suspend fun deleteEnded(id: Long): Int
 }
 
 @Dao
@@ -109,6 +132,9 @@ interface BeerDao {
 
     @Query("SELECT * FROM beer_event WHERE sessionId = :sessionId ORDER BY at, id")
     fun observe(sessionId: Long): Flow<List<BeerEvent>>
+
+    @Query("SELECT b.* FROM beer_event b JOIN session s ON s.id = b.sessionId WHERE s.endedAt IS NOT NULL ORDER BY b.at, b.id")
+    fun observeEnded(): Flow<List<BeerEvent>>
 
     @Query("UPDATE beer_event SET at = :at, finishedAt = :finishedAt, sizeMl = :sizeMl, abv = :abv WHERE id = :id")
     suspend fun update(id: Long, at: Long, finishedAt: Long?, sizeMl: Int, abv: Double): Int

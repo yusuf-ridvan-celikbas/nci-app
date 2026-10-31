@@ -21,6 +21,14 @@ class FakeSessionDao : SessionDao {
     override suspend fun update(session: Session) {
         rows.value = rows.value.map { if (it.id == session.id) session else it }
     }
+    override fun observeHistory(): Flow<List<SessionSummary>> =
+        rows.map { list -> list.filter { it.endedAt != null }.map { SessionSummary(it, 0, 0, 0) } }
+    override fun observe(id: Long): Flow<Session?> = rows.map { list -> list.firstOrNull { it.id == id } }
+    override suspend fun deleteEnded(id: Long): Int {
+        val before = rows.value.size
+        rows.value = rows.value.filterNot { it.id == id && it.endedAt != null }
+        return before - rows.value.size
+    }
 }
 
 class FakeBeerDao : BeerDao {
@@ -43,6 +51,7 @@ class FakeBeerDao : BeerDao {
     }
     override suspend fun count(sessionId: Long) = rows.value.count { it.sessionId == sessionId }
     override fun observeCount(sessionId: Long): Flow<Int> = rows.map { list -> list.count { it.sessionId == sessionId } }
+    override fun observeEnded(): Flow<List<BeerEvent>> = rows
     override fun observe(sessionId: Long): Flow<List<BeerEvent>> =
         rows.map { list -> list.filter { it.sessionId == sessionId }.sortedWith(compareBy({ it.at }, { it.id })) }
     override suspend fun update(id: Long, at: Long, finishedAt: Long?, sizeMl: Int, abv: Double): Int {

@@ -158,4 +158,33 @@
     <string name="water_count">Su: %1$d</string>
     <string name="water_add">Su +1</string>
     <string name="water_added">Su eklendi</string>
+    <string name="history_title">Geçmiş</string>
+    <string name="history_sessions">Oturumlar</string>
+    <string name="history_stats">İstatistikler</string>
+    <string name="history_empty">Henüz bitmiş oturum yok.</string>
+    <string name="history_versus_row">%1$s · Kapışma</string>
+    <plurals name="beers_count">
+        <item quantity="one">%1$d bira</item>
+        <item quantity="other">%1$d bira</item>
+    </plurals>
+    <plurals name="notes_count">
+        <item quantity="one">%1$d not</item>
+        <item quantity="other">%1$d not</item>
+    </plurals>
+    <string name="duration_value">%1$d sa %2$d dk</string>
+    <plurals name="stats_sessions">
+        <item quantity="one">%1$d oturum</item>
+        <item quantity="other">%1$d oturum</item>
+    </plurals>
+    <string name="stats_avg_beers">Oturum başına bira: %1$s</string>
+    <string name="stats_pace">Ortalama tempo: bira başına %1$s dk</string>
+    <string name="stats_water_ratio">Bira başına su: %1$s</string>
+    <string name="stats_chart_beers">Oturum başına bira (son 20)</string>
+    <string name="stats_chart_peak">Oturum başına tahmini en yüksek ‰</string>
+    <string name="stats_chart_description">Eskiden yeniye değerler: %1$s</string>
+    <string name="stats_peak_note">En yüksek değerler mevcut vücut profilini kullanır. Yalnızca kendi biraların sayılır.</string>
+    <string name="session_detail_title">Oturum</string>
+    <string name="detail_beers">Bira: %1$d</string>
+    <string name="delete_session_title">Bu oturum silinsin mi?</string>
+    <string name="delete_session_body">Biraları, suyu ve notları bu telefondan silinir. Geri alınamaz.</string>
 </resources>

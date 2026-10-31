@@ -33,6 +33,9 @@ import com.cansin.app.system.LauncherAlias
 import com.cansin.app.ui.AgeGateScreen
 import com.cansin.app.ui.CounterScreen
 import com.cansin.app.ui.CounterViewModel
+import com.cansin.app.ui.HistoryScreen
+import com.cansin.app.ui.HistoryViewModel
+import com.cansin.app.ui.SessionDetailScreen
 import com.cansin.app.ui.NotesScreen
 import com.cansin.app.ui.NotesViewModel
 import com.cansin.app.ui.NotificationAccess
@@ -57,7 +60,7 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 
-private enum class Screen { COUNTER, TAB, SETTINGS, PROMILLE }
+private enum class Screen { COUNTER, TAB, SETTINGS, PROMILLE, HISTORY, DETAIL }
 
 class MainActivity : ComponentActivity() {
     private val app get() = application as CansinApp
@@ -67,6 +70,7 @@ class MainActivity : ComponentActivity() {
     private val promille: PromilleViewModel by viewModels { PromilleViewModel.factory(app.sessionRepository, app.settingsStore) }
     private val versus: VersusViewModel by viewModels { VersusViewModel.factory(app.sessionRepository, app.friendRepository) }
     private val water: WaterViewModel by viewModels { WaterViewModel.factory(app.sessionRepository, app.settingsStore) }
+    private val history: HistoryViewModel by viewModels { HistoryViewModel.factory(app.historyRepository, app.settingsStore) }
     private var resumed by mutableStateOf(false)
     private var notificationAccess by mutableStateOf(NotificationAccess(permissionGranted = false, enabled = false))
 
@@ -122,7 +126,9 @@ class MainActivity : ComponentActivity() {
         var editingSides by rememberSaveable { mutableStateOf(false) }
         val versusState by versus.state.collectAsState()
         val friends by versus.friends.collectAsState()
-        BackHandler(screen != Screen.COUNTER) { screen = Screen.COUNTER }
+        var detailId by rememberSaveable { mutableStateOf<Long?>(null) }
+        LaunchedEffect(detailId) { history.select(detailId) }
+        BackHandler(screen != Screen.COUNTER) { screen = if (screen == Screen.DETAIL) Screen.HISTORY else Screen.COUNTER }
 
         CansinTheme(dark, settings.accent) {
             when {
@@ -139,6 +145,15 @@ class MainActivity : ComponentActivity() {
                     actions = settingsActions(onBack = { screen = Screen.COUNTER }),
                 )
                 screen == Screen.TAB -> NotesScreen(notes, onBack = { screen = Screen.COUNTER })
+                screen == Screen.HISTORY -> HistoryScreen(
+                    history,
+                    onBack = { screen = Screen.COUNTER },
+                    onOpen = { id ->
+                        detailId = id
+                        screen = Screen.DETAIL
+                    },
+                )
+                screen == Screen.DETAIL -> SessionDetailScreen(history, onBack = { screen = Screen.HISTORY })
                 screen == Screen.PROMILLE -> {
                     PromilleTicker(promille, resumed)
                     PromilleScreen(promille, onBack = { screen = Screen.COUNTER })
@@ -148,6 +163,7 @@ class MainActivity : ComponentActivity() {
                     onOpenSettings = { screen = Screen.SETTINGS },
                     onOpenTab = { screen = Screen.TAB },
                     onEditSides = { editingSides = true },
+                    onOpenHistory = { screen = Screen.HISTORY },
                     promilleCard = { PromilleSlot(onOpen = { screen = Screen.PROMILLE }) },
                     waterBar = { WaterSlot(it) },
                 )
@@ -158,6 +174,7 @@ class MainActivity : ComponentActivity() {
                     onOpenSettings = { screen = Screen.SETTINGS },
                     onOpenTab = { screen = Screen.TAB },
                     onStartVersus = { editingSides = true },
+                    onOpenHistory = { screen = Screen.HISTORY },
                     promilleCard = { PromilleSlot(onOpen = { screen = Screen.PROMILLE }) },
                     waterBar = { WaterSlot(it) },
                 )

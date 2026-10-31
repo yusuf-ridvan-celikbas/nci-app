@@ -1,6 +1,6 @@
 # Progress
 
-Current phase: **P9 done (installed on device, awaiting user check) → awaiting review before P10**
+Current phase: **P10 done (installed on device, awaiting user check) → awaiting review before P11**
 
 ## Phases
 - [x] Setup (project, wrapper, git, CLAUDE.md)
@@ -13,7 +13,7 @@ Current phase: **P9 done (installed on device, awaiting user check) → awaiting
 - [x] P7 Promil estimator
 - [x] P8 Versus
 - [x] P9 Water reminder
-- [ ] P10 History & stats
+- [x] P10 History & stats
 - [ ] P11 Export & hardening
 - [ ] P12 iOS port
 - [ ] P13 Online friends (design first)
@@ -35,6 +35,7 @@ Current phase: **P9 done (installed on device, awaiting user check) → awaiting
 - `ui/PromilleScreen.kt` (PromilleTicker, PromilleCard on counter, PromilleScreen with beer list, BeerEditDialog, WarningBanner + taxi/112 intents), `ui/PromilleViewModel.kt`, `ui/ProfileDialog.kt`; `ui/theme/Theme.kt` LocalAlertColors (fixed danger=RED, caution=AMBER palettes)
 - P8: `domain/VersusRules.kt` (VersusSetup, TabTotals, cleanName, fits, meSide, isMine, noteSide, totals); `data/FriendRepository.kt` + FriendDao; repository startVersus/updateVersus/addBeer(side)/addMyBeer/removeLatest(side); `ui/VersusScreen.kt`, `ui/VersusSetupDialog.kt`, `ui/VersusViewModel.kt`, `ui/SideUi.kt` (sideName, sideColor, SideChips); `UndoEffect` shared in CounterScreen.kt; theme `VersusColors` (fixed RED/BLUE light tones)
 - P9: `domain/WaterRules.kt` (beersSinceWater, shouldNudge, clamp 1–10); WaterDao; repository addWater/undoWater/water(); `ui/WaterViewModel.kt`, `ui/WaterBar.kt` (count + Water +1 + nudge card); UndoEffect now generic
+- P10: `domain/StatsRules.kt` (durationMs, paceMin, peak, session, overview); `data/HistoryRepository.kt` (SessionDao.observeHistory → SessionSummary with beer/note/water counts, observe(id), deleteEnded; BeerDao.observeEnded); `ui/HistoryViewModel.kt`, `ui/HistoryScreen.kt` (Sessions | Stats tabs), `ui/SessionDetailScreen.kt` (delete with confirm), `ui/BarChart.kt` (Canvas, no lib)
 - `ui/ReminderSection.kt` settings section incl. POST_NOTIFICATIONS rationale + request
 - `CansinApp` = manual DI (appScope, db, SettingsStore, Reminders, SessionRepository with SessionListener → widget refresh + reminders)
 - Tests: app/src/test (fake DAOs, SessionRepositoryTest, SessionRulesTest, SettingsTest, PaletteContrastTest, WidgetLayoutTest, ReminderPolicyTest, NoteRepositoryTest, NoteRulesTest)
@@ -61,6 +62,8 @@ Current phase: **P9 done (installed on device, awaiting user check) → awaiting
 - P5: Amount = Long minor units (cents/kuruş), no currency; input accepts "12.5"/"12,50", max 1,000,000.00, ≤2 decimals; shown with locale decimal separator. (Chosen while user away – confirm.)
 - P5: A note with no open session starts one. Session is "empty" only with 0 beers AND 0 notes (undo/−1/delete/end use this). Notes count as activity for 6 h auto-close.
 - P5: Edited time stored in editedTime (createdAt kept); picker time resolves to the date closest to createdAt (handles midnight). Notes list ordered by COALESCE(editedTime, createdAt). Note delete added (not in spec, needed for typos).
+- P10: History lists ended sessions only (open one is on the main screen). Delete only works on ended sessions (SQL guard), FK CASCADE removes beers/notes/water. History icon in counter + versus top bars; back from detail → history.
+- P10: Stats count only *my* beers (solo, or my versus side); versus sessions without a me side are skipped. Avg pace = total span / total intervals (sessions with ≥2 beers). Water ratio = water / my beers. Peak ‰ recomputed with the *current* body profile (noted on screen + disclaimer). Charts: last 20 sessions, beers and peak ‰; a11y description lists values. No records/badges (store policy).
 - P9: Water reminder is an in-app nudge card (no notification): shown when ≥ N of *my* beers since the last water; "Not now" hides it until the next beer (in-memory). On by default, N=2 (prefs water_enabled, water_every). Water +1 needs an open session (solo, or versus with a me side), has 5 s undo. Water counts for session activity (6 h) and keeps a session from being auto-deleted. No DB schema change (WaterEvent existed in v1).
 - P8: DB v2 via Room AutoMigration(1→2): session + redName, blueName, redFriendId, blueFriendId, meSide; note + side (null = shared). Verified upgrade on device.
 - P8: Versus = own session (user choice). Start from the people icon on the counter; ends open solo session (deleted if empty). Main screen routes to VersusScreen while open session is VERSUS; End session → back to solo. Empty versus session is NOT auto-deleted on undo/−1 (only on End session).
@@ -81,6 +84,9 @@ Current phase: **P9 done (installed on device, awaiting user check) → awaiting
 - P4: Notification: title = chosen app name, text localized; VISIBILITY_PRIVATE with public version "Reminder"; two channels (default, silent = IMPORTANCE_LOW) since channel sound can't change later. Actions verify session_id == open session, else ignored.
 - P4: "Yes, got another" sets finishedAt on the latest beer (only if unset) and adds a beer. Interval changes apply from the next scheduling.
 - P3: updatePeriodMillis=0 (no periodic wakeups). Widget picker label is static ("Counter"/"Sayaç"); in-widget title follows app name.
+
+## P10 report
+- Release APK 1.60 MB (+20 KB). Permissions unchanged. Lint clean except version notices. Tests: 107/107. No schema change. Delete is local and irreversible (confirm dialog).
 
 ## P9 report
 - Release APK 1.58 MB (+17 KB). Permissions unchanged. Lint clean except version notices. Tests: 101/101. No new security surface.
@@ -125,4 +131,5 @@ Current phase: **P9 done (installed on device, awaiting user check) → awaiting
 - P7: Verify TR limits (2026 bill may lower NORMAL to 0.20) and set lastVerified before release.
 - P8: Shared tab amounts are shown separately, not split 50/50 — split wanted?
 - P9: Water nudge default ON — OK? Should it also fire as a notification when reminders are on?
+- P10: Counter top bar now has 4 icons; long app name (SoyTuTentación) may truncate – switch to start-aligned title if so.
 - Release signing: no keystore yet; will use untracked signing.properties.

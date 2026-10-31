@@ -63,6 +63,7 @@ fun CounterScreen(
     onOpenSettings: () -> Unit,
     onOpenTab: () -> Unit,
     onStartVersus: () -> Unit,
+    onOpenHistory: () -> Unit,
     promilleCard: @Composable () -> Unit,
     waterBar: @Composable (SnackbarHostState) -> Unit,
 ) {
@@ -81,6 +82,9 @@ fun CounterScreen(
                     }
                 },
                 actions = {
+                    IconButton(onClick = onOpenHistory) {
+                        Icon(painterResource(R.drawable.ic_history), stringResource(R.string.history_title))
+                    }
                     IconButton(onClick = onStartVersus) {
                         Icon(painterResource(R.drawable.ic_versus), stringResource(R.string.versus_start))
                     }

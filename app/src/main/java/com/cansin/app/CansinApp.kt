@@ -4,6 +4,7 @@ import android.app.Application
 import com.cansin.app.data.AppDatabase
 import com.cansin.app.data.BeerEvent
 import com.cansin.app.data.FriendRepository
+import com.cansin.app.data.HistoryRepository
 import com.cansin.app.data.SessionListener
 import com.cansin.app.data.SessionRepository
 import com.cansin.app.prefs.SettingsStore
@@ -19,6 +20,9 @@ class CansinApp : Application() {
     private val database by lazy { AppDatabase.build(this) }
     val settingsStore: SettingsStore by lazy { SettingsStore(this) }
     val friendRepository: FriendRepository by lazy { FriendRepository(database.friendDao()) }
+    val historyRepository: HistoryRepository by lazy {
+        HistoryRepository(database.sessionDao(), database.beerDao(), database.noteDao(), database.waterDao())
+    }
     val reminders: Reminders by lazy { Reminders(this, settingsStore, { sessionRepository }) }
 
     val sessionRepository: SessionRepository by lazy {

@@ -73,7 +73,7 @@ fun PromilleTicker(viewModel: PromilleViewModel, resumed: Boolean) {
 private fun locale(): Locale = LocalConfiguration.current.locales[0]
 
 @Composable
-private fun formatPromille(value: Double): String = String.format(locale(), "%.2f", value)
+internal fun formatPromille(value: Double): String = String.format(locale(), "%.2f", value)
 
 @Composable
 private fun warningsFor(state: PromilleState): List<Warning> {
@@ -117,7 +117,7 @@ fun PromilleCard(state: PromilleState, onOpen: () -> Unit, onSetUp: () -> Unit, 
 }
 
 @Composable
-private fun Disclaimer() {
+internal fun Disclaimer() {
     Text(
         stringResource(R.string.promille_disclaimer),
         style = MaterialTheme.typography.bodySmall,

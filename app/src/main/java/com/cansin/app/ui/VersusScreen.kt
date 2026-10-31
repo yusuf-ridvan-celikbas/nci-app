@@ -49,6 +49,7 @@ fun VersusScreen(
     onOpenSettings: () -> Unit,
     onOpenTab: () -> Unit,
     onEditSides: () -> Unit,
+    onOpenHistory: () -> Unit,
     promilleCard: @Composable () -> Unit,
     waterBar: @Composable (SnackbarHostState) -> Unit,
 ) {
@@ -67,6 +68,9 @@ fun VersusScreen(
                     }
                 },
                 actions = {
+                    IconButton(onClick = onOpenHistory) {
+                        Icon(painterResource(R.drawable.ic_history), stringResource(R.string.history_title))
+                    }
                     IconButton(onClick = onEditSides) {
                         Icon(painterResource(R.drawable.ic_versus), stringResource(R.string.versus_edit))
                     }
