@@ -1,6 +1,6 @@
 # Progress
 
-Current phase: **P11 done (NOT installed on device – user asleep; P10 installed) → awaiting review before P12 (iOS)**
+Current phase: **P11 done on master. Branch `feature/widget-pages` (local only, not pushed, not installed): widget redesign + manual drink timer → awaiting user review/merge. Next: P12 (iOS, needs a Mac) or P13 design.**
 
 ## Phases
 - [x] Setup (project, wrapper, git, CLAUDE.md)
@@ -37,6 +37,7 @@ Current phase: **P11 done (NOT installed on device – user asleep; P10 installe
 - P9: `domain/WaterRules.kt` (beersSinceWater, shouldNudge, clamp 1–10); WaterDao; repository addWater/undoWater/water(); `ui/WaterViewModel.kt`, `ui/WaterBar.kt` (count + Water +1 + nudge card); UndoEffect now generic
 - P10: `domain/StatsRules.kt` (durationMs, paceMin, peak, session, overview); `data/HistoryRepository.kt` (SessionDao.observeHistory → SessionSummary with beer/note/water counts, observe(id), deleteEnded; BeerDao.observeEnded); `ui/HistoryViewModel.kt`, `ui/HistoryScreen.kt` (Sessions | Stats tabs), `ui/SessionDetailScreen.kt` (delete with confirm), `ui/BarChart.kt` (Canvas, no lib)
 - P11: `domain/ExportJson.kt` (hand-written JSON writer, unit-tested escaping), ExportDao (all rows), `system/DataManager.kt` (export → cache/export/cansin-export.json via FileProvider + ACTION_SEND chooser; deleteAll), `ui/DataSection.kt` (Settings → Data)
+- Widget v2 (branch feature/widget-pages): `widget/` WidgetRenderer (3 pages BEER/TAB/WATER, ‹ › + dots, WidgetData), WidgetActionReceiver (ADD, WATER, TIMER, PREV, NEXT; validates action + widget id), CounterWidget (page per widget id, cleaned onDeleted); `domain/TimerRules.kt` (TimerState, WidgetPage, canStart, isCurrent, page/step); `timer/DrinkTimer.kt`; `ui/TimerBar.kt`
 - `ui/ReminderSection.kt` settings section incl. POST_NOTIFICATIONS rationale + request
 - `CansinApp` = manual DI (appScope, db, SettingsStore, Reminders, SessionRepository with SessionListener → widget refresh + reminders)
 - Tests: app/src/test (fake DAOs, SessionRepositoryTest, SessionRulesTest, SettingsTest, PaletteContrastTest, WidgetLayoutTest, ReminderPolicyTest, NoteRepositoryTest, NoteRulesTest)
@@ -63,6 +64,9 @@ Current phase: **P11 done (NOT installed on device – user asleep; P10 installe
 - P5: Amount = Long minor units (cents/kuruş), no currency; input accepts "12.5"/"12,50", max 1,000,000.00, ≤2 decimals; shown with locale decimal separator. (Chosen while user away – confirm.)
 - P5: A note with no open session starts one. Session is "empty" only with 0 beers AND 0 notes (undo/−1/delete/end use this). Notes count as activity for 6 h auto-close.
 - P5: Edited time stored in editedTime (createdAt kept); picker time resolves to the date closest to createdAt (handles midnight). Notes list ordered by COALESCE(editedTime, createdAt). Note delete added (not in spec, needed for typos).
+- Widget v2: user chose arrows + dots (no swipe: avoids a RemoteViewsService), manual timer, tab page = total + open Tab. Page stored per widget in DataStore (widget_page_<id>). Beer page: +1 (versus: score, opens app). Tab page: total (+ note count on wide), button/value open the Tab screen (MainActivity EXTRA_OPEN_TAB, CLEAR_TOP|SINGLE_TOP → onNewIntent). Water page: count, +1 adds water (needs open session with a me side, else opens app). Old "since last beer" chronometer removed.
+- Drink timer (manual): ▶ starts timing my latest unfinished beer (DataStore timer_beer_id/session_id/started_at); ■ stops and sets that beer's finishedAt (used by promille). Shown on wide widget beer page + in app above Water. Cleared on session close. Settings → Drinking timer switch (default on) hides all timers and clears a running one. Small widget has no timer (no room).
+- Snapshot now read-only staleness via lastActivity (beers/notes/water), plus notes, tabMinor, water, hasMe, myLatestBeer.
 - P11: Export: JSON format "cansin-export" v1, sessions with nested beers/water/notes + friends; body profile only if the user ticks it (default off). No storage permission: file in cacheDir/export (replaced each export, wiped on delete-all), shared via non-exported FileProvider (grantUriPermissions, read-only grant on the share intent).
 - P11: Delete all data: cancels reminders, Room clearAllTables, wipes export cache, clears DataStore except age_confirmed, app_name, language, theme_mode, accent (so the launcher alias + locale stay consistent), refreshes widgets. Confirm dialog.
 - P10: History lists ended sessions only (open one is on the main screen). Delete only works on ended sessions (SQL guard), FK CASCADE removes beers/notes/water. History icon in counter + versus top bars; back from detail → history.
@@ -87,6 +91,9 @@ Current phase: **P11 done (NOT installed on device – user asleep; P10 installe
 - P4: Notification: title = chosen app name, text localized; VISIBILITY_PRIVATE with public version "Reminder"; two channels (default, silent = IMPORTANCE_LOW) since channel sound can't change later. Actions verify session_id == open session, else ignored.
 - P4: "Yes, got another" sets finishedAt on the latest beer (only if unset) and adds a beer. Interval changes apply from the next scheduling.
 - P3: updatePeriodMillis=0 (no periodic wakeups). Widget picker label is static ("Counter"/"Sayaç"); in-widget title follows app name.
+
+## Widget v2 report (branch)
+- Release APK 1.62 MB (+5 KB). Permissions unchanged; no new exported components (receiver stays exported=false). Lint clean except version notices. Tests: 116/116. Not tested on device.
 
 ## P11 report / audit (2026-10-31)
 - Release APK 1.62 MB (+18 KB); AAB 4.13 MB (all ABIs; Play splits per device). Largest: classes.dex 2.68 MB (uncompressed). Target < 5 MB OK.

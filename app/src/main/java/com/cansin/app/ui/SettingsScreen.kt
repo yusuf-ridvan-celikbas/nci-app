@@ -67,6 +67,7 @@ class SettingsActions(
     val onDeleteFriend: (Long) -> Unit,
     val onWaterEnabled: (Boolean) -> Unit,
     val onWaterEvery: (Int) -> Unit,
+    val onTimerEnabled: (Boolean) -> Unit,
     val onExport: (Boolean) -> Unit,
     val onDeleteAll: () -> Unit,
 )
@@ -113,6 +114,14 @@ fun SettingsScreen(
             BeerSection(settings.beerSize, actions.onBeerSize)
             HorizontalDivider(Modifier.padding(vertical = 16.dp))
             WaterSection(settings, actions)
+            HorizontalDivider(Modifier.padding(vertical = 16.dp))
+            SectionHeader(R.string.setting_timer)
+            SwitchRow(R.string.setting_timer, settings.timerEnabled, actions.onTimerEnabled)
+            Text(
+                stringResource(R.string.setting_timer_note),
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
             HorizontalDivider(Modifier.padding(vertical = 16.dp))
             ProfileSection(settings.profile, actions.onProfile)
             if (friends.isNotEmpty()) {

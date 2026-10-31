@@ -40,8 +40,7 @@
     <string name="color_purple">Purple</string>
     <string name="color_dynamic">Dynamic (from wallpaper)</string>
     <string name="widget_name">Counter</string>
-    <string name="widget_description">Beer count with a quick +1</string>
-    <string name="widget_since_last">Since last:</string>
+    <string name="widget_description">Beers, tab and water with quick buttons</string>
     <string name="section_reminders">Reminders</string>
     <string name="setting_reminders">Ask if my drink is finished</string>
     <string name="setting_reminder_interval">Ask after %1$d min</string>
@@ -201,4 +200,18 @@
     <string name="delete_all_data">Delete all data</string>
     <string name="delete_all_title">Delete all data?</string>
     <string name="delete_all_body">All sessions, beers, water, notes, friends, your body profile and reminder settings are removed from this phone. App name, language and colours are kept. This can’t be undone.</string>
+    <string name="widget_page_beer">Beers</string>
+    <string name="widget_page_tab">Tab</string>
+    <string name="widget_page_water">Water</string>
+    <string name="widget_prev">Previous page</string>
+    <string name="widget_next">Next page</string>
+    <string name="widget_open">Open</string>
+    <string name="widget_open_tab">Open tab</string>
+    <string name="widget_page_position">%1$s, page %2$d of %3$d</string>
+    <string name="timer_start">Start drinking timer</string>
+    <string name="timer_stop">Stop drinking timer</string>
+    <string name="timer_running">Drinking</string>
+    <string name="timer_idle">Start timer</string>
+    <string name="setting_timer">Drinking timer</string>
+    <string name="setting_timer_note">Start the timer when you actually begin a beer; stopping it saves the finish time for the estimate. Turn off to hide all timers.</string>
 </resources>

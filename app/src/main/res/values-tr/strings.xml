@@ -34,8 +34,7 @@
     <string name="color_purple">Mor</string>
     <string name="color_dynamic">Dinamik (duvar kağıdından)</string>
     <string name="widget_name">Sayaç</string>
-    <string name="widget_description">Hızlı +1 ile bira sayacı</string>
-    <string name="widget_since_last">Sonuncudan beri:</string>
+    <string name="widget_description">Hızlı düğmelerle bira, hesap ve su</string>
     <string name="section_reminders">Hatırlatmalar</string>
     <string name="setting_reminders">İçeceğimin bitip bitmediğini sor</string>
     <string name="setting_reminder_interval">%1$d dk sonra sor</string>
@@ -195,4 +194,18 @@
     <string name="delete_all_data">Tüm verileri sil</string>
     <string name="delete_all_title">Tüm veriler silinsin mi?</string>
     <string name="delete_all_body">Tüm oturumlar, biralar, su, notlar, arkadaşlar, vücut profilin ve hatırlatma ayarları bu telefondan silinir. Uygulama adı, dil ve renkler korunur. Geri alınamaz.</string>
+    <string name="widget_page_beer">Biralar</string>
+    <string name="widget_page_tab">Hesap</string>
+    <string name="widget_page_water">Su</string>
+    <string name="widget_prev">Önceki sayfa</string>
+    <string name="widget_next">Sonraki sayfa</string>
+    <string name="widget_open">Aç</string>
+    <string name="widget_open_tab">Hesabı aç</string>
+    <string name="widget_page_position">%1$s, sayfa %2$d / %3$d</string>
+    <string name="timer_start">İçme zamanlayıcısını başlat</string>
+    <string name="timer_stop">İçme zamanlayıcısını durdur</string>
+    <string name="timer_running">İçiliyor</string>
+    <string name="timer_idle">Zamanlayıcı</string>
+    <string name="setting_timer">İçme zamanlayıcısı</string>
+    <string name="setting_timer_note">Birayı gerçekten içmeye başladığında başlat; durdurmak bitiş saatini tahmin için kaydeder. Tüm zamanlayıcıları gizlemek için kapat.</string>
 </resources>

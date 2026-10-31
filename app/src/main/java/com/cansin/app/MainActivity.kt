@@ -51,6 +51,9 @@ import com.cansin.app.ui.VersusSetupDialog
 import com.cansin.app.ui.VersusViewModel
 import com.cansin.app.ui.UndoEffect
 import com.cansin.app.ui.WaterBar
+import com.cansin.app.ui.TimerBar
+import com.cansin.app.domain.TimerRules
+import com.cansin.app.domain.TimerState
 import com.cansin.app.ui.WaterViewModel
 import androidx.compose.material3.SnackbarHostState
 import com.cansin.app.ui.theme.CansinTheme
@@ -72,6 +75,7 @@ class MainActivity : ComponentActivity() {
     private val water: WaterViewModel by viewModels { WaterViewModel.factory(app.sessionRepository, app.settingsStore) }
     private val history: HistoryViewModel by viewModels { HistoryViewModel.factory(app.historyRepository, app.settingsStore) }
     private var resumed by mutableStateOf(false)
+    private var openTabRequest by mutableStateOf(false)
     private var notificationAccess by mutableStateOf(NotificationAccess(permissionGranted = false, enabled = false))
 
     override fun attachBaseContext(newBase: Context) {
@@ -86,10 +90,20 @@ class MainActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        if (savedInstanceState == null) handleIntent(intent)
         setContent {
             val settings by store.settings.collectAsState(initial = null)
             settings?.let { App(it) }
         }
+    }
+
+    override fun onNewIntent(intent: Intent) {
+        super.onNewIntent(intent)
+        handleIntent(intent)
+    }
+
+    private fun handleIntent(intent: Intent?) {
+        if (intent?.getBooleanExtra(EXTRA_OPEN_TAB, false) == true) openTabRequest = true
     }
 
     override fun onStart() {
@@ -128,6 +142,12 @@ class MainActivity : ComponentActivity() {
         val friends by versus.friends.collectAsState()
         var detailId by rememberSaveable { mutableStateOf<Long?>(null) }
         LaunchedEffect(detailId) { history.select(detailId) }
+        LaunchedEffect(openTabRequest) {
+            if (openTabRequest) {
+                screen = Screen.TAB
+                openTabRequest = false
+            }
+        }
         BackHandler(screen != Screen.COUNTER) { screen = if (screen == Screen.DETAIL) Screen.HISTORY else Screen.COUNTER }
 
         CansinTheme(dark, settings.accent) {
@@ -198,6 +218,20 @@ class MainActivity : ComponentActivity() {
     @Composable
     private fun WaterSlot(snackbar: SnackbarHostState) {
         val state by water.state.collectAsState()
+        val settings by store.settings.collectAsState(initial = null)
+        val timer by store.timerState.collectAsState(initial = TimerState())
+        val promilleState by promille.state.collectAsState()
+        val myLatestBeer = promilleState.beers.lastOrNull()
+        if (settings?.timerEnabled == true) {
+            val running = timer.running && timer.sessionId == myLatestBeer?.sessionId
+            TimerBar(
+                startedAt = timer.startedAt.takeIf { running },
+                canStart = TimerRules.canStart(true, timer, myLatestBeer),
+                resumed = resumed,
+                onStart = { app.appScope.launch { app.drinkTimer.start(); CounterWidget.refreshAll(app) } },
+                onStop = { app.appScope.launch { app.drinkTimer.stop(); CounterWidget.refreshAll(app) } },
+            )
+        }
         UndoEffect(water.waterAdded, snackbar, water::undo, R.string.water_added)
         WaterBar(state, onAdd = water::add, onDismiss = water::dismiss)
     }
@@ -249,6 +283,7 @@ class MainActivity : ComponentActivity() {
         onDeleteFriend = { id -> versus.deleteFriend(id) },
         onWaterEnabled = { on -> update { setWaterEnabled(on) } },
         onWaterEvery = { n -> update { setWaterEvery(n) } },
+        onTimerEnabled = { on -> update { setTimerEnabled(on) } },
         onExport = { includeProfile -> lifecycleScope.launch { startActivity(app.dataManager.export(includeProfile)) } },
         onDeleteAll = { lifecycleScope.launch { app.dataManager.deleteAll() } },
     )
@@ -258,5 +293,9 @@ class MainActivity : ComponentActivity() {
             store.block()
             CounterWidget.refreshAll(app)
         }
+    }
+
+    companion object {
+        const val EXTRA_OPEN_TAB = "com.cansin.app.OPEN_TAB"
     }
 }
