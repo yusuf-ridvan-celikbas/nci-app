@@ -18,6 +18,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.LiveRegionMode
 import androidx.compose.ui.semantics.liveRegion
@@ -51,12 +52,16 @@ fun CareCard(state: CareState, onDismiss: (CareKind) -> Unit) {
         modifier = Modifier.fillMaxWidth().semantics { liveRegion = LiveRegionMode.Polite },
     ) {
         Column(Modifier.padding(start = 16.dp, end = 8.dp, top = 12.dp)) {
-            Text(
-                stringResource(if (kind == CareKind.LATE) R.string.care_late else R.string.care_slow_down),
-                color = MaterialTheme.colorScheme.onTertiaryContainer,
-            )
+            val format = rememberAmountFormat()
+            val text = when (kind) {
+                CareKind.LATE -> stringResource(R.string.care_late)
+                CareKind.SLOW_DOWN -> stringResource(R.string.care_slow_down)
+                CareKind.BEER_LIMIT -> pluralStringResource(R.plurals.care_beer_limit, state.beerLimit ?: 0, state.beerLimit ?: 0)
+                CareKind.BUDGET -> stringResource(R.string.care_budget, format(state.budgetMinor ?: 0))
+            }
+            Text(text, color = MaterialTheme.colorScheme.onTertiaryContainer)
             FlowRow {
-                if (kind == CareKind.LATE) {
+                if (kind == CareKind.LATE || kind == CareKind.BEER_LIMIT) {
                     TextButton(onClick = { context.open(wayHome(state.home, stops)) }) { Text(stringResource(R.string.care_way_home)) }
                     TextButton(onClick = { context.open(("geo:0,0?q=" + Uri.encode(taxi)).toUri()) }) {
                         Text(stringResource(R.string.action_transport))

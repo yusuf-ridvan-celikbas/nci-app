@@ -73,6 +73,7 @@ class SettingsActions(
     val onCareEnabled: (Boolean) -> Unit,
     val onCareLateHour: (Int) -> Unit,
     val onHomePlace: (String?) -> Unit,
+    val onLimits: (Int?, Long?) -> Unit,
     val onExport: (Boolean) -> Unit,
     val onDeleteAll: () -> Unit,
 )

@@ -56,6 +56,8 @@ private val CURRENCY = stringPreferencesKey("currency")
 private val CARE_ENABLED = booleanPreferencesKey("care_enabled")
 private val CARE_LATE_HOUR = intPreferencesKey("care_late_hour")
 private val HOME_PLACE = stringPreferencesKey("home_place")
+private val BEER_LIMIT = intPreferencesKey("beer_limit")
+private val BUDGET_MINOR = longPreferencesKey("budget_minor")
 private val TIMER_BEER = longPreferencesKey("timer_beer_id")
 private val TIMER_SESSION = longPreferencesKey("timer_session_id")
 private val TIMER_STARTED = longPreferencesKey("timer_started_at")
@@ -88,6 +90,8 @@ class SettingsStore(private val context: Context) {
             careEnabled = p[CARE_ENABLED] ?: true,
             careLateHour = CareRules.clampLateHour(p[CARE_LATE_HOUR] ?: CareRules.DEFAULT_LATE_HOUR),
             homePlace = CareRules.cleanHome(p[HOME_PLACE]),
+            beerLimit = CareRules.cleanBeerLimit(p[BEER_LIMIT]),
+            budgetMinor = CareRules.cleanBudget(p[BUDGET_MINOR]),
         )
     }
 
@@ -173,6 +177,11 @@ class SettingsStore(private val context: Context) {
     suspend fun setCareEnabled(value: Boolean) = edit { it[CARE_ENABLED] = value }
     suspend fun setCareLateHour(value: Int) = edit { it[CARE_LATE_HOUR] = CareRules.clampLateHour(value) }
     suspend fun setHomePlace(value: String?) = edit { it.putOrRemove(HOME_PLACE, CareRules.cleanHome(value)) }
+
+    suspend fun setLimits(beers: Int?, budgetMinor: Long?) = edit {
+        it.putOrRemove(BEER_LIMIT, CareRules.cleanBeerLimit(beers))
+        it.putOrRemove(BUDGET_MINOR, CareRules.cleanBudget(budgetMinor))
+    }
 
     suspend fun setCurrency(value: Currency) = edit { it[CURRENCY] = value.name }
 

@@ -62,6 +62,8 @@ data class Settings(
     val careEnabled: Boolean = true,
     val careLateHour: Int = CareRules.DEFAULT_LATE_HOUR,
     val homePlace: String? = null,
+    val beerLimit: Int? = null,
+    val budgetMinor: Long? = null,
 ) {
     companion object {
         const val DEFAULT_REMINDER_INTERVAL_MIN = 10

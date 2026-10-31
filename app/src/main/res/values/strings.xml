@@ -253,4 +253,15 @@
     <string name="setting_home_hint">Address or area, e.g. Kadıköy</string>
     <string name="setting_home_note">Opens your maps app with public transport. Stored only on this phone.</string>
     <string name="action_remove">Remove</string>
+    <plurals name="care_beer_limit">
+        <item quantity="one">You set a limit of %d beer tonight and you\'ve reached it. Water or heading home?</item>
+        <item quantity="other">You set a limit of %d beers tonight and you\'ve reached it. Water or heading home?</item>
+    </plurals>
+    <string name="care_budget">You\'ve reached the budget you set (%s).</string>
+    <string name="setting_limits">My limits per night</string>
+    <string name="setting_limits_off">Off</string>
+    <string name="setting_beer_limit">Beers</string>
+    <string name="setting_budget">Budget</string>
+    <string name="setting_limits_note">Your own choice. You get a gentle card when you reach a limit; leave empty to turn it off.</string>
+    <string name="limits_invalid">Beers 1–20, budget a positive amount.</string>
 </resources>

@@ -25,7 +25,10 @@ import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
 import com.cansin.app.R
+import com.cansin.app.domain.AmountInput
 import com.cansin.app.domain.CareRules
+import com.cansin.app.domain.NoteRules
+import androidx.compose.ui.text.input.KeyboardType
 import com.cansin.app.prefs.Settings
 import java.time.LocalTime
 import java.time.format.DateTimeFormatter
@@ -59,6 +62,27 @@ internal fun CareSection(settings: Settings, actions: SettingsActions) {
         Text(settings.homePlace ?: stringResource(R.string.setting_home_not_set), color = MaterialTheme.colorScheme.onSurfaceVariant)
     }
     Note(R.string.setting_home_note)
+    var editingLimits by rememberSaveable { mutableStateOf(false) }
+    val format = rememberAmountFormat()
+    Column(
+        Modifier.fillMaxWidth().heightIn(min = 48.dp).clickable(role = Role.Button) { editingLimits = true }.padding(vertical = 8.dp),
+    ) {
+        Text(stringResource(R.string.setting_limits), style = MaterialTheme.typography.titleSmall)
+        val parts = listOfNotNull(
+            settings.beerLimit?.let { stringResource(R.string.setting_beer_limit) + ": " + it },
+            settings.budgetMinor?.let { stringResource(R.string.setting_budget) + ": " + format(it) },
+        )
+        Text(parts.joinToString(" · ").ifEmpty { stringResource(R.string.setting_limits_off) }, color = MaterialTheme.colorScheme.onSurfaceVariant)
+    }
+    Note(R.string.setting_limits_note)
+    if (editingLimits) {
+        LimitsDialog(
+            beers = settings.beerLimit,
+            budgetMinor = settings.budgetMinor,
+            onSave = { b, m -> actions.onLimits(b, m); editingLimits = false },
+            onDismiss = { editingLimits = false },
+        )
+    }
     if (editingHome) {
         HomeDialog(
             initial = settings.homePlace.orEmpty(),
@@ -71,6 +95,51 @@ internal fun CareSection(settings: Settings, actions: SettingsActions) {
 @Composable
 private fun Note(text: Int) {
     Text(stringResource(text), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+}
+
+@Composable
+private fun LimitsDialog(beers: Int?, budgetMinor: Long?, onSave: (Int?, Long?) -> Unit, onDismiss: () -> Unit) {
+    val plain = rememberPlainAmountFormat()
+    var beerText by rememberSaveable { mutableStateOf(beers?.toString().orEmpty()) }
+    var budgetText by rememberSaveable { mutableStateOf(budgetMinor?.let(plain).orEmpty()) }
+    val beerValue = beerText.trim().takeIf { it.isNotEmpty() }?.let { t -> t.toIntOrNull()?.let(CareRules::cleanBeerLimit) ?: -1 }
+    val budgetValue = when (val parsed = NoteRules.parseAmount(budgetText)) {
+        AmountInput.Empty -> null
+        AmountInput.Invalid -> -1L
+        is AmountInput.Valid -> CareRules.cleanBudget(parsed.minor) ?: -1L
+    }
+    val valid = beerValue != -1 && budgetValue != -1L
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text(stringResource(R.string.setting_limits)) },
+        text = {
+            Column {
+                OutlinedTextField(
+                    value = beerText,
+                    onValueChange = { beerText = it.filter(Char::isDigit).take(2) },
+                    label = { Text(stringResource(R.string.setting_beer_limit)) },
+                    singleLine = true,
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number, imeAction = ImeAction.Next),
+                )
+                OutlinedTextField(
+                    value = budgetText,
+                    onValueChange = { budgetText = it.take(13) },
+                    label = { Text(stringResource(R.string.setting_budget)) },
+                    singleLine = true,
+                    isError = budgetValue == -1L,
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal, imeAction = ImeAction.Done),
+                    modifier = Modifier.padding(top = 8.dp),
+                )
+                if (!valid) {
+                    Text(stringResource(R.string.limits_invalid), color = MaterialTheme.colorScheme.error, style = MaterialTheme.typography.bodySmall)
+                }
+            }
+        },
+        confirmButton = {
+            TextButton(onClick = { onSave(beerValue, budgetValue) }, enabled = valid) { Text(stringResource(R.string.action_save)) }
+        },
+        dismissButton = { TextButton(onClick = onDismiss) { Text(stringResource(R.string.action_cancel)) } },
+    )
 }
 
 @Composable

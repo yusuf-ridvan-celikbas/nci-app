@@ -247,4 +247,15 @@
     <string name="setting_home_hint">Adres veya semt, ör. Kadıköy</string>
     <string name="setting_home_note">Harita uygulamanı toplu taşıma ile açar. Sadece bu telefonda saklanır.</string>
     <string name="action_remove">Kaldır</string>
+    <plurals name="care_beer_limit">
+        <item quantity="one">Bu gece kendine %d bira sınırı koydun ve ulaştın. Su mu, eve dönüş mü?</item>
+        <item quantity="other">Bu gece kendine %d bira sınırı koydun ve ulaştın. Su mu, eve dönüş mü?</item>
+    </plurals>
+    <string name="care_budget">Belirlediğin bütçeye ulaştın (%s).</string>
+    <string name="setting_limits">Gecelik sınırlarım</string>
+    <string name="setting_limits_off">Kapalı</string>
+    <string name="setting_beer_limit">Bira</string>
+    <string name="setting_budget">Bütçe</string>
+    <string name="setting_limits_note">Senin seçimin. Bir sınıra ulaşınca nazik bir kart görürsün; kapatmak için boş bırak.</string>
+    <string name="limits_invalid">Bira 1–20, bütçe pozitif bir tutar olmalı.</string>
 </resources>

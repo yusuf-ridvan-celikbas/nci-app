@@ -314,6 +314,7 @@ class MainActivity : ComponentActivity() {
         onCareEnabled = { on -> update { setCareEnabled(on) } },
         onCareLateHour = { h -> update { setCareLateHour(h) } },
         onHomePlace = { home -> update { setHomePlace(home) } },
+        onLimits = { beers, budget -> update { setLimits(beers, budget) } },
         onExport = { includeProfile -> lifecycleScope.launch { startActivity(app.dataManager.export(includeProfile)) } },
         onDeleteAll = { lifecycleScope.launch { app.dataManager.deleteAll() } },
     )

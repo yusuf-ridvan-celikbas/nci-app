@@ -7,6 +7,7 @@ import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
 import com.cansin.app.data.SessionRepository
 import com.cansin.app.domain.CareDismissals
+import com.cansin.app.domain.CareInput
 import com.cansin.app.domain.CareKind
 import com.cansin.app.domain.CareRules
 import com.cansin.app.domain.VersusRules
@@ -18,15 +19,14 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOf
-import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import java.time.Instant
 import java.time.ZoneId
 
-data class CareState(val kind: CareKind? = null, val home: String? = null)
+data class CareState(val kind: CareKind? = null, val home: String? = null, val beerLimit: Int? = null, val budgetMinor: Long? = null)
 
-private data class OpenSession(val active: Boolean = false, val myBeers: Int = 0)
+private data class OpenSession(val active: Boolean = false, val myBeers: Int = 0, val mySpend: Long = 0)
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class CareViewModel(repository: SessionRepository, settingsStore: SettingsStore) : ViewModel() {
@@ -34,12 +34,28 @@ class CareViewModel(repository: SessionRepository, settingsStore: SettingsStore)
     private val dismissed = MutableStateFlow(CareDismissals())
 
     private val session = repository.openSession.flatMapLatest { s ->
-        if (s == null) flowOf(OpenSession()) else repository.beers(s.id).map { beers -> OpenSession(true, beers.count { VersusRules.isMine(it, s) }) }
+        if (s == null) {
+            flowOf(OpenSession())
+        } else {
+            combine(repository.beers(s.id), repository.notes(s.id)) { beers, notes ->
+                OpenSession(true, beers.count { VersusRules.isMine(it, s) }, CareRules.mySpend(s, notes))
+            }
+        }
     }.stateIn(viewModelScope, SharingStarted.Eagerly, OpenSession())
 
     val state: StateFlow<CareState> = combine(session, settingsStore.settings, now, dismissed) { s, settings, t, d ->
-        val hour = Instant.ofEpochMilli(t).atZone(ZoneId.systemDefault()).hour
-        CareState(CareRules.pick(settings.careEnabled, s.active, t, hour, settings.careLateHour, s.myBeers, d), settings.homePlace)
+        val input = CareInput(
+            enabled = settings.careEnabled,
+            sessionActive = s.active,
+            now = t,
+            hour = Instant.ofEpochMilli(t).atZone(ZoneId.systemDefault()).hour,
+            lateHour = settings.careLateHour,
+            myBeers = s.myBeers,
+            beerLimit = settings.beerLimit,
+            budgetMinor = settings.budgetMinor,
+            mySpendMinor = s.mySpend,
+        )
+        CareState(CareRules.pick(input, d), settings.homePlace, settings.beerLimit, settings.budgetMinor)
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), CareState())
 
     fun tick(at: Long) {
@@ -47,9 +63,12 @@ class CareViewModel(repository: SessionRepository, settingsStore: SettingsStore)
     }
 
     fun dismiss(kind: CareKind) = dismissed.update {
+        val s = session.value
         when (kind) {
             CareKind.LATE -> it.copy(lateAt = System.currentTimeMillis())
-            CareKind.SLOW_DOWN -> it.copy(slowDownAtBeers = session.value.myBeers)
+            CareKind.SLOW_DOWN -> it.copy(slowDownAtBeers = s.myBeers)
+            CareKind.BEER_LIMIT -> it.copy(limitAtBeers = s.myBeers)
+            CareKind.BUDGET -> it.copy(budgetAtSpend = s.mySpend)
         }
     }
 
