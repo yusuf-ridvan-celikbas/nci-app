@@ -16,6 +16,7 @@ import com.cansin.app.domain.BeerRules
 import com.cansin.app.domain.ResultCards
 import com.cansin.app.domain.BeerSize
 import com.cansin.app.domain.BodyProfile
+import com.cansin.app.domain.Currency
 import com.cansin.app.domain.License
 import com.cansin.app.domain.Sex
 import com.cansin.app.domain.TimerState
@@ -50,6 +51,7 @@ private val WATER_ENABLED = booleanPreferencesKey("water_enabled")
 private val WATER_EVERY = intPreferencesKey("water_every")
 private val TIMER_ENABLED = booleanPreferencesKey("timer_enabled")
 private val SHARE_NAME = stringPreferencesKey("share_name")
+private val CURRENCY = stringPreferencesKey("currency")
 private val TIMER_BEER = longPreferencesKey("timer_beer_id")
 private val TIMER_SESSION = longPreferencesKey("timer_session_id")
 private val TIMER_STARTED = longPreferencesKey("timer_started_at")
@@ -78,6 +80,7 @@ class SettingsStore(private val context: Context) {
             waterEvery = WaterRules.clamp(p[WATER_EVERY] ?: WaterRules.DEFAULT_EVERY),
             timerEnabled = p[TIMER_ENABLED] ?: true,
             shareName = ResultCards.cleanName(p[SHARE_NAME]),
+            currency = enumOr(p[CURRENCY], Currency.NONE),
         )
     }
 
@@ -159,6 +162,8 @@ class SettingsStore(private val context: Context) {
         val keep = setOf(AGE_CONFIRMED, APP_NAME, LANGUAGE, THEME_MODE, ACCENT)
         p.asMap().keys.filterNot { it in keep }.forEach { p.remove(it) }
     }
+
+    suspend fun setCurrency(value: Currency) = edit { it[CURRENCY] = value.name }
 
     suspend fun setShareName(value: String?) = edit { it.putOrRemove(SHARE_NAME, ResultCards.cleanName(value)) }
 

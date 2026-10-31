@@ -4,6 +4,7 @@ import androidx.annotation.StringRes
 import com.cansin.app.R
 import com.cansin.app.domain.BeerSize
 import com.cansin.app.domain.BodyProfile
+import com.cansin.app.domain.Currency
 import com.cansin.app.domain.WaterRules
 
 enum class AppName(@StringRes val label: Int, val alias: String) {
@@ -56,6 +57,7 @@ data class Settings(
     val waterEvery: Int = WaterRules.DEFAULT_EVERY,
     val timerEnabled: Boolean = true,
     val shareName: String? = null,
+    val currency: Currency = Currency.NONE,
 ) {
     companion object {
         const val DEFAULT_REMINDER_INTERVAL_MIN = 10

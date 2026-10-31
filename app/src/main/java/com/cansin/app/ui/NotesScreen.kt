@@ -27,6 +27,9 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.staticCompositionLocalOf
+import androidx.compose.ui.platform.LocalConfiguration
+import com.cansin.app.domain.Currency
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -100,7 +103,7 @@ fun NotesScreen(viewModel: NotesViewModel, onBack: () -> Unit) {
         NoteEditDialog(
             note = note,
             session = state.session.takeIf { state.versus },
-            formatAmount = format,
+            formatAmount = rememberPlainAmountFormat(),
             onSave = { viewModel.update(it); editing = null },
             onDelete = { viewModel.delete(note); editing = null },
             onDismiss = { editing = null },
@@ -108,8 +111,21 @@ fun NotesScreen(viewModel: NotesViewModel, onBack: () -> Unit) {
     }
 }
 
+/** Currency chosen in Settings, provided once in MainActivity. */
+internal val LocalCurrency = staticCompositionLocalOf { Currency.NONE }
+
+/** Display format with the currency symbol. */
 @Composable
 internal fun rememberAmountFormat(): (Long) -> String {
+    val separator = DecimalFormatSymbols.getInstance().decimalSeparator
+    val currency = LocalCurrency.current
+    val turkish = LocalConfiguration.current.locales[0].language == "tr"
+    return remember(separator, currency, turkish) { { minor: Long -> currency.format(minor, separator, turkish) } }
+}
+
+/** Plain number for editable text fields (no symbol). */
+@Composable
+internal fun rememberPlainAmountFormat(): (Long) -> String {
     val separator = DecimalFormatSymbols.getInstance().decimalSeparator
     return remember(separator) { { minor: Long -> NoteRules.formatAmount(minor, separator) } }
 }

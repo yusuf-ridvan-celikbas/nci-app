@@ -23,6 +23,12 @@ class ExportJsonTest {
     )
 
     @Test
+    fun currencyOnlyWhenSet() {
+        assertFalse(ExportJson.build(data, includeProfile = false, exportedAt = 0).contains("currency"))
+        assertTrue(ExportJson.build(data.copy(currency = Currency.TRY), includeProfile = false, exportedAt = 0).contains("\"currency\":\"TRY\""))
+    }
+
+    @Test
     fun profileOnlyWhenTicked() {
         assertFalse(ExportJson.build(data, includeProfile = false, exportedAt = 0).contains("bodyProfile"))
         assertTrue(ExportJson.build(data, includeProfile = true, exportedAt = 0).contains("\"bodyProfile\":{\"sex\":\"FEMALE\",\"age\":30"))

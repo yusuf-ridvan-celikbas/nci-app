@@ -220,4 +220,10 @@
     <string name="share_name">Adın</string>
     <string name="share_body">Yalnızca adın, gün, bira sayın, süre ve su paylaşılır. Kime gideceğini sen seçersin.</string>
     <string name="share_message">Oturum sonucum. İçe aktarmak için bu mesajı uygulamada Geçmiş → Arkadaşlar bölümüne yapıştır:\n%1$s</string>
+    <string name="setting_currency">Hesap para birimi</string>
+    <string name="currency_none">Simge yok</string>
+    <string name="currency_try">Türk lirası (₺)</string>
+    <string name="currency_eur">Euro (€)</string>
+    <string name="currency_usd">ABD doları ($)</string>
+    <string name="currency_gbp">İngiliz sterlini (£)</string>
 </resources>

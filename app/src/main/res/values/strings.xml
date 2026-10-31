@@ -226,4 +226,10 @@
     <string name="share_name">Your name</string>
     <string name="share_body">Shares only your name, the day, your beer count, duration and water. You choose who gets it.</string>
     <string name="share_message">My session result. To import it, paste this message into the app under History → Friends:\n%1$s</string>
+    <string name="setting_currency">Currency for the tab</string>
+    <string name="currency_none">No symbol</string>
+    <string name="currency_try">Turkish lira (₺)</string>
+    <string name="currency_eur">Euro (€)</string>
+    <string name="currency_usd">US dollar ($)</string>
+    <string name="currency_gbp">British pound (£)</string>
 </resources>

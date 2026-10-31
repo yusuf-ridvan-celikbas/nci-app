@@ -16,7 +16,6 @@ import androidx.compose.ui.graphics.toArgb
 import com.cansin.app.MainActivity
 import com.cansin.app.R
 import com.cansin.app.data.CounterSnapshot
-import com.cansin.app.domain.NoteRules
 import com.cansin.app.domain.TimerRules
 import com.cansin.app.domain.TimerState
 import com.cansin.app.domain.WidgetPage
@@ -81,8 +80,9 @@ object WidgetRenderer {
                 }
             }
             WidgetPage.TAB -> {
-                val separator = DecimalFormatSymbols.getInstance(context.resources.configuration.locales[0]).decimalSeparator
-                views.setTextViewText(R.id.widget_value, NoteRules.formatAmount(snapshot.tabMinor, separator))
+                val locale = context.resources.configuration.locales[0]
+                val separator = DecimalFormatSymbols.getInstance(locale).decimalSeparator
+                views.setTextViewText(R.id.widget_value, data.settings.currency.format(snapshot.tabMinor, separator, locale.language == "tr"))
                 views.setContentDescription(R.id.widget_value, null)
                 val open = context.getString(R.string.widget_open)
                 button(views, open, context.getString(R.string.widget_open_tab), openApp(context, tab = true))

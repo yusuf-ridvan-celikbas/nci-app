@@ -24,10 +24,12 @@ class DataManager(
 
     suspend fun export(includeProfile: Boolean): Intent = withContext(Dispatchers.IO) {
         val dao = database.exportDao()
+        val settings = store.settings.first()
         val data = ExportData(
             dao.sessions(), dao.beers(), dao.water(), dao.notes(), dao.friends(),
-            store.settings.first().profile,
+            settings.profile,
             database.friendResultDao().all(),
+            settings.currency,
         )
         val json = ExportJson.build(data, includeProfile, System.currentTimeMillis())
         exportDir.deleteRecursively()

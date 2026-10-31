@@ -44,6 +44,7 @@ import com.cansin.app.R
 import com.cansin.app.data.FriendProfile
 import com.cansin.app.domain.BeerSize
 import com.cansin.app.domain.BodyProfile
+import com.cansin.app.domain.Currency
 import com.cansin.app.domain.WaterRules
 import com.cansin.app.prefs.Accent
 import com.cansin.app.prefs.AppName
@@ -68,6 +69,7 @@ class SettingsActions(
     val onWaterEnabled: (Boolean) -> Unit,
     val onWaterEvery: (Int) -> Unit,
     val onTimerEnabled: (Boolean) -> Unit,
+    val onCurrency: (Currency) -> Unit,
     val onExport: (Boolean) -> Unit,
     val onDeleteAll: () -> Unit,
 )
@@ -105,6 +107,7 @@ fun SettingsScreen(
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
             ChoiceGroup(R.string.setting_language, Language.entries, language, { it.label }, actions.onLanguage)
+            ChoiceGroup(R.string.setting_currency, Currency.entries, settings.currency, ::currencyLabel, actions.onCurrency)
             HorizontalDivider(Modifier.padding(vertical = 16.dp))
             SectionHeader(R.string.section_appearance)
             ChoiceGroup(R.string.setting_theme_mode, ThemeMode.entries, settings.themeMode, { it.label }, actions.onThemeMode)
@@ -218,6 +221,14 @@ private fun FriendsSection(friends: List<FriendProfile>, onDelete: (Long) -> Uni
             }
         }
     }
+}
+
+private fun currencyLabel(currency: Currency): Int = when (currency) {
+    Currency.NONE -> R.string.currency_none
+    Currency.TRY -> R.string.currency_try
+    Currency.EUR -> R.string.currency_eur
+    Currency.USD -> R.string.currency_usd
+    Currency.GBP -> R.string.currency_gbp
 }
 
 @Composable

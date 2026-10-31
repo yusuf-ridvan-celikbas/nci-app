@@ -16,6 +16,7 @@ import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -57,6 +58,7 @@ import com.cansin.app.domain.TimerState
 import com.cansin.app.ui.WaterViewModel
 import androidx.compose.material3.SnackbarHostState
 import com.cansin.app.ui.theme.CansinTheme
+import com.cansin.app.ui.LocalCurrency
 import com.cansin.app.ui.theme.dynamicColorAvailable
 import com.cansin.app.widget.CounterWidget
 import kotlinx.coroutines.flow.first
@@ -150,7 +152,7 @@ class MainActivity : ComponentActivity() {
         }
         BackHandler(screen != Screen.COUNTER) { screen = if (screen == Screen.DETAIL) Screen.HISTORY else Screen.COUNTER }
 
-        CansinTheme(dark, settings.accent) {
+        CansinTheme(dark, settings.accent) { CompositionLocalProvider(LocalCurrency provides settings.currency) {
             when {
                 !settings.ageConfirmed -> AgeGateScreen(
                     onConfirm = { update { confirmAge() } },
@@ -212,7 +214,7 @@ class MainActivity : ComponentActivity() {
                     onDismiss = { editingSides = false },
                 )
             }
-        }
+        } }
     }
 
     @Composable
@@ -284,6 +286,7 @@ class MainActivity : ComponentActivity() {
         onWaterEnabled = { on -> update { setWaterEnabled(on) } },
         onWaterEvery = { n -> update { setWaterEvery(n) } },
         onTimerEnabled = { on -> update { setTimerEnabled(on) } },
+        onCurrency = { c -> update { setCurrency(c) } },
         onExport = { includeProfile -> lifecycleScope.launch { startActivity(app.dataManager.export(includeProfile)) } },
         onDeleteAll = { lifecycleScope.launch { app.dataManager.deleteAll() } },
     )

@@ -15,6 +15,7 @@ data class ExportData(
     val friends: List<FriendProfile>,
     val profile: BodyProfile?,
     val friendResults: List<FriendResult> = emptyList(),
+    val currency: Currency = Currency.NONE,
 )
 
 object ExportJson {
@@ -60,6 +61,7 @@ object ExportJson {
                 linkedMapOf("name" to it.name, "day" to it.day, "beers" to it.beers, "durationMin" to it.durationMin, "water" to it.water)
             },
         )
+        if (data.currency != Currency.NONE) root["currency"] = data.currency.name
         val profile = data.profile
         if (includeProfile && profile != null) {
             root["bodyProfile"] = linkedMapOf(
