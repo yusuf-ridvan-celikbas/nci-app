@@ -148,4 +148,14 @@
     <string name="action_start">Başlat</string>
     <string name="tab_side_total">%1$s: %2$s</string>
     <string name="section_friends">Arkadaşlar</string>
+    <string name="section_water">Su</string>
+    <string name="setting_water">Su hatırlatması</string>
+    <plurals name="water_every">
+        <item quantity="one">Her biradan sonra hatırlat</item>
+        <item quantity="other">Her %1$d birada bir hatırlat</item>
+    </plurals>
+    <string name="water_nudge">Bir bardak su içme zamanı.</string>
+    <string name="water_count">Su: %1$d</string>
+    <string name="water_add">Su +1</string>
+    <string name="water_added">Su eklendi</string>
 </resources>

@@ -1,5 +1,6 @@
 package com.cansin.app.ui
 
+import androidx.annotation.StringRes
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.combinedClickable
@@ -44,7 +45,6 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.cansin.app.R
-import com.cansin.app.data.BeerEvent
 import com.cansin.app.domain.BeerSize
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.delay
@@ -64,6 +64,7 @@ fun CounterScreen(
     onOpenTab: () -> Unit,
     onStartVersus: () -> Unit,
     promilleCard: @Composable () -> Unit,
+    waterBar: @Composable (SnackbarHostState) -> Unit,
 ) {
     val state by viewModel.state.collectAsState()
     var pickingSize by rememberSaveable { mutableStateOf(false) }
@@ -122,6 +123,7 @@ fun CounterScreen(
                 enabled = state.count > 0,
                 modifier = Modifier.semantics { contentDescription = removeDescription },
             ) { Text(stringResource(R.string.minus_one), fontSize = 24.sp) }
+            waterBar(snackbar)
         }
     }
 
@@ -140,8 +142,13 @@ fun CounterScreen(
 }
 
 @Composable
-internal fun UndoEffect(events: Flow<BeerEvent>, snackbar: SnackbarHostState, onUndo: (BeerEvent) -> Unit) {
-    val addedText = stringResource(R.string.beer_added)
+internal fun <T> UndoEffect(
+    events: Flow<T>,
+    snackbar: SnackbarHostState,
+    onUndo: (T) -> Unit,
+    @StringRes message: Int = R.string.beer_added,
+) {
+    val addedText = stringResource(message)
     val undoText = stringResource(R.string.undo)
     LaunchedEffect(events) {
         events.collectLatest { event ->

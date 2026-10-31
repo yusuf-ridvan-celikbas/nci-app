@@ -29,6 +29,7 @@ class SessionRepository(
     private val sessions: SessionDao,
     private val beers: BeerDao,
     private val notes: NoteDao,
+    private val water: WaterDao,
     private val clock: () -> Long = System::currentTimeMillis,
     private val inactivityMs: Long = SessionRules.DEFAULT_INACTIVITY_MS,
     private val listener: SessionListener = object : SessionListener {},
@@ -49,6 +50,8 @@ class SessionRepository(
     fun notes(sessionId: Long): Flow<List<Note>> = notes.observe(sessionId)
 
     fun beers(sessionId: Long): Flow<List<BeerEvent>> = beers.observe(sessionId)
+
+    fun water(sessionId: Long): Flow<List<WaterEvent>> = water.observe(sessionId)
 
     suspend fun snapshot(): CounterSnapshot {
         val session = sessions.open() ?: return CounterSnapshot(0, null)
@@ -153,6 +156,16 @@ class SessionRepository(
         deleteIfEmpty(note.sessionId)
     }
 
+    suspend fun addWater(): WaterEvent? = write {
+        val session = activeSession(clock()) ?: return@write null
+        val event = WaterEvent(sessionId = session.id, at = clock())
+        event.copy(id = water.insert(event))
+    }
+
+    suspend fun undoWater(event: WaterEvent) = write {
+        if (water.delete(event.id) > 0) deleteIfEmpty(event.sessionId)
+    }
+
     suspend fun closeIfStale() = write { activeSession(clock()) }
 
     private suspend fun <T> write(block: suspend () -> T): T {
@@ -172,7 +185,12 @@ class SessionRepository(
 
     private suspend fun activeSession(now: Long): Session? {
         val session = sessions.open() ?: return null
-        val lastActivity = maxOf(session.startedAt, beers.latest(session.id)?.at ?: 0, notes.lastCreatedAt(session.id) ?: 0)
+        val lastActivity = maxOf(
+            session.startedAt,
+            beers.latest(session.id)?.at ?: 0,
+            notes.lastCreatedAt(session.id) ?: 0,
+            water.lastAt(session.id) ?: 0,
+        )
         if (!SessionRules.isStale(lastActivity, now, inactivityMs)) return session
         sessions.end(session.id, lastActivity)
         pending += Event.SessionClosed(session.id)
@@ -185,5 +203,6 @@ class SessionRepository(
         pending += Event.SessionClosed(sessionId)
     }
 
-    private suspend fun isEmpty(sessionId: Long) = beers.count(sessionId) == 0 && notes.count(sessionId) == 0
+    private suspend fun isEmpty(sessionId: Long) =
+        beers.count(sessionId) == 0 && notes.count(sessionId) == 0 && water.count(sessionId) == 0
 }

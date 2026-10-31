@@ -96,7 +96,7 @@ fun ReminderSection(settings: Settings, access: NotificationAccess, actions: Set
 }
 
 @Composable
-private fun SwitchRow(title: Int, checked: Boolean, onChange: (Boolean) -> Unit) {
+internal fun SwitchRow(title: Int, checked: Boolean, onChange: (Boolean) -> Unit) {
     Row(
         modifier = Modifier
             .fillMaxWidth()

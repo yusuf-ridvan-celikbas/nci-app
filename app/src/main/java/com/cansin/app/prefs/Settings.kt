@@ -4,6 +4,7 @@ import androidx.annotation.StringRes
 import com.cansin.app.R
 import com.cansin.app.domain.BeerSize
 import com.cansin.app.domain.BodyProfile
+import com.cansin.app.domain.WaterRules
 
 enum class AppName(@StringRes val label: Int, val alias: String) {
     SOY_TU_TENTACION(R.string.name_soy, "com.cansin.app.LauncherSoy"),
@@ -51,6 +52,8 @@ data class Settings(
     val beerSize: BeerSize = BeerSize.DEFAULT,
     val profile: BodyProfile? = null,
     val profilePromptDismissed: Boolean = false,
+    val waterEnabled: Boolean = true,
+    val waterEvery: Int = WaterRules.DEFAULT_EVERY,
 ) {
     companion object {
         const val DEFAULT_REMINDER_INTERVAL_MIN = 10

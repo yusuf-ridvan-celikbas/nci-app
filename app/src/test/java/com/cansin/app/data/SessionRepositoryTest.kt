@@ -16,8 +16,9 @@ class SessionRepositoryTest {
     private val sessions = FakeSessionDao()
     private val beers = FakeBeerDao()
     private val notes = FakeNoteDao()
+    private val water = FakeWaterDao()
     private var now = 1_000_000L
-    private val repo = SessionRepository(sessions, beers, notes, clock = { now })
+    private val repo = SessionRepository(sessions, beers, notes, water, clock = { now })
 
     private suspend fun openCount() = repo.openSession.first()?.let { beers.count(it.id) } ?: 0
 
@@ -136,7 +137,7 @@ class SessionRepositoryTest {
     }
 
     private val listener = RecordingListener()
-    private val observed = SessionRepository(sessions, beers, notes, clock = { now }, listener = listener)
+    private val observed = SessionRepository(sessions, beers, notes, water, clock = { now }, listener = listener)
 
     @Test
     fun everyWriteNotifiesChange() = runBlocking {
@@ -205,7 +206,7 @@ class SessionRepositoryTest {
 
     @Test
     fun beerUsesDefaultSizeUnlessOverridden() = runBlocking {
-        val sized = SessionRepository(sessions, beers, notes, clock = { now }, defaultSize = { BeerSize(330, 4.5) })
+        val sized = SessionRepository(sessions, beers, notes, water, clock = { now }, defaultSize = { BeerSize(330, 4.5) })
         assertEquals(BeerSize(330, 4.5), sized.add().let { BeerSize(it.sizeMl, it.abv) })
         assertEquals(BeerSize(568, 6.0), sized.add(size = BeerSize(568, 6.0)).let { BeerSize(it.sizeMl, it.abv) })
         assertEquals(listOf(330, 568), beers.rows.value.map { it.sizeMl })

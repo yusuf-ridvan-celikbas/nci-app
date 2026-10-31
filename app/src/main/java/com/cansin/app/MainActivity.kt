@@ -46,6 +46,10 @@ import com.cansin.app.ui.SettingsScreen
 import com.cansin.app.ui.VersusScreen
 import com.cansin.app.ui.VersusSetupDialog
 import com.cansin.app.ui.VersusViewModel
+import com.cansin.app.ui.UndoEffect
+import com.cansin.app.ui.WaterBar
+import com.cansin.app.ui.WaterViewModel
+import androidx.compose.material3.SnackbarHostState
 import com.cansin.app.ui.theme.CansinTheme
 import com.cansin.app.ui.theme.dynamicColorAvailable
 import com.cansin.app.widget.CounterWidget
@@ -62,6 +66,7 @@ class MainActivity : ComponentActivity() {
     private val notes: NotesViewModel by viewModels { NotesViewModel.factory(app.sessionRepository) }
     private val promille: PromilleViewModel by viewModels { PromilleViewModel.factory(app.sessionRepository, app.settingsStore) }
     private val versus: VersusViewModel by viewModels { VersusViewModel.factory(app.sessionRepository, app.friendRepository) }
+    private val water: WaterViewModel by viewModels { WaterViewModel.factory(app.sessionRepository, app.settingsStore) }
     private var resumed by mutableStateOf(false)
     private var notificationAccess by mutableStateOf(NotificationAccess(permissionGranted = false, enabled = false))
 
@@ -144,6 +149,7 @@ class MainActivity : ComponentActivity() {
                     onOpenTab = { screen = Screen.TAB },
                     onEditSides = { editingSides = true },
                     promilleCard = { PromilleSlot(onOpen = { screen = Screen.PROMILLE }) },
+                    waterBar = { WaterSlot(it) },
                 )
                 else -> CounterScreen(
                     viewModel = counter,
@@ -153,6 +159,7 @@ class MainActivity : ComponentActivity() {
                     onOpenTab = { screen = Screen.TAB },
                     onStartVersus = { editingSides = true },
                     promilleCard = { PromilleSlot(onOpen = { screen = Screen.PROMILLE }) },
+                    waterBar = { WaterSlot(it) },
                 )
             }
             if (editingSides && settings.ageConfirmed) {
@@ -169,6 +176,13 @@ class MainActivity : ComponentActivity() {
                 )
             }
         }
+    }
+
+    @Composable
+    private fun WaterSlot(snackbar: SnackbarHostState) {
+        val state by water.state.collectAsState()
+        UndoEffect(water.waterAdded, snackbar, water::undo, R.string.water_added)
+        WaterBar(state, onAdd = water::add, onDismiss = water::dismiss)
     }
 
     @Composable
@@ -216,6 +230,8 @@ class MainActivity : ComponentActivity() {
         onBeerSize = { size -> update { setBeerSize(size) } },
         onProfile = { profile -> update { setProfile(profile) } },
         onDeleteFriend = { id -> versus.deleteFriend(id) },
+        onWaterEnabled = { on -> update { setWaterEnabled(on) } },
+        onWaterEvery = { n -> update { setWaterEvery(n) } },
     )
 
     private fun update(block: suspend SettingsStore.() -> Unit) {

@@ -12,10 +12,11 @@ class VersusRepositoryTest {
     private val sessions = FakeSessionDao()
     private val beers = FakeBeerDao()
     private val notes = FakeNoteDao()
+    private val water = FakeWaterDao()
     private var now = 1_000_000L
     private val log = mutableListOf<String>()
     private val repo = SessionRepository(
-        sessions, beers, notes, clock = { now },
+        sessions, beers, notes, water, clock = { now },
         listener = object : SessionListener {
             override suspend fun onBeerAdded(event: BeerEvent, mine: Boolean) { log += "${event.side}:$mine" }
             override suspend fun onSessionClosed(sessionId: Long) { log += "closed:$sessionId" }
@@ -96,7 +97,7 @@ class VersusRepositoryTest {
         assertEquals(Side.RED, repo.addMyBeer(finishPrevious = true)?.side)
         repo.updateVersus(VersusSetup(meSide = null))
         assertNull(repo.addMyBeer())
-        assertEquals(Side.SOLO, SessionRepository(FakeSessionDao(), FakeBeerDao(), FakeNoteDao()).addMyBeer()?.side)
+        assertEquals(Side.SOLO, SessionRepository(FakeSessionDao(), FakeBeerDao(), FakeNoteDao(), FakeWaterDao()).addMyBeer()?.side)
     }
 
     @Test

@@ -17,6 +17,7 @@ import com.cansin.app.domain.BeerSize
 import com.cansin.app.domain.BodyProfile
 import com.cansin.app.domain.License
 import com.cansin.app.domain.Sex
+import com.cansin.app.domain.WaterRules
 import com.cansin.app.reminder.ReminderPolicy
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
@@ -42,6 +43,8 @@ private val PROFILE_HEIGHT = intPreferencesKey("profile_height_cm")
 private val PROFILE_WEIGHT = intPreferencesKey("profile_weight_kg")
 private val PROFILE_LICENSE = stringPreferencesKey("profile_license")
 private val PROFILE_PROMPT_DISMISSED = booleanPreferencesKey("profile_prompt_dismissed")
+private val WATER_ENABLED = booleanPreferencesKey("water_enabled")
+private val WATER_EVERY = intPreferencesKey("water_every")
 private val REMINDER_NEXT_AT = longPreferencesKey("reminder_next_at")
 private val REMINDER_SESSION = longPreferencesKey("reminder_session")
 private val REMINDER_STOPPED_SESSION = longPreferencesKey("reminder_stopped_session")
@@ -62,6 +65,8 @@ class SettingsStore(private val context: Context) {
             ),
             profile = readProfile(p),
             profilePromptDismissed = p[PROFILE_PROMPT_DISMISSED] == true,
+            waterEnabled = p[WATER_ENABLED] ?: true,
+            waterEvery = WaterRules.clamp(p[WATER_EVERY] ?: WaterRules.DEFAULT_EVERY),
         )
     }
 
@@ -110,6 +115,9 @@ class SettingsStore(private val context: Context) {
             it[PROFILE_LICENSE] = value.license.name
         }
     }
+
+    suspend fun setWaterEnabled(value: Boolean) = edit { it[WATER_ENABLED] = value }
+    suspend fun setWaterEvery(value: Int) = edit { it[WATER_EVERY] = WaterRules.clamp(value) }
 
     suspend fun dismissProfilePrompt() = edit { it[PROFILE_PROMPT_DISMISSED] = true }
 

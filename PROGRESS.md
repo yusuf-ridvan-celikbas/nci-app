@@ -1,6 +1,6 @@
 # Progress
 
-Current phase: **P8 done (installed on device, awaiting user check) → awaiting review before P9**
+Current phase: **P9 done (installed on device, awaiting user check) → awaiting review before P10**
 
 ## Phases
 - [x] Setup (project, wrapper, git, CLAUDE.md)
@@ -12,7 +12,7 @@ Current phase: **P8 done (installed on device, awaiting user check) → awaiting
 - [x] P6 Beer size
 - [x] P7 Promil estimator
 - [x] P8 Versus
-- [ ] P9 Water reminder
+- [x] P9 Water reminder
 - [ ] P10 History & stats
 - [ ] P11 Export & hardening
 - [ ] P12 iOS port
@@ -34,6 +34,7 @@ Current phase: **P8 done (installed on device, awaiting user check) → awaiting
 - `domain/BodyProfile.kt` (Sex, License, ranges, parse), `domain/Promille.kt` (PromilleModel: grams, Watson TBW, drinkEnd, 1-min simulation → current/peak/zeroAt), `domain/Warnings.kt` (TrDrivingLaw config, WarningRules → Warning list)
 - `ui/PromilleScreen.kt` (PromilleTicker, PromilleCard on counter, PromilleScreen with beer list, BeerEditDialog, WarningBanner + taxi/112 intents), `ui/PromilleViewModel.kt`, `ui/ProfileDialog.kt`; `ui/theme/Theme.kt` LocalAlertColors (fixed danger=RED, caution=AMBER palettes)
 - P8: `domain/VersusRules.kt` (VersusSetup, TabTotals, cleanName, fits, meSide, isMine, noteSide, totals); `data/FriendRepository.kt` + FriendDao; repository startVersus/updateVersus/addBeer(side)/addMyBeer/removeLatest(side); `ui/VersusScreen.kt`, `ui/VersusSetupDialog.kt`, `ui/VersusViewModel.kt`, `ui/SideUi.kt` (sideName, sideColor, SideChips); `UndoEffect` shared in CounterScreen.kt; theme `VersusColors` (fixed RED/BLUE light tones)
+- P9: `domain/WaterRules.kt` (beersSinceWater, shouldNudge, clamp 1–10); WaterDao; repository addWater/undoWater/water(); `ui/WaterViewModel.kt`, `ui/WaterBar.kt` (count + Water +1 + nudge card); UndoEffect now generic
 - `ui/ReminderSection.kt` settings section incl. POST_NOTIFICATIONS rationale + request
 - `CansinApp` = manual DI (appScope, db, SettingsStore, Reminders, SessionRepository with SessionListener → widget refresh + reminders)
 - Tests: app/src/test (fake DAOs, SessionRepositoryTest, SessionRulesTest, SettingsTest, PaletteContrastTest, WidgetLayoutTest, ReminderPolicyTest, NoteRepositoryTest, NoteRulesTest)
@@ -60,6 +61,7 @@ Current phase: **P8 done (installed on device, awaiting user check) → awaiting
 - P5: Amount = Long minor units (cents/kuruş), no currency; input accepts "12.5"/"12,50", max 1,000,000.00, ≤2 decimals; shown with locale decimal separator. (Chosen while user away – confirm.)
 - P5: A note with no open session starts one. Session is "empty" only with 0 beers AND 0 notes (undo/−1/delete/end use this). Notes count as activity for 6 h auto-close.
 - P5: Edited time stored in editedTime (createdAt kept); picker time resolves to the date closest to createdAt (handles midnight). Notes list ordered by COALESCE(editedTime, createdAt). Note delete added (not in spec, needed for typos).
+- P9: Water reminder is an in-app nudge card (no notification): shown when ≥ N of *my* beers since the last water; "Not now" hides it until the next beer (in-memory). On by default, N=2 (prefs water_enabled, water_every). Water +1 needs an open session (solo, or versus with a me side), has 5 s undo. Water counts for session activity (6 h) and keeps a session from being auto-deleted. No DB schema change (WaterEvent existed in v1).
 - P8: DB v2 via Room AutoMigration(1→2): session + redName, blueName, redFriendId, blueFriendId, meSide; note + side (null = shared). Verified upgrade on device.
 - P8: Versus = own session (user choice). Start from the people icon on the counter; ends open solo session (deleted if empty). Main screen routes to VersusScreen while open session is VERSUS; End session → back to solo. Empty versus session is NOT auto-deleted on undo/−1 (only on End session).
 - P8: Side rules: SOLO beers only outside versus, RED/BLUE only in versus (addBeer returns null otherwise). "Me" side per session: promille uses only my beers; reminders schedule only on my beers; reminder "another" → addMyBeer (no-op if no me side). Widget in versus shows "R–B" score and +1 opens the app; WidgetActionReceiver add is a no-op in versus.
@@ -79,6 +81,9 @@ Current phase: **P8 done (installed on device, awaiting user check) → awaiting
 - P4: Notification: title = chosen app name, text localized; VISIBILITY_PRIVATE with public version "Reminder"; two channels (default, silent = IMPORTANCE_LOW) since channel sound can't change later. Actions verify session_id == open session, else ignored.
 - P4: "Yes, got another" sets finishedAt on the latest beer (only if unset) and adds a beer. Interval changes apply from the next scheduling.
 - P3: updatePeriodMillis=0 (no periodic wakeups). Widget picker label is static ("Counter"/"Sayaç"); in-widget title follows app name.
+
+## P9 report
+- Release APK 1.58 MB (+17 KB). Permissions unchanged. Lint clean except version notices. Tests: 101/101. No new security surface.
 
 ## P8 report
 - Release APK 1.56 MB (+52 KB). Permissions unchanged. Lint clean except version notices. Tests: 93/93. DB migration v1→v2 tested by installing over existing data on device.
@@ -119,4 +124,5 @@ Current phase: **P8 done (installed on device, awaiting user check) → awaiting
 - P7: EN locale shows no health cautions (spec says EN → generic only). Add EN "slow down / poisoning" without numbers?
 - P7: Verify TR limits (2026 bill may lower NORMAL to 0.20) and set lastVerified before release.
 - P8: Shared tab amounts are shown separately, not split 50/50 — split wanted?
+- P9: Water nudge default ON — OK? Should it also fire as a notification when reminders are on?
 - Release signing: no keystore yet; will use untracked signing.properties.

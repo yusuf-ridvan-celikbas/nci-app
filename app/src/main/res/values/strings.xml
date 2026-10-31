@@ -154,4 +154,14 @@
     <string name="action_start">Start</string>
     <string name="tab_side_total">%1$s: %2$s</string>
     <string name="section_friends">Friends</string>
+    <string name="section_water">Water</string>
+    <string name="setting_water">Water reminder</string>
+    <plurals name="water_every">
+        <item quantity="one">Remind me after every beer</item>
+        <item quantity="other">Remind me every %1$d beers</item>
+    </plurals>
+    <string name="water_nudge">Time for a glass of water.</string>
+    <string name="water_count">Water: %1$d</string>
+    <string name="water_add">Water +1</string>
+    <string name="water_added">Water added</string>
 </resources>

@@ -28,6 +28,24 @@ interface SessionDao {
 }
 
 @Dao
+interface WaterDao {
+    @Insert
+    suspend fun insert(event: WaterEvent): Long
+
+    @Query("DELETE FROM water_event WHERE id = :id")
+    suspend fun delete(id: Long): Int
+
+    @Query("SELECT COUNT(*) FROM water_event WHERE sessionId = :sessionId")
+    suspend fun count(sessionId: Long): Int
+
+    @Query("SELECT MAX(at) FROM water_event WHERE sessionId = :sessionId")
+    suspend fun lastAt(sessionId: Long): Long?
+
+    @Query("SELECT * FROM water_event WHERE sessionId = :sessionId ORDER BY at, id")
+    fun observe(sessionId: Long): Flow<List<WaterEvent>>
+}
+
+@Dao
 interface FriendDao {
     @Query("SELECT * FROM friend_profile ORDER BY name COLLATE NOCASE")
     fun observeAll(): Flow<List<FriendProfile>>

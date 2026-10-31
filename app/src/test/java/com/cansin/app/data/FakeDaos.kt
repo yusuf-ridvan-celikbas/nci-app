@@ -69,5 +69,20 @@ class FakeNoteDao : NoteDao {
     override suspend fun lastCreatedAt(sessionId: Long) = rows.value.filter { it.sessionId == sessionId }.maxOfOrNull { it.createdAt }
 }
 
+class FakeWaterDao : WaterDao {
+    val rows = MutableStateFlow(listOf<WaterEvent>())
+    private var nextId = 1L
+
+    override suspend fun insert(event: WaterEvent): Long = nextId++.also { rows.value += event.copy(id = it) }
+    override suspend fun delete(id: Long): Int {
+        val before = rows.value.size
+        rows.value = rows.value.filterNot { it.id == id }
+        return before - rows.value.size
+    }
+    override suspend fun count(sessionId: Long) = rows.value.count { it.sessionId == sessionId }
+    override suspend fun lastAt(sessionId: Long) = rows.value.filter { it.sessionId == sessionId }.maxOfOrNull { it.at }
+    override fun observe(sessionId: Long): Flow<List<WaterEvent>> = rows.map { list -> list.filter { it.sessionId == sessionId } }
+}
+
 suspend fun SessionRepository.add(finishPrevious: Boolean = false, size: BeerSize? = null): BeerEvent =
     checkNotNull(addBeer(finishPrevious, size))

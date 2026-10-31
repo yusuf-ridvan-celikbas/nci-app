@@ -20,17 +20,21 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Slider
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableFloatStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.heading
@@ -40,11 +44,13 @@ import com.cansin.app.R
 import com.cansin.app.data.FriendProfile
 import com.cansin.app.domain.BeerSize
 import com.cansin.app.domain.BodyProfile
+import com.cansin.app.domain.WaterRules
 import com.cansin.app.prefs.Accent
 import com.cansin.app.prefs.AppName
 import com.cansin.app.prefs.Language
 import com.cansin.app.prefs.Settings
 import com.cansin.app.prefs.ThemeMode
+import kotlin.math.roundToInt
 
 class SettingsActions(
     val onBack: () -> Unit,
@@ -59,6 +65,8 @@ class SettingsActions(
     val onBeerSize: (BeerSize) -> Unit,
     val onProfile: (BodyProfile?) -> Unit,
     val onDeleteFriend: (Long) -> Unit,
+    val onWaterEnabled: (Boolean) -> Unit,
+    val onWaterEvery: (Int) -> Unit,
 )
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -101,6 +109,8 @@ fun SettingsScreen(
             ChoiceGroup(R.string.setting_color, accents, settings.accent, { it.label }, actions.onAccent)
             HorizontalDivider(Modifier.padding(vertical = 16.dp))
             BeerSection(settings.beerSize, actions.onBeerSize)
+            HorizontalDivider(Modifier.padding(vertical = 16.dp))
+            WaterSection(settings, actions)
             HorizontalDivider(Modifier.padding(vertical = 16.dp))
             ProfileSection(settings.profile, actions.onProfile)
             if (friends.isNotEmpty()) {
@@ -163,6 +173,23 @@ private fun ProfileSection(profile: BodyProfile?, onChange: (BodyProfile?) -> Un
                 editing = false
             },
             onDismiss = { editing = false },
+        )
+    }
+}
+
+@Composable
+private fun WaterSection(settings: Settings, actions: SettingsActions) {
+    SectionHeader(R.string.section_water)
+    SwitchRow(R.string.setting_water, settings.waterEnabled, actions.onWaterEnabled)
+    if (settings.waterEnabled) {
+        var every by remember(settings.waterEvery) { mutableFloatStateOf(settings.waterEvery.toFloat()) }
+        Text(pluralStringResource(R.plurals.water_every, every.roundToInt(), every.roundToInt()))
+        Slider(
+            value = every,
+            onValueChange = { every = it },
+            onValueChangeFinished = { actions.onWaterEvery(every.roundToInt()) },
+            valueRange = WaterRules.MIN_EVERY.toFloat()..WaterRules.MAX_EVERY.toFloat(),
+            steps = WaterRules.MAX_EVERY - WaterRules.MIN_EVERY - 1,
         )
     }
 }

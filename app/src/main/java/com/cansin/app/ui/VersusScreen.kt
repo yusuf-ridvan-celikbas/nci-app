@@ -3,7 +3,6 @@ package com.cansin.app.ui
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Row
@@ -51,6 +50,7 @@ fun VersusScreen(
     onOpenTab: () -> Unit,
     onEditSides: () -> Unit,
     promilleCard: @Composable () -> Unit,
+    waterBar: @Composable (SnackbarHostState) -> Unit,
 ) {
     val state by viewModel.state.collectAsState()
     val session = state.session ?: return
@@ -87,7 +87,10 @@ fun VersusScreen(
         Column(Modifier.fillMaxSize().padding(padding)) {
             SideHalf(session, Side.RED, state.red, onEditSides, viewModel::add, viewModel::removeLatest)
             SideHalf(session, Side.BLUE, state.blue, onEditSides, viewModel::add, viewModel::removeLatest)
-            Box(Modifier.padding(16.dp)) { promilleCard() }
+            Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                waterBar(snackbar)
+                promilleCard()
+            }
         }
     }
 }

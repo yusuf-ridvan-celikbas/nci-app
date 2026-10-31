@@ -13,8 +13,9 @@ class NoteRepositoryTest {
     private val sessions = FakeSessionDao()
     private val beers = FakeBeerDao()
     private val notes = FakeNoteDao()
+    private val water = FakeWaterDao()
     private var now = 1_000_000L
-    private val repo = SessionRepository(sessions, beers, notes, clock = { now })
+    private val repo = SessionRepository(sessions, beers, notes, water, clock = { now })
 
     @Test
     fun noteStartsSessionWhenNoneOpen() = runBlocking {
