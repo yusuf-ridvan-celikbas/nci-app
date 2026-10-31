@@ -53,4 +53,21 @@
     <string name="action_stop">Bu gecelik yeter</string>
     <string name="channel_reminders">Hatırlatmalar</string>
     <string name="channel_reminders_silent">Sessiz hatırlatmalar</string>
+    <string name="tab_title">Hesap</string>
+    <string name="open_tab">Hesabı aç</string>
+    <string name="note_hint">Not ekle</string>
+    <string name="amount_hint">Tutar</string>
+    <string name="add_note">Not ekle</string>
+    <string name="tab_total">Toplam: %1$s</string>
+    <string name="no_notes">Henüz not yok. Kimin ne ödediğini veya başka bir şeyi ekle.</string>
+    <string name="edit_note">Notu düzenle</string>
+    <string name="note_text">Not</string>
+    <string name="note_person">Kişi (isteğe bağlı)</string>
+    <string name="note_amount">Tutar (isteğe bağlı)</string>
+    <string name="note_time">Saat: %1$s</string>
+    <string name="note_edited">düzenlendi</string>
+    <string name="invalid_amount">0 veya daha büyük, en fazla 2 ondalıklı bir sayı gir.</string>
+    <string name="pick_time">Saat seç</string>
+    <string name="action_save">Kaydet</string>
+    <string name="action_delete">Sil</string>
 </resources>

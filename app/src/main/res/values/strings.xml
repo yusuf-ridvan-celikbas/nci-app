@@ -59,4 +59,21 @@
     <string name="action_stop">Stop for tonight</string>
     <string name="channel_reminders">Reminders</string>
     <string name="channel_reminders_silent">Silent reminders</string>
+    <string name="tab_title">Tab</string>
+    <string name="open_tab">Open tab</string>
+    <string name="note_hint">Add a note</string>
+    <string name="amount_hint">Amount</string>
+    <string name="add_note">Add note</string>
+    <string name="tab_total">Total: %1$s</string>
+    <string name="no_notes">No notes yet. Add who paid what, or anything else.</string>
+    <string name="edit_note">Edit note</string>
+    <string name="note_text">Note</string>
+    <string name="note_person">Person (optional)</string>
+    <string name="note_amount">Amount (optional)</string>
+    <string name="note_time">Time: %1$s</string>
+    <string name="note_edited">edited</string>
+    <string name="invalid_amount">Enter a number of 0 or more, up to 2 decimals.</string>
+    <string name="pick_time">Pick time</string>
+    <string name="action_save">Save</string>
+    <string name="action_delete">Delete</string>
 </resources>

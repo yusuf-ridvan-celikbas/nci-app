@@ -37,3 +37,20 @@ class FakeBeerDao : BeerDao {
     override suspend fun count(sessionId: Long) = rows.value.count { it.sessionId == sessionId }
     override fun observeCount(sessionId: Long): Flow<Int> = rows.map { list -> list.count { it.sessionId == sessionId } }
 }
+
+class FakeNoteDao : NoteDao {
+    val rows = MutableStateFlow(listOf<Note>())
+    private var nextId = 1L
+
+    override fun observe(sessionId: Long): Flow<List<Note>> =
+        rows.map { list -> list.filter { it.sessionId == sessionId }.sortedWith(compareBy({ it.editedTime ?: it.createdAt }, { it.id })) }
+    override suspend fun insert(note: Note): Long = nextId++.also { rows.value += note.copy(id = it) }
+    override suspend fun update(note: Note) {
+        rows.value = rows.value.map { if (it.id == note.id) note else it }
+    }
+    override suspend fun delete(id: Long) {
+        rows.value = rows.value.filterNot { it.id == id }
+    }
+    override suspend fun count(sessionId: Long) = rows.value.count { it.sessionId == sessionId }
+    override suspend fun lastCreatedAt(sessionId: Long) = rows.value.filter { it.sessionId == sessionId }.maxOfOrNull { it.createdAt }
+}

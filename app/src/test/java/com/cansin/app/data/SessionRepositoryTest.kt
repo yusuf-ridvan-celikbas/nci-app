@@ -14,8 +14,9 @@ import org.junit.Test
 class SessionRepositoryTest {
     private val sessions = FakeSessionDao()
     private val beers = FakeBeerDao()
+    private val notes = FakeNoteDao()
     private var now = 1_000_000L
-    private val repo = SessionRepository(sessions, beers, clock = { now })
+    private val repo = SessionRepository(sessions, beers, notes, clock = { now })
 
     private suspend fun openCount() = repo.openSession.first()?.let { beers.count(it.id) } ?: 0
 
@@ -134,7 +135,7 @@ class SessionRepositoryTest {
     }
 
     private val listener = RecordingListener()
-    private val observed = SessionRepository(sessions, beers, clock = { now }, listener = listener)
+    private val observed = SessionRepository(sessions, beers, notes, clock = { now }, listener = listener)
 
     @Test
     fun everyWriteNotifiesChange() = runBlocking {

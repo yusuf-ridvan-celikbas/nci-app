@@ -3,6 +3,7 @@ package com.cansin.app.data
 import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.Query
+import androidx.room.Update
 import kotlinx.coroutines.flow.Flow
 
 @Dao
@@ -21,6 +22,27 @@ interface SessionDao {
 
     @Query("DELETE FROM session WHERE id = :id")
     suspend fun delete(id: Long)
+}
+
+@Dao
+interface NoteDao {
+    @Query("SELECT * FROM note WHERE sessionId = :sessionId ORDER BY COALESCE(editedTime, createdAt), id")
+    fun observe(sessionId: Long): Flow<List<Note>>
+
+    @Insert
+    suspend fun insert(note: Note): Long
+
+    @Update
+    suspend fun update(note: Note)
+
+    @Query("DELETE FROM note WHERE id = :id")
+    suspend fun delete(id: Long)
+
+    @Query("SELECT COUNT(*) FROM note WHERE sessionId = :sessionId")
+    suspend fun count(sessionId: Long): Int
+
+    @Query("SELECT MAX(createdAt) FROM note WHERE sessionId = :sessionId")
+    suspend fun lastCreatedAt(sessionId: Long): Long?
 }
 
 @Dao

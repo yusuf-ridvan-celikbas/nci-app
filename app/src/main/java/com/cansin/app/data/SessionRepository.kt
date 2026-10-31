@@ -1,5 +1,6 @@
 package com.cansin.app.data
 
+import com.cansin.app.domain.NoteRules
 import com.cansin.app.domain.SessionRules
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.sync.Mutex
@@ -16,6 +17,7 @@ interface SessionListener {
 class SessionRepository(
     private val sessions: SessionDao,
     private val beers: BeerDao,
+    private val notes: NoteDao,
     private val clock: () -> Long = System::currentTimeMillis,
     private val inactivityMs: Long = SessionRules.DEFAULT_INACTIVITY_MS,
     private val listener: SessionListener = object : SessionListener {},
@@ -31,6 +33,8 @@ class SessionRepository(
     val openSession: Flow<Session?> = sessions.observeOpen()
 
     fun beerCount(sessionId: Long): Flow<Int> = beers.observeCount(sessionId)
+
+    fun notes(sessionId: Long): Flow<List<Note>> = notes.observe(sessionId)
 
     suspend fun snapshot(): CounterSnapshot {
         val session = sessions.open() ?: return CounterSnapshot(0, null)
@@ -61,8 +65,32 @@ class SessionRepository(
 
     suspend fun endSession() = write {
         val session = sessions.open() ?: return@write
-        if (beers.count(session.id) == 0) sessions.delete(session.id) else sessions.end(session.id, clock())
+        if (isEmpty(session.id)) sessions.delete(session.id) else sessions.end(session.id, clock())
         pending += Event.SessionClosed(session.id)
+    }
+
+    suspend fun addNote(text: String, amountMinor: Long?): Note? = write {
+        val clean = NoteRules.cleanText(text) ?: return@write null
+        val now = clock()
+        val sessionId = activeSession(now)?.id ?: sessions.insert(Session(startedAt = now))
+        val note = Note(sessionId = sessionId, text = clean, amountMinor = amountMinor?.takeIf { NoteRules.isValidAmount(it) }, createdAt = now)
+        note.copy(id = notes.insert(note))
+    }
+
+    suspend fun updateNote(note: Note) = write {
+        val clean = NoteRules.cleanText(note.text) ?: return@write
+        notes.update(
+            note.copy(
+                text = clean,
+                person = NoteRules.cleanPerson(note.person),
+                amountMinor = note.amountMinor?.takeIf { NoteRules.isValidAmount(it) },
+            ),
+        )
+    }
+
+    suspend fun deleteNote(note: Note) = write {
+        notes.delete(note.id)
+        deleteIfEmpty(note.sessionId)
     }
 
     suspend fun closeIfStale() = write { activeSession(clock()) }
@@ -84,7 +112,7 @@ class SessionRepository(
 
     private suspend fun activeSession(now: Long): Session? {
         val session = sessions.open() ?: return null
-        val lastActivity = beers.latest(session.id)?.at ?: session.startedAt
+        val lastActivity = maxOf(session.startedAt, beers.latest(session.id)?.at ?: 0, notes.lastCreatedAt(session.id) ?: 0)
         if (!SessionRules.isStale(lastActivity, now, inactivityMs)) return session
         sessions.end(session.id, lastActivity)
         pending += Event.SessionClosed(session.id)
@@ -92,8 +120,10 @@ class SessionRepository(
     }
 
     private suspend fun deleteIfEmpty(sessionId: Long) {
-        if (beers.count(sessionId) > 0) return
+        if (!isEmpty(sessionId)) return
         sessions.delete(sessionId)
         pending += Event.SessionClosed(sessionId)
     }
+
+    private suspend fun isEmpty(sessionId: Long) = beers.count(sessionId) == 0 && notes.count(sessionId) == 0
 }

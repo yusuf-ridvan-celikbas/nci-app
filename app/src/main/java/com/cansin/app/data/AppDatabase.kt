@@ -12,6 +12,7 @@ import androidx.room.RoomDatabase
 abstract class AppDatabase : RoomDatabase() {
     abstract fun sessionDao(): SessionDao
     abstract fun beerDao(): BeerDao
+    abstract fun noteDao(): NoteDao
 
     companion object {
         fun build(context: Context): AppDatabase =

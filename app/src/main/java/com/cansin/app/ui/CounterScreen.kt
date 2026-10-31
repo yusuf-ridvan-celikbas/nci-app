@@ -45,7 +45,7 @@ private const val UNDO_WINDOW_MS = 5_000L
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun CounterScreen(viewModel: CounterViewModel, title: String, onOpenSettings: () -> Unit) {
+fun CounterScreen(viewModel: CounterViewModel, title: String, onOpenSettings: () -> Unit, onOpenTab: () -> Unit) {
     val state by viewModel.state.collectAsState()
     val snackbar = remember { SnackbarHostState() }
     val addedText = stringResource(R.string.beer_added)
@@ -69,6 +69,11 @@ fun CounterScreen(viewModel: CounterViewModel, title: String, onOpenSettings: ()
         topBar = {
             CenterAlignedTopAppBar(
                 title = { Text(title) },
+                navigationIcon = {
+                    IconButton(onClick = onOpenTab) {
+                        Icon(painterResource(R.drawable.ic_receipt), stringResource(R.string.open_tab))
+                    }
+                },
                 actions = {
                     IconButton(onClick = onOpenSettings) {
                         Icon(painterResource(R.drawable.ic_settings), stringResource(R.string.settings))

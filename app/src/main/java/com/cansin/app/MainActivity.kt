@@ -33,6 +33,8 @@ import com.cansin.app.system.LauncherAlias
 import com.cansin.app.ui.AgeGateScreen
 import com.cansin.app.ui.CounterScreen
 import com.cansin.app.ui.CounterViewModel
+import com.cansin.app.ui.NotesScreen
+import com.cansin.app.ui.NotesViewModel
 import com.cansin.app.ui.NotificationAccess
 import com.cansin.app.ui.SettingsActions
 import com.cansin.app.ui.SettingsScreen
@@ -43,10 +45,13 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 
+private enum class Screen { COUNTER, TAB, SETTINGS }
+
 class MainActivity : ComponentActivity() {
     private val app get() = application as CansinApp
     private val store: SettingsStore get() = app.settingsStore
     private val counter: CounterViewModel by viewModels { CounterViewModel.factory(app.sessionRepository) }
+    private val notes: NotesViewModel by viewModels { NotesViewModel.factory(app.sessionRepository) }
     private var notificationAccess by mutableStateOf(NotificationAccess(permissionGranted = false, enabled = false))
 
     override fun attachBaseContext(newBase: Context) {
@@ -91,8 +96,8 @@ class MainActivity : ComponentActivity() {
             val style = SystemBarStyle.auto(Color.TRANSPARENT, Color.TRANSPARENT) { dark }
             enableEdgeToEdge(style, style)
         }
-        var showSettings by rememberSaveable { mutableStateOf(false) }
-        BackHandler(showSettings) { showSettings = false }
+        var screen by rememberSaveable { mutableStateOf(Screen.COUNTER) }
+        BackHandler(screen != Screen.COUNTER) { screen = Screen.COUNTER }
 
         CansinTheme(dark, settings.accent) {
             when {
@@ -100,17 +105,19 @@ class MainActivity : ComponentActivity() {
                     onConfirm = { update { confirmAge() } },
                     onDecline = { finish() },
                 )
-                showSettings -> SettingsScreen(
+                screen == Screen.SETTINGS -> SettingsScreen(
                     settings = settings,
                     language = AppLocale.current(this, settings.language),
                     dynamicAvailable = dynamicColorAvailable,
                     notificationAccess = notificationAccess,
-                    actions = settingsActions(onBack = { showSettings = false }),
+                    actions = settingsActions(onBack = { screen = Screen.COUNTER }),
                 )
+                screen == Screen.TAB -> NotesScreen(notes, onBack = { screen = Screen.COUNTER })
                 else -> CounterScreen(
                     viewModel = counter,
                     title = stringResource(settings.appName.label),
-                    onOpenSettings = { showSettings = true },
+                    onOpenSettings = { screen = Screen.SETTINGS },
+                    onOpenTab = { screen = Screen.TAB },
                 )
             }
         }

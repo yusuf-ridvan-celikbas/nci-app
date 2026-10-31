@@ -22,6 +22,7 @@ class CansinApp : Application() {
         SessionRepository(
             database.sessionDao(),
             database.beerDao(),
+            database.noteDao(),
             listener = object : SessionListener {
                 override suspend fun onChanged() = CounterWidget.refreshAll(this@CansinApp)
                 override suspend fun onBeerAdded(event: BeerEvent) = reminders.onBeerAdded(event.sessionId)

@@ -1,6 +1,6 @@
 # Progress
 
-Current phase: **P4 done (on-device reminder check pending by user) → awaiting review before P5**
+Current phase: **P5 done (not yet tested on device; phone disconnected) → awaiting review before P6**
 
 ## Phases
 - [x] Setup (project, wrapper, git, CLAUDE.md)
@@ -8,7 +8,7 @@ Current phase: **P4 done (on-device reminder check pending by user) → awaiting
 - [x] P2 Settings & personalization
 - [x] P3 Widget
 - [x] P4 Reminder
-- [ ] P5 Notes / tab
+- [x] P5 Notes / tab
 - [ ] P6 Beer size
 - [ ] P7 Promil estimator
 - [ ] P8 Versus
@@ -28,9 +28,11 @@ Current phase: **P4 done (on-device reminder check pending by user) → awaiting
 - Navigation: rememberSaveable flag in MainActivity + BackHandler (no navigation lib)
 - `widget/` CounterWidget (exported AppWidgetProvider, system actions only; refreshAll), WidgetActionReceiver (exported=false, ACTION_ADD → addBeer), WidgetRenderer (RemoteViews, colors from ui/theme colorScheme, localized via AppLocale.localized), WidgetLayout (pure helpers)
 - `reminder/` ReminderPolicy (pure), Reminders (controller: schedule/snooze/stop/restore, AlarmManager), ReminderNotifier (channels + notification), ReminderReceiver (exported=false: REMIND/ANOTHER/SNOOZE/STOP, requires session_id extra), BootReceiver (exported=false: BOOT_COMPLETED, MY_PACKAGE_REPLACED)
+- `domain/NoteRules.kt` (text/person caps, amount parse/format in minor units, pickTime across midnight); NoteDao; repository addNote/updateNote/deleteNote
+- `ui/NotesScreen.kt` (Tab screen: list, total, quick-add text+amount), `ui/NoteEditDialog.kt` (text/person/amount/time picker, delete), NotesViewModel; MainActivity Screen enum COUNTER/TAB/SETTINGS
 - `ui/ReminderSection.kt` settings section incl. POST_NOTIFICATIONS rationale + request
 - `CansinApp` = manual DI (appScope, db, SettingsStore, Reminders, SessionRepository with SessionListener → widget refresh + reminders)
-- Tests: app/src/test (fake DAOs, SessionRepositoryTest, SessionRulesTest, SettingsTest, PaletteContrastTest, WidgetLayoutTest, ReminderPolicyTest)
+- Tests: app/src/test (fake DAOs, SessionRepositoryTest, SessionRulesTest, SettingsTest, PaletteContrastTest, WidgetLayoutTest, ReminderPolicyTest, NoteRepositoryTest, NoteRulesTest)
 
 ## Decisions
 - Toolchain: JDK 17, AGP 9.4.1 + Gradle 9.6.0 wrapper, Kotlin 2.2.10 + KSP 2.3.11, compile/targetSdk 37, minSdk 26. Kotlin 2.4.x / AGP 9.5 deferred.
@@ -51,6 +53,9 @@ Current phase: **P4 done (on-device reminder check pending by user) → awaiting
 - P3: Widget uses RemoteViews, not Glance (user-approved: no dependency). +1 goes through a non-exported receiver via explicit immutable PendingIntent; the exported provider only refreshes. Rapid taps serialized by repository Mutex.
 - P3: Repository has onChange callback → every write refreshes widgets; settings changes refresh too. snapshot() is read-only and shows a stale (>6 h) session as 0.
 - P3: One provider, two layouts: small (count + +1) and wide ≥250dp (name, count, "since last" Chronometer, +1). API 31+: responsive size map + setColorInt light/dark pair (follows system night automatically); API 26–30: layout from min width option, colors fixed at render time.
+- P5: Amount = Long minor units (cents/kuruş), no currency; input accepts "12.5"/"12,50", max 1,000,000.00, ≤2 decimals; shown with locale decimal separator. (Chosen while user away – confirm.)
+- P5: A note with no open session starts one. Session is "empty" only with 0 beers AND 0 notes (undo/−1/delete/end use this). Notes count as activity for 6 h auto-close.
+- P5: Edited time stored in editedTime (createdAt kept); picker time resolves to the date closest to createdAt (handles midnight). Notes list ordered by COALESCE(editedTime, createdAt). Note delete added (not in spec, needed for typos).
 - P4: Repository emits events via SessionListener (onBeerAdded, onSessionClosed, onChanged), dispatched after the write lock is released, in order.
 - P4: Scheduling = AlarmManager.setAndAllowWhileIdle(RTC_WAKEUP), inexact; no WorkManager, no SCHEDULE_EXACT_ALARM. One alarm PendingIntent (same action/request code) → reschedule replaces, no duplicates.
 - P4: Reminders off by default. Enabling on API 33+ shows rationale dialog then the system prompt; denied/blocked shows a link to system notification settings. Enabling mid-session schedules from now.
@@ -58,6 +63,9 @@ Current phase: **P4 done (on-device reminder check pending by user) → awaiting
 - P4: Notification: title = chosen app name, text localized; VISIBILITY_PRIVATE with public version "Reminder"; two channels (default, silent = IMPORTANCE_LOW) since channel sound can't change later. Actions verify session_id == open session, else ignored.
 - P4: "Yes, got another" sets finishedAt on the latest beer (only if unset) and adds a beer. Interval changes apply from the next scheduling.
 - P3: updatePeriodMillis=0 (no periodic wakeups). Widget picker label is static ("Counter"/"Sayaç"); in-widget title follows app name.
+
+## P5 report
+- Release APK 1.47 MB (+250 KB, mostly M3 TimePicker + text fields/LazyColumn). Option: platform TimePickerDialog saves ~?KB but ignores app theme colors. Permissions unchanged. Lint clean except version notices. Tests: 55/55. Not tested on device.
 
 ## P4 report
 - Release APK 1.22 MB (+69 KB: Slider/Switch/AlertDialog), AAB 2.96 MB. Permissions: POST_NOTIFICATIONS (runtime, only when user enables reminders), RECEIVE_BOOT_COMPLETED (restore pending reminder). Exported unchanged (aliases, widget provider, profileinstaller). Lint clean except version notices. Tests: 38/38.
@@ -81,5 +89,6 @@ Current phase: **P4 done (on-device reminder check pending by user) → awaiting
 ## Open questions
 - Widget label/theme (P3) and notification title (P4) must read SettingsStore; on API 26–32 notifications need AppLocale.wrap(appContext) for language.
 - androidx.profileinstaller ProfileInstallReceiver is exported (DUMP-permission, adb-only). Keep or remove via manifest merge?
-- Note amount as minor units (Long) OK?
+- Note amount as minor units (Long), no currency symbol — OK? (implemented)
+- P5 size: keep M3 TimePicker (+~200 KB est.) or use platform TimePickerDialog?
 - Release signing: no keystore yet; will use untracked signing.properties.
