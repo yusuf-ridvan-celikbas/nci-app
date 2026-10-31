@@ -1,5 +1,7 @@
 package com.cansin.app.data
 
+import com.cansin.app.domain.BeerRules
+import com.cansin.app.domain.BeerSize
 import com.cansin.app.domain.NoteRules
 import com.cansin.app.domain.SessionRules
 import kotlinx.coroutines.flow.Flow
@@ -21,6 +23,7 @@ class SessionRepository(
     private val clock: () -> Long = System::currentTimeMillis,
     private val inactivityMs: Long = SessionRules.DEFAULT_INACTIVITY_MS,
     private val listener: SessionListener = object : SessionListener {},
+    private val defaultSize: suspend () -> BeerSize = { BeerSize.DEFAULT },
 ) {
     private sealed interface Event {
         data class BeerAdded(val event: BeerEvent) : Event
@@ -43,13 +46,18 @@ class SessionRepository(
         return CounterSnapshot(beers.count(session.id), latest.at, session.id)
     }
 
-    suspend fun addBeer(finishPrevious: Boolean = false): BeerEvent = write {
+    suspend fun addBeer(finishPrevious: Boolean = false, size: BeerSize? = null): BeerEvent {
+        val chosen = BeerRules.clamp(size ?: defaultSize())
+        return write { insertBeer(finishPrevious, chosen) }
+    }
+
+    private suspend fun insertBeer(finishPrevious: Boolean, size: BeerSize): BeerEvent {
         val now = clock()
         val active = activeSession(now)
         if (finishPrevious && active != null) beers.latest(active.id)?.let { beers.finish(it.id, now) }
         val sessionId = active?.id ?: sessions.insert(Session(startedAt = now))
-        val event = BeerEvent(sessionId = sessionId, at = now)
-        event.copy(id = beers.insert(event)).also { pending += Event.BeerAdded(it) }
+        val event = BeerEvent(sessionId = sessionId, sizeMl = size.sizeMl, abv = size.abv, at = now)
+        return event.copy(id = beers.insert(event)).also { pending += Event.BeerAdded(it) }
     }
 
     suspend fun undo(event: BeerEvent) = write {

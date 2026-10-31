@@ -11,6 +11,7 @@ import com.cansin.app.widget.CounterWidget
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.flow.first
 
 class CansinApp : Application() {
     val appScope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
@@ -28,6 +29,7 @@ class CansinApp : Application() {
                 override suspend fun onBeerAdded(event: BeerEvent) = reminders.onBeerAdded(event.sessionId)
                 override suspend fun onSessionClosed(sessionId: Long) = reminders.onSessionClosed(sessionId)
             },
+            defaultSize = { settingsStore.settings.first().beerSize },
         )
     }
 }

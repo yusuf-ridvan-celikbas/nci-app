@@ -7,6 +7,7 @@ import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
 import com.cansin.app.data.BeerEvent
 import com.cansin.app.data.SessionRepository
+import com.cansin.app.domain.BeerSize
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.Flow
@@ -35,7 +36,7 @@ class CounterViewModel(private val repository: SessionRepository) : ViewModel() 
 
     fun refresh() = viewModelScope.launch { repository.closeIfStale() }
 
-    fun add() = viewModelScope.launch { added.send(repository.addBeer()) }
+    fun add(size: BeerSize? = null) = viewModelScope.launch { added.send(repository.addBeer(size = size)) }
 
     fun undo(event: BeerEvent) = viewModelScope.launch { repository.undo(event) }
 

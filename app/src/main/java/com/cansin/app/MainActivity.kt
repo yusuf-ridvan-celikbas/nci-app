@@ -116,6 +116,7 @@ class MainActivity : ComponentActivity() {
                 else -> CounterScreen(
                     viewModel = counter,
                     title = stringResource(settings.appName.label),
+                    defaultSize = settings.beerSize,
                     onOpenSettings = { screen = Screen.SETTINGS },
                     onOpenTab = { screen = Screen.TAB },
                 )
@@ -147,6 +148,7 @@ class MainActivity : ComponentActivity() {
                     .putExtra(android.provider.Settings.EXTRA_APP_PACKAGE, packageName),
             )
         },
+        onBeerSize = { size -> update { setBeerSize(size) } },
     )
 
     private fun update(block: suspend SettingsStore.() -> Unit) {

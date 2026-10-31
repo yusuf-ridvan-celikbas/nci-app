@@ -1,5 +1,6 @@
 package com.cansin.app.data
 
+import com.cansin.app.domain.BeerSize
 import com.cansin.app.domain.SessionRules
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
@@ -200,5 +201,20 @@ class SessionRepositoryTest {
         (1..200).map { async { repo.addBeer() } }.awaitAll()
         assertEquals(1, sessions.rows.value.size)
         assertEquals(200, openCount())
+    }
+
+    @Test
+    fun beerUsesDefaultSizeUnlessOverridden() = runBlocking {
+        val sized = SessionRepository(sessions, beers, notes, clock = { now }, defaultSize = { BeerSize(330, 4.5) })
+        assertEquals(BeerSize(330, 4.5), sized.addBeer().let { BeerSize(it.sizeMl, it.abv) })
+        assertEquals(BeerSize(568, 6.0), sized.addBeer(size = BeerSize(568, 6.0)).let { BeerSize(it.sizeMl, it.abv) })
+        assertEquals(listOf(330, 568), beers.rows.value.map { it.sizeMl })
+    }
+
+    @Test
+    fun outOfRangeSizeIsClamped() = runBlocking {
+        val event = repo.addBeer(size = BeerSize(50_000, 99.0))
+        assertEquals(2_000, event.sizeMl)
+        assertEquals(20.0, event.abv, 0.0)
     }
 }

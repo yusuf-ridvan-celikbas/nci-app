@@ -2,6 +2,7 @@ package com.cansin.app.prefs
 
 import androidx.annotation.StringRes
 import com.cansin.app.R
+import com.cansin.app.domain.BeerSize
 
 enum class AppName(@StringRes val label: Int, val alias: String) {
     SOY_TU_TENTACION(R.string.name_soy, "com.cansin.app.LauncherSoy"),
@@ -46,6 +47,7 @@ data class Settings(
     val remindersEnabled: Boolean = false,
     val reminderIntervalMin: Int = DEFAULT_REMINDER_INTERVAL_MIN,
     val reminderSilent: Boolean = false,
+    val beerSize: BeerSize = BeerSize.DEFAULT,
 ) {
     companion object {
         const val DEFAULT_REMINDER_INTERVAL_MIN = 10

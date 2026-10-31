@@ -1,6 +1,6 @@
 # Progress
 
-Current phase: **P5 done (not yet tested on device; phone disconnected) → awaiting review before P6**
+Current phase: **P6 done (P5+P6 not yet tested on device) → awaiting review before P7**
 
 ## Phases
 - [x] Setup (project, wrapper, git, CLAUDE.md)
@@ -9,7 +9,7 @@ Current phase: **P5 done (not yet tested on device; phone disconnected) → awai
 - [x] P3 Widget
 - [x] P4 Reminder
 - [x] P5 Notes / tab
-- [ ] P6 Beer size
+- [x] P6 Beer size
 - [ ] P7 Promil estimator
 - [ ] P8 Versus
 - [ ] P9 Water reminder
@@ -30,6 +30,7 @@ Current phase: **P5 done (not yet tested on device; phone disconnected) → awai
 - `reminder/` ReminderPolicy (pure), Reminders (controller: schedule/snooze/stop/restore, AlarmManager), ReminderNotifier (channels + notification), ReminderReceiver (exported=false: REMIND/ANOTHER/SNOOZE/STOP, requires session_id extra), BootReceiver (exported=false: BOOT_COMPLETED, MY_PACKAGE_REPLACED)
 - `domain/NoteRules.kt` (text/person caps, amount parse/format in minor units, pickTime across midnight); NoteDao; repository addNote/updateNote/deleteNote
 - `ui/NotesScreen.kt` (Tab screen: list, total, quick-add text+amount), `ui/NoteEditDialog.kt` (text/person/amount/time picker, delete), NotesViewModel; MainActivity Screen enum COUNTER/TAB/SETTINGS
+- `domain/BeerSize.kt` (BeerSize, BeerRules: presets 33/50 cl, cl/ABV parse+format, clamp); `ui/BeerSizeDialog.kt` (shared by Settings default + long-press +1); repository `addBeer(size)` falls back to `defaultSize` lambda (Settings)
 - `ui/ReminderSection.kt` settings section incl. POST_NOTIFICATIONS rationale + request
 - `CansinApp` = manual DI (appScope, db, SettingsStore, Reminders, SessionRepository with SessionListener → widget refresh + reminders)
 - Tests: app/src/test (fake DAOs, SessionRepositoryTest, SessionRulesTest, SettingsTest, PaletteContrastTest, WidgetLayoutTest, ReminderPolicyTest, NoteRepositoryTest, NoteRulesTest)
@@ -38,7 +39,7 @@ Current phase: **P5 done (not yet tested on device; phone disconnected) → awai
 - Toolchain: JDK 17, AGP 9.4.1 + Gradle 9.6.0 wrapper, Kotlin 2.2.10 + KSP 2.3.11, compile/targetSdk 37, minSdk 26. Kotlin 2.4.x / AGP 9.5 deferred.
 - Approved deps: Compose BOM 2026.09.00 (ui, material3), activity-compose 1.13.0, lifecycle-viewmodel 2.11.0, Room 2.8.5 (+KSP), DataStore prefs 1.3.0; junit (test).
 - Times stored as epoch millis (Long). Note amount stored as `amountMinor: Long` (cents/kuruş) – confirm in P5.
-- Default BeerEvent size 500 ml, ABV 5.0 (P6 makes configurable).
+- Default BeerEvent size 500 ml, ABV 5.0; configurable in Settings since P6.
 - Auto-close (6 h) checked lazily on app start (onStart) and on each +1/−1; endedAt = last beer time. No background work.
 - Undo (5 s snackbar) deletes that exact event; −1 deletes newest beer in open session. Session with 0 beers is deleted.
 - "End session" always visible (bottom bar), disabled when no session.
@@ -56,6 +57,7 @@ Current phase: **P5 done (not yet tested on device; phone disconnected) → awai
 - P5: Amount = Long minor units (cents/kuruş), no currency; input accepts "12.5"/"12,50", max 1,000,000.00, ≤2 decimals; shown with locale decimal separator. (Chosen while user away – confirm.)
 - P5: A note with no open session starts one. Session is "empty" only with 0 beers AND 0 notes (undo/−1/delete/end use this). Notes count as activity for 6 h auto-close.
 - P5: Edited time stored in editedTime (createdAt kept); picker time resolves to the date closest to createdAt (handles midnight). Notes list ordered by COALESCE(editedTime, createdAt). Note delete added (not in spec, needed for typos).
+- P6: Size stored in ml (cl input, ≤1 decimal, 10–200 cl); ABV 0–20 %, ≤1 decimal. Prefs default_size_ml/default_abv, clamped on read and in repository. Widget and reminder "another" use the default size. Long-press +1 → dialog (33/50/custom + ABV prefilled with default) → adds that beer (normal undo snackbar). +1 is now a Box+combinedClickable (M3 Button has no long-press), with a11y long-click label.
 - P4: Repository emits events via SessionListener (onBeerAdded, onSessionClosed, onChanged), dispatched after the write lock is released, in order.
 - P4: Scheduling = AlarmManager.setAndAllowWhileIdle(RTC_WAKEUP), inexact; no WorkManager, no SCHEDULE_EXACT_ALARM. One alarm PendingIntent (same action/request code) → reschedule replaces, no duplicates.
 - P4: Reminders off by default. Enabling on API 33+ shows rationale dialog then the system prompt; denied/blocked shows a link to system notification settings. Enabling mid-session schedules from now.
@@ -64,8 +66,11 @@ Current phase: **P5 done (not yet tested on device; phone disconnected) → awai
 - P4: "Yes, got another" sets finishedAt on the latest beer (only if unset) and adds a beer. Interval changes apply from the next scheduling.
 - P3: updatePeriodMillis=0 (no periodic wakeups). Widget picker label is static ("Counter"/"Sayaç"); in-widget title follows app name.
 
+## P6 report
+- Release APK 1.47 MB (+1.4 KB). Permissions unchanged. Lint clean except version notices. Tests: 62/62. No new security surface (input validated + clamped). Not tested on device.
+
 ## P5 report
-- Release APK 1.47 MB (+250 KB, mostly M3 TimePicker + text fields/LazyColumn). Option: platform TimePickerDialog saves ~?KB but ignores app theme colors. Permissions unchanged. Lint clean except version notices. Tests: 55/55. Not tested on device.
+- Release APK 1.47 MB (+250 KB, mostly M3 TimePicker + text fields/LazyColumn). User chose to keep M3 TimePicker. Permissions unchanged. Lint clean except version notices. Tests: 55/55. Not tested on device.
 
 ## P4 report
 - Release APK 1.22 MB (+69 KB: Slider/Switch/AlertDialog), AAB 2.96 MB. Permissions: POST_NOTIFICATIONS (runtime, only when user enables reminders), RECEIVE_BOOT_COMPLETED (restore pending reminder). Exported unchanged (aliases, widget provider, profileinstaller). Lint clean except version notices. Tests: 38/38.
@@ -89,6 +94,4 @@ Current phase: **P5 done (not yet tested on device; phone disconnected) → awai
 ## Open questions
 - Widget label/theme (P3) and notification title (P4) must read SettingsStore; on API 26–32 notifications need AppLocale.wrap(appContext) for language.
 - androidx.profileinstaller ProfileInstallReceiver is exported (DUMP-permission, adb-only). Keep or remove via manifest merge?
-- Note amount as minor units (Long), no currency symbol — OK? (implemented)
-- P5 size: keep M3 TimePicker (+~200 KB est.) or use platform TimePickerDialog?
 - Release signing: no keystore yet; will use untracked signing.properties.

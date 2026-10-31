@@ -1,6 +1,10 @@
 package com.cansin.app.ui
 
+import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.background
+import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -8,7 +12,6 @@ import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.material3.Button
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -25,17 +28,23 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.cansin.app.R
+import com.cansin.app.domain.BeerSize
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.collectLatest
@@ -45,8 +54,15 @@ private const val UNDO_WINDOW_MS = 5_000L
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun CounterScreen(viewModel: CounterViewModel, title: String, onOpenSettings: () -> Unit, onOpenTab: () -> Unit) {
+fun CounterScreen(
+    viewModel: CounterViewModel,
+    title: String,
+    defaultSize: BeerSize,
+    onOpenSettings: () -> Unit,
+    onOpenTab: () -> Unit,
+) {
     val state by viewModel.state.collectAsState()
+    var pickingSize by rememberSaveable { mutableStateOf(false) }
     val snackbar = remember { SnackbarHostState() }
     val addedText = stringResource(R.string.beer_added)
     val undoText = stringResource(R.string.undo)
@@ -101,12 +117,7 @@ fun CounterScreen(viewModel: CounterViewModel, title: String, onOpenSettings: ()
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
             Text(text = state.count.toString(), style = MaterialTheme.typography.displayLarge)
-            val addDescription = stringResource(R.string.add_beer)
-            Button(
-                onClick = { viewModel.add() },
-                shape = CircleShape,
-                modifier = Modifier.size(200.dp).semantics { contentDescription = addDescription },
-            ) { Text(stringResource(R.string.plus_one), fontSize = 64.sp) }
+            AddButton(onClick = { viewModel.add() }, onLongClick = { pickingSize = true })
             Text(
                 text = stringResource(R.string.counter_prompt),
                 style = MaterialTheme.typography.bodyLarge,
@@ -119,5 +130,41 @@ fun CounterScreen(viewModel: CounterViewModel, title: String, onOpenSettings: ()
                 modifier = Modifier.semantics { contentDescription = removeDescription },
             ) { Text(stringResource(R.string.minus_one), fontSize = 24.sp) }
         }
+    }
+
+    if (pickingSize) {
+        BeerSizeDialog(
+            title = R.string.pick_size_title,
+            confirm = R.string.action_add,
+            initial = defaultSize,
+            onConfirm = {
+                pickingSize = false
+                viewModel.add(it)
+            },
+            onDismiss = { pickingSize = false },
+        )
+    }
+}
+
+@OptIn(ExperimentalFoundationApi::class)
+@Composable
+private fun AddButton(onClick: () -> Unit, onLongClick: () -> Unit) {
+    val addDescription = stringResource(R.string.add_beer)
+    Box(
+        contentAlignment = Alignment.Center,
+        modifier = Modifier
+            .size(200.dp)
+            .clip(CircleShape)
+            .background(MaterialTheme.colorScheme.primary)
+            .combinedClickable(
+                role = Role.Button,
+                onClickLabel = addDescription,
+                onLongClickLabel = stringResource(R.string.pick_size),
+                onLongClick = onLongClick,
+                onClick = onClick,
+            )
+            .semantics { contentDescription = addDescription },
+    ) {
+        Text(stringResource(R.string.plus_one), fontSize = 64.sp, color = MaterialTheme.colorScheme.onPrimary)
     }
 }

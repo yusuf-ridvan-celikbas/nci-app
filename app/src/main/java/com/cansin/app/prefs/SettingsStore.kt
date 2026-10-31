@@ -5,12 +5,15 @@ import androidx.datastore.core.handlers.ReplaceFileCorruptionHandler
 import androidx.datastore.preferences.core.MutablePreferences
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.booleanPreferencesKey
+import androidx.datastore.preferences.core.doublePreferencesKey
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.emptyPreferences
 import androidx.datastore.preferences.core.intPreferencesKey
 import androidx.datastore.preferences.core.longPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
+import com.cansin.app.domain.BeerRules
+import com.cansin.app.domain.BeerSize
 import com.cansin.app.reminder.ReminderPolicy
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
@@ -28,6 +31,8 @@ private val ACCENT = stringPreferencesKey("accent")
 private val REMINDERS_ENABLED = booleanPreferencesKey("reminders_enabled")
 private val REMINDER_INTERVAL = intPreferencesKey("reminder_interval_min")
 private val REMINDER_SILENT = booleanPreferencesKey("reminder_silent")
+private val DEFAULT_SIZE_ML = intPreferencesKey("default_size_ml")
+private val DEFAULT_ABV = doublePreferencesKey("default_abv")
 private val REMINDER_NEXT_AT = longPreferencesKey("reminder_next_at")
 private val REMINDER_SESSION = longPreferencesKey("reminder_session")
 private val REMINDER_STOPPED_SESSION = longPreferencesKey("reminder_stopped_session")
@@ -43,6 +48,9 @@ class SettingsStore(private val context: Context) {
             remindersEnabled = p[REMINDERS_ENABLED] == true,
             reminderIntervalMin = ReminderPolicy.clampInterval(p[REMINDER_INTERVAL] ?: Settings.DEFAULT_REMINDER_INTERVAL_MIN),
             reminderSilent = p[REMINDER_SILENT] == true,
+            beerSize = BeerRules.clamp(
+                BeerSize(p[DEFAULT_SIZE_ML] ?: BeerSize.DEFAULT.sizeMl, p[DEFAULT_ABV] ?: BeerSize.DEFAULT.abv),
+            ),
         )
     }
 
@@ -58,6 +66,12 @@ class SettingsStore(private val context: Context) {
     suspend fun setRemindersEnabled(value: Boolean) = edit { it[REMINDERS_ENABLED] = value }
     suspend fun setReminderInterval(minutes: Int) = edit { it[REMINDER_INTERVAL] = ReminderPolicy.clampInterval(minutes) }
     suspend fun setReminderSilent(value: Boolean) = edit { it[REMINDER_SILENT] = value }
+
+    suspend fun setBeerSize(value: BeerSize) = edit {
+        val clamped = BeerRules.clamp(value)
+        it[DEFAULT_SIZE_ML] = clamped.sizeMl
+        it[DEFAULT_ABV] = clamped.abv
+    }
 
     suspend fun setScheduledReminder(at: Long?, sessionId: Long?) = edit {
         it.putOrRemove(REMINDER_NEXT_AT, at)

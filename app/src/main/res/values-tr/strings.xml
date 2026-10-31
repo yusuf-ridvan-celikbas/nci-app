@@ -70,4 +70,17 @@
     <string name="pick_time">Saat seç</string>
     <string name="action_save">Kaydet</string>
     <string name="action_delete">Sil</string>
+    <string name="section_beer">Bira</string>
+    <string name="setting_default_beer">Varsayılan bira</string>
+    <string name="beer_size_value">%1$s cl · %%%2$s</string>
+    <string name="size_cl">%1$s cl</string>
+    <string name="size_custom">Özel</string>
+    <string name="size_custom_cl">Boyut (cl)</string>
+    <string name="abv_label" formatted="false">Alkol oranı (%)</string>
+    <string name="invalid_size">10–200 cl arası, en fazla 1 ondalık gir.</string>
+    <string name="invalid_abv">0–20 arası, en fazla 1 ondalık gir.</string>
+    <string name="pick_size_title">Bu bira</string>
+    <string name="pick_size">Boyut seç</string>
+    <string name="pick_size_hint">Farklı bir boyut seçmek için +1’e basılı tut.</string>
+    <string name="action_add">Ekle</string>
 </resources>
