@@ -1,6 +1,6 @@
 # Progress
 
-Current phase: **P11 done on master. Branch `feature/widget-pages` (local only, not pushed, not installed): widget redesign + manual drink timer → awaiting user review/merge. Next: P12 (iOS, needs a Mac) or P13 design.**
+Current phase: **P11 + widget v2/drink timer on master (user-tested on device). Not pushed (no remote yet). Next: P12 (iOS, needs a Mac) or P13 design.**
 
 ## Phases
 - [x] Setup (project, wrapper, git, CLAUDE.md)
