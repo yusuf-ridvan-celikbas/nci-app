@@ -4,6 +4,7 @@ import androidx.annotation.StringRes
 import com.cansin.app.R
 import com.cansin.app.domain.BeerSize
 import com.cansin.app.domain.BodyProfile
+import com.cansin.app.domain.CareRules
 import com.cansin.app.domain.Currency
 import com.cansin.app.domain.WaterRules
 
@@ -58,6 +59,9 @@ data class Settings(
     val timerEnabled: Boolean = true,
     val shareName: String? = null,
     val currency: Currency = Currency.NONE,
+    val careEnabled: Boolean = true,
+    val careLateHour: Int = CareRules.DEFAULT_LATE_HOUR,
+    val homePlace: String? = null,
 ) {
     companion object {
         const val DEFAULT_REMINDER_INTERVAL_MIN = 10

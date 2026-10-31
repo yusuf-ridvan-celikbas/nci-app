@@ -70,6 +70,9 @@ class SettingsActions(
     val onWaterEvery: (Int) -> Unit,
     val onTimerEnabled: (Boolean) -> Unit,
     val onCurrency: (Currency) -> Unit,
+    val onCareEnabled: (Boolean) -> Unit,
+    val onCareLateHour: (Int) -> Unit,
+    val onHomePlace: (String?) -> Unit,
     val onExport: (Boolean) -> Unit,
     val onDeleteAll: () -> Unit,
 )
@@ -117,6 +120,8 @@ fun SettingsScreen(
             BeerSection(settings.beerSize, actions.onBeerSize)
             HorizontalDivider(Modifier.padding(vertical = 16.dp))
             WaterSection(settings, actions)
+            HorizontalDivider(Modifier.padding(vertical = 16.dp))
+            CareSection(settings, actions)
             HorizontalDivider(Modifier.padding(vertical = 16.dp))
             SectionHeader(R.string.setting_timer)
             SwitchRow(R.string.setting_timer, settings.timerEnabled, actions.onTimerEnabled)

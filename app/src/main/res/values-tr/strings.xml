@@ -234,4 +234,17 @@
     <string name="shortcut_tab_long">Hesabı aç</string>
     <string name="tile_label">+1 bira</string>
     <string name="tile_open_app">Uygulamayı aç</string>
+    <string name="care_late">Geç oldu. Eve dönme vakti mi?</string>
+    <string name="care_slow_down">Bu gece yavaş git. Bir bardak su iyi gelir.</string>
+    <string name="care_way_home">Eve yol</string>
+    <string name="care_stops_query">otobüs durağı</string>
+    <string name="section_care">Kendine iyi bak</string>
+    <string name="setting_care">Nazik hatırlatmalar</string>
+    <string name="setting_care_note">Geç olunca veya birkaç biradan sonra nazik bir kart. Hiçbir şey telefonundan çıkmaz.</string>
+    <string name="setting_late_hour">Geç saat başlangıcı</string>
+    <string name="setting_home">Ev ("Eve yol" için)</string>
+    <string name="setting_home_not_set">Ayarlanmadı – yakındaki duraklar gösterilir</string>
+    <string name="setting_home_hint">Adres veya semt, ör. Kadıköy</string>
+    <string name="setting_home_note">Harita uygulamanı toplu taşıma ile açar. Sadece bu telefonda saklanır.</string>
+    <string name="action_remove">Kaldır</string>
 </resources>

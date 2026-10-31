@@ -59,6 +59,9 @@ import com.cansin.app.ui.WaterViewModel
 import androidx.compose.material3.SnackbarHostState
 import com.cansin.app.ui.theme.CansinTheme
 import com.cansin.app.ui.LocalCurrency
+import com.cansin.app.ui.CareCard
+import com.cansin.app.ui.CareTicker
+import com.cansin.app.ui.CareViewModel
 import com.cansin.app.domain.QuickAction
 import com.cansin.app.ui.theme.dynamicColorAvailable
 import com.cansin.app.widget.CounterWidget
@@ -76,6 +79,7 @@ class MainActivity : ComponentActivity() {
     private val promille: PromilleViewModel by viewModels { PromilleViewModel.factory(app.sessionRepository, app.settingsStore) }
     private val versus: VersusViewModel by viewModels { VersusViewModel.factory(app.sessionRepository, app.friendRepository) }
     private val water: WaterViewModel by viewModels { WaterViewModel.factory(app.sessionRepository, app.settingsStore) }
+    private val care: CareViewModel by viewModels { CareViewModel.factory(app.sessionRepository, app.settingsStore) }
     private val history: HistoryViewModel by viewModels { HistoryViewModel.factory(app.historyRepository, app.settingsStore) }
     private var resumed by mutableStateOf(false)
     private var openTabRequest by mutableStateOf(false)
@@ -199,7 +203,7 @@ class MainActivity : ComponentActivity() {
                     onOpenTab = { screen = Screen.TAB },
                     onEditSides = { editingSides = true },
                     onOpenHistory = { screen = Screen.HISTORY },
-                    promilleCard = { PromilleSlot(onOpen = { screen = Screen.PROMILLE }) },
+                    promilleCard = { CareSlot(); PromilleSlot(onOpen = { screen = Screen.PROMILLE }) },
                     waterBar = { WaterSlot(it) },
                 )
                 else -> CounterScreen(
@@ -210,7 +214,7 @@ class MainActivity : ComponentActivity() {
                     onOpenTab = { screen = Screen.TAB },
                     onStartVersus = { editingSides = true },
                     onOpenHistory = { screen = Screen.HISTORY },
-                    promilleCard = { PromilleSlot(onOpen = { screen = Screen.PROMILLE }) },
+                    promilleCard = { CareSlot(); PromilleSlot(onOpen = { screen = Screen.PROMILLE }) },
                     waterBar = { WaterSlot(it) },
                 )
             }
@@ -228,6 +232,13 @@ class MainActivity : ComponentActivity() {
                 )
             }
         } }
+    }
+
+    @Composable
+    private fun CareSlot() {
+        val state by care.state.collectAsState()
+        CareTicker(care, resumed)
+        CareCard(state, care::dismiss)
     }
 
     @Composable
@@ -300,6 +311,9 @@ class MainActivity : ComponentActivity() {
         onWaterEvery = { n -> update { setWaterEvery(n) } },
         onTimerEnabled = { on -> update { setTimerEnabled(on) } },
         onCurrency = { c -> update { setCurrency(c) } },
+        onCareEnabled = { on -> update { setCareEnabled(on) } },
+        onCareLateHour = { h -> update { setCareLateHour(h) } },
+        onHomePlace = { home -> update { setHomePlace(home) } },
         onExport = { includeProfile -> lifecycleScope.launch { startActivity(app.dataManager.export(includeProfile)) } },
         onDeleteAll = { lifecycleScope.launch { app.dataManager.deleteAll() } },
     )

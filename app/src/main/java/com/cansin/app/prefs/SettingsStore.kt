@@ -16,6 +16,7 @@ import com.cansin.app.domain.BeerRules
 import com.cansin.app.domain.ResultCards
 import com.cansin.app.domain.BeerSize
 import com.cansin.app.domain.BodyProfile
+import com.cansin.app.domain.CareRules
 import com.cansin.app.domain.Currency
 import com.cansin.app.domain.License
 import com.cansin.app.domain.Sex
@@ -52,6 +53,9 @@ private val WATER_EVERY = intPreferencesKey("water_every")
 private val TIMER_ENABLED = booleanPreferencesKey("timer_enabled")
 private val SHARE_NAME = stringPreferencesKey("share_name")
 private val CURRENCY = stringPreferencesKey("currency")
+private val CARE_ENABLED = booleanPreferencesKey("care_enabled")
+private val CARE_LATE_HOUR = intPreferencesKey("care_late_hour")
+private val HOME_PLACE = stringPreferencesKey("home_place")
 private val TIMER_BEER = longPreferencesKey("timer_beer_id")
 private val TIMER_SESSION = longPreferencesKey("timer_session_id")
 private val TIMER_STARTED = longPreferencesKey("timer_started_at")
@@ -81,6 +85,9 @@ class SettingsStore(private val context: Context) {
             timerEnabled = p[TIMER_ENABLED] ?: true,
             shareName = ResultCards.cleanName(p[SHARE_NAME]),
             currency = enumOr(p[CURRENCY], Currency.NONE),
+            careEnabled = p[CARE_ENABLED] ?: true,
+            careLateHour = CareRules.clampLateHour(p[CARE_LATE_HOUR] ?: CareRules.DEFAULT_LATE_HOUR),
+            homePlace = CareRules.cleanHome(p[HOME_PLACE]),
         )
     }
 
@@ -162,6 +169,10 @@ class SettingsStore(private val context: Context) {
         val keep = setOf(AGE_CONFIRMED, APP_NAME, LANGUAGE, THEME_MODE, ACCENT)
         p.asMap().keys.filterNot { it in keep }.forEach { p.remove(it) }
     }
+
+    suspend fun setCareEnabled(value: Boolean) = edit { it[CARE_ENABLED] = value }
+    suspend fun setCareLateHour(value: Int) = edit { it[CARE_LATE_HOUR] = CareRules.clampLateHour(value) }
+    suspend fun setHomePlace(value: String?) = edit { it.putOrRemove(HOME_PLACE, CareRules.cleanHome(value)) }
 
     suspend fun setCurrency(value: Currency) = edit { it[CURRENCY] = value.name }
 

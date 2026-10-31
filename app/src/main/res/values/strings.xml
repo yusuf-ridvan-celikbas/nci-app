@@ -240,4 +240,17 @@
     <string name="shortcut_tab_long">Open the tab</string>
     <string name="tile_label">+1 beer</string>
     <string name="tile_open_app">Open the app</string>
+    <string name="care_late">It\'s getting late. Time to head home?</string>
+    <string name="care_slow_down">Take it slow tonight. A glass of water helps.</string>
+    <string name="care_way_home">Way home</string>
+    <string name="care_stops_query">bus stop</string>
+    <string name="section_care">Looking after you</string>
+    <string name="setting_care">Kind reminders</string>
+    <string name="setting_care_note">A gentle card when it gets late or after several beers. Nothing leaves your phone.</string>
+    <string name="setting_late_hour">Late from</string>
+    <string name="setting_home">Home (for "Way home")</string>
+    <string name="setting_home_not_set">Not set – shows nearby stops</string>
+    <string name="setting_home_hint">Address or area, e.g. Kadıköy</string>
+    <string name="setting_home_note">Opens your maps app with public transport. Stored only on this phone.</string>
+    <string name="action_remove">Remove</string>
 </resources>
