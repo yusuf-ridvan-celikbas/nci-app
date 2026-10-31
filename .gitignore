@@ -27,3 +27,6 @@ google-services.json
 *.ap_
 *.dex
 /app/release/
+
+# Claude Code local worktrees
+.claude/worktrees/

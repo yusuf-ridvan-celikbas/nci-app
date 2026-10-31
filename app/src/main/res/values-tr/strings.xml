@@ -226,4 +226,12 @@
     <string name="currency_eur">Euro (€)</string>
     <string name="currency_usd">ABD doları ($)</string>
     <string name="currency_gbp">İngiliz sterlini (£)</string>
+    <string name="shortcut_beer">+1 bira</string>
+    <string name="shortcut_beer_long">Bira ekle</string>
+    <string name="shortcut_water">+1 su</string>
+    <string name="shortcut_water_long">Bir bardak su ekle</string>
+    <string name="shortcut_tab">Hesap</string>
+    <string name="shortcut_tab_long">Hesabı aç</string>
+    <string name="tile_label">+1 bira</string>
+    <string name="tile_open_app">Uygulamayı aç</string>
 </resources>

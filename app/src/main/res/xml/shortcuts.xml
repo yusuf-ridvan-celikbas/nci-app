@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8"?>
+<shortcuts xmlns:android="http://schemas.android.com/apk/res/android">
+    <shortcut
+        android:shortcutId="beer"
+        android:enabled="true"
+        android:icon="@drawable/ic_shortcut_beer"
+        android:shortcutShortLabel="@string/shortcut_beer"
+        android:shortcutLongLabel="@string/shortcut_beer_long">
+        <intent
+            android:action="android.intent.action.VIEW"
+            android:targetClass="com.cansin.app.MainActivity"
+            android:targetPackage="com.cansin.app">
+            <extra android:name="com.cansin.app.SHORTCUT" android:value="beer" />
+        </intent>
+    </shortcut>
+    <shortcut
+        android:shortcutId="water"
+        android:enabled="true"
+        android:icon="@drawable/ic_shortcut_water"
+        android:shortcutShortLabel="@string/shortcut_water"
+        android:shortcutLongLabel="@string/shortcut_water_long">
+        <intent
+            android:action="android.intent.action.VIEW"
+            android:targetClass="com.cansin.app.MainActivity"
+            android:targetPackage="com.cansin.app">
+            <extra android:name="com.cansin.app.SHORTCUT" android:value="water" />
+        </intent>
+    </shortcut>
+    <shortcut
+        android:shortcutId="tab"
+        android:enabled="true"
+        android:icon="@drawable/ic_shortcut_tab"
+        android:shortcutShortLabel="@string/shortcut_tab"
+        android:shortcutLongLabel="@string/shortcut_tab_long">
+        <intent
+            android:action="android.intent.action.VIEW"
+            android:targetClass="com.cansin.app.MainActivity"
+            android:targetPackage="com.cansin.app">
+            <extra android:name="com.cansin.app.SHORTCUT" android:value="tab" />
+        </intent>
+    </shortcut>
+</shortcuts>

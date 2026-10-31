@@ -59,6 +59,7 @@ import com.cansin.app.ui.WaterViewModel
 import androidx.compose.material3.SnackbarHostState
 import com.cansin.app.ui.theme.CansinTheme
 import com.cansin.app.ui.LocalCurrency
+import com.cansin.app.domain.QuickAction
 import com.cansin.app.ui.theme.dynamicColorAvailable
 import com.cansin.app.widget.CounterWidget
 import kotlinx.coroutines.flow.first
@@ -78,6 +79,7 @@ class MainActivity : ComponentActivity() {
     private val history: HistoryViewModel by viewModels { HistoryViewModel.factory(app.historyRepository, app.settingsStore) }
     private var resumed by mutableStateOf(false)
     private var openTabRequest by mutableStateOf(false)
+    private var quickAction by mutableStateOf<QuickAction?>(null)
     private var notificationAccess by mutableStateOf(NotificationAccess(permissionGranted = false, enabled = false))
 
     override fun attachBaseContext(newBase: Context) {
@@ -106,6 +108,7 @@ class MainActivity : ComponentActivity() {
 
     private fun handleIntent(intent: Intent?) {
         if (intent?.getBooleanExtra(EXTRA_OPEN_TAB, false) == true) openTabRequest = true
+        QuickAction.parse(intent?.getStringExtra(EXTRA_SHORTCUT))?.let { quickAction = it }
     }
 
     override fun onStart() {
@@ -144,6 +147,16 @@ class MainActivity : ComponentActivity() {
         val friends by versus.friends.collectAsState()
         var detailId by rememberSaveable { mutableStateOf<Long?>(null) }
         LaunchedEffect(detailId) { history.select(detailId) }
+        LaunchedEffect(quickAction, settings.ageConfirmed) {
+            val action = quickAction ?: return@LaunchedEffect
+            if (!settings.ageConfirmed) return@LaunchedEffect
+            quickAction = null
+            when (action) {
+                QuickAction.BEER -> { screen = Screen.COUNTER; counter.add() }
+                QuickAction.WATER -> { screen = Screen.COUNTER; water.add() }
+                QuickAction.TAB -> screen = Screen.TAB
+            }
+        }
         LaunchedEffect(openTabRequest) {
             if (openTabRequest) {
                 screen = Screen.TAB
@@ -300,5 +313,6 @@ class MainActivity : ComponentActivity() {
 
     companion object {
         const val EXTRA_OPEN_TAB = "com.cansin.app.OPEN_TAB"
+        const val EXTRA_SHORTCUT = "com.cansin.app.SHORTCUT"
     }
 }
