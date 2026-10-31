@@ -17,9 +17,11 @@ import com.cansin.app.domain.BeerSize
 import com.cansin.app.domain.BodyProfile
 import com.cansin.app.domain.License
 import com.cansin.app.domain.Sex
+import com.cansin.app.domain.TimerState
 import com.cansin.app.domain.WaterRules
 import com.cansin.app.reminder.ReminderPolicy
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 
 private val Context.dataStore by preferencesDataStore(
@@ -45,6 +47,11 @@ private val PROFILE_LICENSE = stringPreferencesKey("profile_license")
 private val PROFILE_PROMPT_DISMISSED = booleanPreferencesKey("profile_prompt_dismissed")
 private val WATER_ENABLED = booleanPreferencesKey("water_enabled")
 private val WATER_EVERY = intPreferencesKey("water_every")
+private val TIMER_ENABLED = booleanPreferencesKey("timer_enabled")
+private val TIMER_BEER = longPreferencesKey("timer_beer_id")
+private val TIMER_SESSION = longPreferencesKey("timer_session_id")
+private val TIMER_STARTED = longPreferencesKey("timer_started_at")
+private const val WIDGET_PAGE_PREFIX = "widget_page_"
 private val REMINDER_NEXT_AT = longPreferencesKey("reminder_next_at")
 private val REMINDER_SESSION = longPreferencesKey("reminder_session")
 private val REMINDER_STOPPED_SESSION = longPreferencesKey("reminder_stopped_session")
@@ -67,6 +74,7 @@ class SettingsStore(private val context: Context) {
             profilePromptDismissed = p[PROFILE_PROMPT_DISMISSED] == true,
             waterEnabled = p[WATER_ENABLED] ?: true,
             waterEvery = WaterRules.clamp(p[WATER_EVERY] ?: WaterRules.DEFAULT_EVERY),
+            timerEnabled = p[TIMER_ENABLED] ?: true,
         )
     }
 
@@ -80,6 +88,31 @@ class SettingsStore(private val context: Context) {
         )
         return profile.takeIf { it.isValid }
     }
+
+    val timerState: Flow<TimerState> = context.dataStore.data.map { p ->
+        TimerState(p[TIMER_BEER], p[TIMER_SESSION], p[TIMER_STARTED])
+    }
+
+    suspend fun setTimer(state: TimerState) = edit {
+        it.putOrRemove(TIMER_BEER, state.beerId)
+        it.putOrRemove(TIMER_SESSION, state.sessionId)
+        it.putOrRemove(TIMER_STARTED, state.startedAt)
+    }
+
+    suspend fun setTimerEnabled(value: Boolean) = edit {
+        it[TIMER_ENABLED] = value
+        if (!value) {
+            it.remove(TIMER_BEER)
+            it.remove(TIMER_SESSION)
+            it.remove(TIMER_STARTED)
+        }
+    }
+
+    suspend fun widgetPage(id: Int): Int = context.dataStore.data.first()[intPreferencesKey(WIDGET_PAGE_PREFIX + id)] ?: 0
+
+    suspend fun setWidgetPage(id: Int, page: Int) = edit { it[intPreferencesKey(WIDGET_PAGE_PREFIX + id)] = page }
+
+    suspend fun removeWidgetPages(ids: IntArray) = edit { p -> ids.forEach { p.remove(intPreferencesKey(WIDGET_PAGE_PREFIX + it)) } }
 
     val reminderState: Flow<ReminderState> = context.dataStore.data.map { p ->
         ReminderState(p[REMINDER_NEXT_AT], p[REMINDER_SESSION], p[REMINDER_STOPPED_SESSION])

@@ -17,6 +17,11 @@ data class CounterSnapshot(
     val versus: Boolean = false,
     val red: Int = 0,
     val blue: Int = 0,
+    val notes: Int = 0,
+    val tabMinor: Long = 0,
+    val water: Int = 0,
+    val hasMe: Boolean = false,
+    val myLatestBeer: BeerEvent? = null,
 )
 
 interface SessionListener {
@@ -55,12 +60,28 @@ class SessionRepository(
 
     suspend fun snapshot(): CounterSnapshot {
         val session = sessions.open() ?: return CounterSnapshot(0, null)
-        val latest = beers.latest(session.id)
-        if (latest == null || SessionRules.isStale(latest.at, clock(), inactivityMs)) return CounterSnapshot(0, null)
-        if (session.mode != SessionMode.VERSUS) return CounterSnapshot(beers.count(session.id), latest.at, session.id)
-        val red = beers.countOnSide(session.id, Side.RED)
-        val blue = beers.countOnSide(session.id, Side.BLUE)
-        return CounterSnapshot(red + blue, latest.at, session.id, versus = true, red = red, blue = blue)
+        if (SessionRules.isStale(lastActivity(session), clock(), inactivityMs)) return CounterSnapshot(0, null)
+        val versus = session.mode == SessionMode.VERSUS
+        val me = VersusRules.meSide(session)
+        return CounterSnapshot(
+            count = beers.count(session.id),
+            lastBeerAt = beers.latest(session.id)?.at,
+            sessionId = session.id,
+            versus = versus,
+            red = if (versus) beers.countOnSide(session.id, Side.RED) else 0,
+            blue = if (versus) beers.countOnSide(session.id, Side.BLUE) else 0,
+            notes = notes.count(session.id),
+            tabMinor = notes.totalMinor(session.id),
+            water = water.count(session.id),
+            hasMe = me != null,
+            myLatestBeer = me?.let { beers.latestOnSide(session.id, it) },
+        )
+    }
+
+    suspend fun finishBeer(beerId: Long, sessionId: Long) = write {
+        val session = activeSession(clock())?.takeIf { it.id == sessionId } ?: return@write
+        beers.finish(beerId, clock())
+        session
     }
 
     suspend fun addBeer(finishPrevious: Boolean = false, size: BeerSize? = null, side: Side = Side.SOLO): BeerEvent? {
@@ -185,17 +206,19 @@ class SessionRepository(
 
     private suspend fun activeSession(now: Long): Session? {
         val session = sessions.open() ?: return null
-        val lastActivity = maxOf(
-            session.startedAt,
-            beers.latest(session.id)?.at ?: 0,
-            notes.lastCreatedAt(session.id) ?: 0,
-            water.lastAt(session.id) ?: 0,
-        )
+        val lastActivity = lastActivity(session)
         if (!SessionRules.isStale(lastActivity, now, inactivityMs)) return session
         sessions.end(session.id, lastActivity)
         pending += Event.SessionClosed(session.id)
         return null
     }
+
+    private suspend fun lastActivity(session: Session): Long = maxOf(
+        session.startedAt,
+        beers.latest(session.id)?.at ?: 0,
+        notes.lastCreatedAt(session.id) ?: 0,
+        water.lastAt(session.id) ?: 0,
+    )
 
     private suspend fun deleteIfEmpty(sessionId: Long) {
         if (!isEmpty(sessionId) || sessions.open()?.takeIf { it.id == sessionId }?.mode == SessionMode.VERSUS) return

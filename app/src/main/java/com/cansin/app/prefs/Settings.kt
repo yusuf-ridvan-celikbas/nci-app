@@ -54,6 +54,7 @@ data class Settings(
     val profilePromptDismissed: Boolean = false,
     val waterEnabled: Boolean = true,
     val waterEvery: Int = WaterRules.DEFAULT_EVERY,
+    val timerEnabled: Boolean = true,
 ) {
     companion object {
         const val DEFAULT_REMINDER_INTERVAL_MIN = 10

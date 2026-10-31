@@ -10,6 +10,7 @@ import com.cansin.app.data.SessionListener
 import com.cansin.app.data.SessionRepository
 import com.cansin.app.prefs.SettingsStore
 import com.cansin.app.reminder.Reminders
+import com.cansin.app.timer.DrinkTimer
 import com.cansin.app.widget.CounterWidget
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -27,6 +28,7 @@ class CansinApp : Application() {
     val dataManager: DataManager by lazy {
         DataManager(this, database, settingsStore, { reminders.cancel() }, { CounterWidget.refreshAll(this) })
     }
+    val drinkTimer: DrinkTimer by lazy { DrinkTimer(settingsStore, { sessionRepository }) }
     val reminders: Reminders by lazy { Reminders(this, settingsStore, { sessionRepository }) }
 
     val sessionRepository: SessionRepository by lazy {
@@ -40,7 +42,10 @@ class CansinApp : Application() {
                 override suspend fun onBeerAdded(event: BeerEvent, mine: Boolean) {
                     if (mine) reminders.onBeerAdded(event.sessionId)
                 }
-                override suspend fun onSessionClosed(sessionId: Long) = reminders.onSessionClosed(sessionId)
+                override suspend fun onSessionClosed(sessionId: Long) {
+                    reminders.onSessionClosed(sessionId)
+                    drinkTimer.clearIf(sessionId)
+                }
             },
             defaultSize = { settingsStore.settings.first().beerSize },
         )

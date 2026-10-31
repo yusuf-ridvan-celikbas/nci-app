@@ -75,6 +75,7 @@ class FakeNoteDao : NoteDao {
         rows.value = rows.value.filterNot { it.id == id }
     }
     override suspend fun count(sessionId: Long) = rows.value.count { it.sessionId == sessionId }
+    override suspend fun totalMinor(sessionId: Long) = rows.value.filter { it.sessionId == sessionId }.sumOf { it.amountMinor ?: 0 }
     override suspend fun lastCreatedAt(sessionId: Long) = rows.value.filter { it.sessionId == sessionId }.maxOfOrNull { it.createdAt }
 }
 

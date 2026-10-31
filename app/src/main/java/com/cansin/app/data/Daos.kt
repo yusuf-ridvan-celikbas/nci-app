@@ -120,6 +120,9 @@ interface NoteDao {
 
     @Query("SELECT MAX(createdAt) FROM note WHERE sessionId = :sessionId")
     suspend fun lastCreatedAt(sessionId: Long): Long?
+
+    @Query("SELECT COALESCE(SUM(amountMinor), 0) FROM note WHERE sessionId = :sessionId")
+    suspend fun totalMinor(sessionId: Long): Long
 }
 
 @Dao

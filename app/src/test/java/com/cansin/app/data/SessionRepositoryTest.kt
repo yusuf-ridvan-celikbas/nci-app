@@ -118,7 +118,11 @@ class SessionRepositoryTest {
         repo.add()
         now += 1_000
         val last = repo.add()
-        assertEquals(CounterSnapshot(2, last.at, last.sessionId), repo.snapshot())
+        val snapshot = repo.snapshot()
+        assertEquals(2, snapshot.count)
+        assertEquals(last.at, snapshot.lastBeerAt)
+        assertEquals(last.sessionId, snapshot.sessionId)
+        assertEquals(last.id, snapshot.myLatestBeer?.id)
     }
 
     @Test
@@ -227,5 +231,28 @@ class SessionRepositoryTest {
         assertEquals(now, stored.at)
         assertEquals(now, stored.finishedAt)
         assertEquals(BeerSize(100, 20.0), BeerSize(stored.sizeMl, stored.abv))
+    }
+
+    @Test
+    fun snapshotIncludesTabAndWater() = runBlocking {
+        repo.add()
+        repo.addNote("round", 1_250)
+        repo.addNote("tip", null)
+        repo.addWater()
+        val snapshot = repo.snapshot()
+        assertEquals(2, snapshot.notes)
+        assertEquals(1_250L, snapshot.tabMinor)
+        assertEquals(1, snapshot.water)
+        assertEquals(true, snapshot.hasMe)
+    }
+
+    @Test
+    fun finishBeerOnlyForOpenSession() = runBlocking {
+        val beer = repo.add()
+        repo.finishBeer(beer.id, beer.sessionId + 1)
+        assertNull(beers.rows.value.single().finishedAt)
+        now += 60_000
+        repo.finishBeer(beer.id, beer.sessionId)
+        assertEquals(now, beers.rows.value.single().finishedAt)
     }
 }
