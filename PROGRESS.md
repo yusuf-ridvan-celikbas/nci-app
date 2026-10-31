@@ -1,13 +1,13 @@
 # Progress
 
-Current phase: **P3 done (on-device widget check pending by user) → awaiting review before P4**
+Current phase: **P4 done (on-device reminder check pending by user) → awaiting review before P5**
 
 ## Phases
 - [x] Setup (project, wrapper, git, CLAUDE.md)
 - [x] P1 Core counter
 - [x] P2 Settings & personalization
 - [x] P3 Widget
-- [ ] P4 Reminder
+- [x] P4 Reminder
 - [ ] P5 Notes / tab
 - [ ] P6 Beer size
 - [ ] P7 Promil estimator
@@ -27,8 +27,10 @@ Current phase: **P3 done (on-device widget check pending by user) → awaiting r
 - `ui/` CounterScreen (top bar: app name + settings), CounterViewModel, AgeGateScreen, theme/Theme.kt (scheme from palette or dynamic)
 - Navigation: rememberSaveable flag in MainActivity + BackHandler (no navigation lib)
 - `widget/` CounterWidget (exported AppWidgetProvider, system actions only; refreshAll), WidgetActionReceiver (exported=false, ACTION_ADD → addBeer), WidgetRenderer (RemoteViews, colors from ui/theme colorScheme, localized via AppLocale.localized), WidgetLayout (pure helpers)
-- `CansinApp` = manual DI (appScope, lazy db, repository with onChange → widget refresh, settings store)
-- Tests: app/src/test (fake DAOs, SessionRepositoryTest, SessionRulesTest, SettingsTest, PaletteContrastTest, WidgetLayoutTest)
+- `reminder/` ReminderPolicy (pure), Reminders (controller: schedule/snooze/stop/restore, AlarmManager), ReminderNotifier (channels + notification), ReminderReceiver (exported=false: REMIND/ANOTHER/SNOOZE/STOP, requires session_id extra), BootReceiver (exported=false: BOOT_COMPLETED, MY_PACKAGE_REPLACED)
+- `ui/ReminderSection.kt` settings section incl. POST_NOTIFICATIONS rationale + request
+- `CansinApp` = manual DI (appScope, db, SettingsStore, Reminders, SessionRepository with SessionListener → widget refresh + reminders)
+- Tests: app/src/test (fake DAOs, SessionRepositoryTest, SessionRulesTest, SettingsTest, PaletteContrastTest, WidgetLayoutTest, ReminderPolicyTest)
 
 ## Decisions
 - Toolchain: JDK 17, AGP 9.4.1 + Gradle 9.6.0 wrapper, Kotlin 2.2.10 + KSP 2.3.11, compile/targetSdk 37, minSdk 26. Kotlin 2.4.x / AGP 9.5 deferred.
@@ -49,7 +51,17 @@ Current phase: **P3 done (on-device widget check pending by user) → awaiting r
 - P3: Widget uses RemoteViews, not Glance (user-approved: no dependency). +1 goes through a non-exported receiver via explicit immutable PendingIntent; the exported provider only refreshes. Rapid taps serialized by repository Mutex.
 - P3: Repository has onChange callback → every write refreshes widgets; settings changes refresh too. snapshot() is read-only and shows a stale (>6 h) session as 0.
 - P3: One provider, two layouts: small (count + +1) and wide ≥250dp (name, count, "since last" Chronometer, +1). API 31+: responsive size map + setColorInt light/dark pair (follows system night automatically); API 26–30: layout from min width option, colors fixed at render time.
+- P4: Repository emits events via SessionListener (onBeerAdded, onSessionClosed, onChanged), dispatched after the write lock is released, in order.
+- P4: Scheduling = AlarmManager.setAndAllowWhileIdle(RTC_WAKEUP), inexact; no WorkManager, no SCHEDULE_EXACT_ALARM. One alarm PendingIntent (same action/request code) → reschedule replaces, no duplicates.
+- P4: Reminders off by default. Enabling on API 33+ shows rationale dialog then the system prompt; denied/blocked shows a link to system notification settings. Enabling mid-session schedules from now.
+- P4: Stored state (DataStore): next_at, session, stopped_session. Fired reminder clears next_at. Boot/app update restores (missed → fires 1 min after restore). Session close cancels; stop-for-tonight only applies to that session.
+- P4: Notification: title = chosen app name, text localized; VISIBILITY_PRIVATE with public version "Reminder"; two channels (default, silent = IMPORTANCE_LOW) since channel sound can't change later. Actions verify session_id == open session, else ignored.
+- P4: "Yes, got another" sets finishedAt on the latest beer (only if unset) and adds a beer. Interval changes apply from the next scheduling.
 - P3: updatePeriodMillis=0 (no periodic wakeups). Widget picker label is static ("Counter"/"Sayaç"); in-widget title follows app name.
+
+## P4 report
+- Release APK 1.22 MB (+69 KB: Slider/Switch/AlertDialog), AAB 2.96 MB. Permissions: POST_NOTIFICATIONS (runtime, only when user enables reminders), RECEIVE_BOOT_COMPLETED (restore pending reminder). Exported unchanged (aliases, widget provider, profileinstaller). Lint clean except version notices. Tests: 38/38.
+- Trade-off: inexact alarm may fire minutes late in Doze; acceptable for a nudge, avoids exact-alarm permission.
 
 ## P3 report
 - Release APK 1.15 MB (+4 KB), AAB 2.8 MB. Permissions: none. Exported: 2 launcher aliases, CounterWidget, profileinstaller receiver. Lint: clean except version notices. Tests: 27/27.

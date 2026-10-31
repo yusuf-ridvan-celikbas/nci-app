@@ -34,6 +34,9 @@ interface BeerDao {
     @Query("DELETE FROM beer_event WHERE id = :id")
     suspend fun delete(id: Long): Int
 
+    @Query("UPDATE beer_event SET finishedAt = :at WHERE id = :id AND finishedAt IS NULL")
+    suspend fun finish(id: Long, at: Long)
+
     @Query("SELECT COUNT(*) FROM beer_event WHERE sessionId = :sessionId")
     suspend fun count(sessionId: Long): Int
 

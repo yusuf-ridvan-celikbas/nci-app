@@ -43,11 +43,21 @@ class SettingsActions(
     val onLanguage: (Language) -> Unit,
     val onThemeMode: (ThemeMode) -> Unit,
     val onAccent: (Accent) -> Unit,
+    val onRemindersEnabled: (Boolean) -> Unit,
+    val onReminderInterval: (Int) -> Unit,
+    val onReminderSilent: (Boolean) -> Unit,
+    val onOpenNotificationSettings: () -> Unit,
 )
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun SettingsScreen(settings: Settings, language: Language, dynamicAvailable: Boolean, actions: SettingsActions) {
+fun SettingsScreen(
+    settings: Settings,
+    language: Language,
+    dynamicAvailable: Boolean,
+    notificationAccess: NotificationAccess,
+    actions: SettingsActions,
+) {
     Scaffold(
         topBar = {
             TopAppBar(
@@ -76,12 +86,14 @@ fun SettingsScreen(settings: Settings, language: Language, dynamicAvailable: Boo
             ChoiceGroup(R.string.setting_theme_mode, ThemeMode.entries, settings.themeMode, { it.label }, actions.onThemeMode)
             val accents = Accent.entries.filter { it != Accent.DYNAMIC || dynamicAvailable }
             ChoiceGroup(R.string.setting_color, accents, settings.accent, { it.label }, actions.onAccent)
+            HorizontalDivider(Modifier.padding(vertical = 16.dp))
+            ReminderSection(settings, notificationAccess, actions)
         }
     }
 }
 
 @Composable
-private fun SectionHeader(@StringRes title: Int) {
+internal fun SectionHeader(@StringRes title: Int) {
     Text(
         stringResource(title),
         style = MaterialTheme.typography.titleMedium,

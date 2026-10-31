@@ -1,6 +1,10 @@
 package com.cansin.app
 
+import android.Manifest
+import android.app.NotificationManager
 import android.content.Context
+import android.content.Intent
+import android.content.pm.PackageManager
 import android.graphics.Color
 import android.os.Build
 import android.os.Bundle
@@ -29,6 +33,7 @@ import com.cansin.app.system.LauncherAlias
 import com.cansin.app.ui.AgeGateScreen
 import com.cansin.app.ui.CounterScreen
 import com.cansin.app.ui.CounterViewModel
+import com.cansin.app.ui.NotificationAccess
 import com.cansin.app.ui.SettingsActions
 import com.cansin.app.ui.SettingsScreen
 import com.cansin.app.ui.theme.CansinTheme
@@ -42,6 +47,7 @@ class MainActivity : ComponentActivity() {
     private val app get() = application as CansinApp
     private val store: SettingsStore get() = app.settingsStore
     private val counter: CounterViewModel by viewModels { CounterViewModel.factory(app.sessionRepository) }
+    private var notificationAccess by mutableStateOf(NotificationAccess(permissionGranted = false, enabled = false))
 
     override fun attachBaseContext(newBase: Context) {
         val language = if (Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU) {
@@ -64,6 +70,14 @@ class MainActivity : ComponentActivity() {
     override fun onStart() {
         super.onStart()
         counter.refresh()
+    }
+
+    override fun onResume() {
+        super.onResume()
+        val granted = Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU ||
+            checkSelfPermission(Manifest.permission.POST_NOTIFICATIONS) == PackageManager.PERMISSION_GRANTED
+        val enabled = getSystemService(NotificationManager::class.java).areNotificationsEnabled()
+        notificationAccess = NotificationAccess(granted, enabled)
     }
 
     @Composable
@@ -90,6 +104,7 @@ class MainActivity : ComponentActivity() {
                     settings = settings,
                     language = AppLocale.current(this, settings.language),
                     dynamicAvailable = dynamicColorAvailable,
+                    notificationAccess = notificationAccess,
                     actions = settingsActions(onBack = { showSettings = false }),
                 )
                 else -> CounterScreen(
@@ -116,6 +131,15 @@ class MainActivity : ComponentActivity() {
         },
         onThemeMode = { mode -> update { setThemeMode(mode) } },
         onAccent = { accent -> update { setAccent(accent) } },
+        onRemindersEnabled = { enabled -> lifecycleScope.launch { app.reminders.setEnabled(enabled) } },
+        onReminderInterval = { minutes -> update { setReminderInterval(minutes) } },
+        onReminderSilent = { silent -> update { setReminderSilent(silent) } },
+        onOpenNotificationSettings = {
+            startActivity(
+                Intent(android.provider.Settings.ACTION_APP_NOTIFICATION_SETTINGS)
+                    .putExtra(android.provider.Settings.EXTRA_APP_PACKAGE, packageName),
+            )
+        },
     )
 
     private fun update(block: suspend SettingsStore.() -> Unit) {

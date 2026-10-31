@@ -36,4 +36,21 @@
     <string name="widget_name">Sayaç</string>
     <string name="widget_description">Hızlı +1 ile bira sayacı</string>
     <string name="widget_since_last">Sonuncudan beri:</string>
+    <string name="section_reminders">Hatırlatmalar</string>
+    <string name="setting_reminders">İçeceğimin bitip bitmediğini sor</string>
+    <string name="setting_reminder_interval">%1$d dk sonra sor</string>
+    <string name="setting_reminder_silent">Sessiz bildirim</string>
+    <string name="notifications_blocked">Bu uygulama için bildirimler kapalı.</string>
+    <string name="open_settings">Ayarları aç</string>
+    <string name="reminder_rationale_title">Bildirimlere izin verilsin mi?</string>
+    <string name="reminder_rationale_body">Hatırlatmalar, içeceğinin bitip bitmediğini soran yerel bildirimlerdir. Hiçbir veri telefonundan çıkmaz.</string>
+    <string name="action_continue">Devam</string>
+    <string name="action_cancel">İptal</string>
+    <string name="reminder_text">Biran bitti mi?</string>
+    <string name="reminder_public">Hatırlatma</string>
+    <string name="action_another">Evet, bir tane daha (+1)</string>
+    <string name="action_snooze">Hâlâ içiyorum</string>
+    <string name="action_stop">Bu gecelik yeter</string>
+    <string name="channel_reminders">Hatırlatmalar</string>
+    <string name="channel_reminders_silent">Sessiz hatırlatmalar</string>
 </resources>

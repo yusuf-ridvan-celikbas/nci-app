@@ -43,7 +43,18 @@ data class Settings(
     val language: Language = Language.SYSTEM,
     val themeMode: ThemeMode = ThemeMode.SYSTEM,
     val accent: Accent = Accent.AMBER,
-)
+    val remindersEnabled: Boolean = false,
+    val reminderIntervalMin: Int = DEFAULT_REMINDER_INTERVAL_MIN,
+    val reminderSilent: Boolean = false,
+) {
+    companion object {
+        const val DEFAULT_REMINDER_INTERVAL_MIN = 10
+        const val MIN_REMINDER_INTERVAL_MIN = 5
+        const val MAX_REMINDER_INTERVAL_MIN = 60
+    }
+}
+
+data class ReminderState(val nextAt: Long? = null, val sessionId: Long? = null, val stoppedSessionId: Long? = null)
 
 inline fun <reified E : Enum<E>> enumOr(name: String?, default: E): E =
     enumValues<E>().firstOrNull { it.name == name } ?: default

@@ -31,6 +31,9 @@ class FakeBeerDao : BeerDao {
         rows.value = rows.value.filterNot { it.id == id }
         return before - rows.value.size
     }
+    override suspend fun finish(id: Long, at: Long) {
+        rows.value = rows.value.map { if (it.id == id && it.finishedAt == null) it.copy(finishedAt = at) else it }
+    }
     override suspend fun count(sessionId: Long) = rows.value.count { it.sessionId == sessionId }
     override fun observeCount(sessionId: Long): Flow<Int> = rows.map { list -> list.count { it.sessionId == sessionId } }
 }

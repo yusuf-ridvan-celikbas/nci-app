@@ -115,7 +115,7 @@ class SessionRepositoryTest {
         repo.addBeer()
         now += 1_000
         val last = repo.addBeer()
-        assertEquals(CounterSnapshot(2, last.at), repo.snapshot())
+        assertEquals(CounterSnapshot(2, last.at, last.sessionId), repo.snapshot())
     }
 
     @Test
@@ -126,15 +126,72 @@ class SessionRepositoryTest {
         assertNull(sessions.rows.value.single().endedAt)
     }
 
+    private class RecordingListener : SessionListener {
+        val log = mutableListOf<String>()
+        override suspend fun onChanged() { log += "changed" }
+        override suspend fun onBeerAdded(event: BeerEvent) { log += "added:${event.sessionId}" }
+        override suspend fun onSessionClosed(sessionId: Long) { log += "closed:$sessionId" }
+    }
+
+    private val listener = RecordingListener()
+    private val observed = SessionRepository(sessions, beers, clock = { now }, listener = listener)
+
     @Test
     fun everyWriteNotifiesChange() = runBlocking {
-        var changes = 0
-        val notifying = SessionRepository(sessions, beers, clock = { now }, onChange = { changes++ })
-        val beer = notifying.addBeer()
-        notifying.undo(beer)
-        notifying.removeLatest()
-        notifying.endSession()
-        assertEquals(4, changes)
+        val beer = observed.addBeer()
+        observed.undo(beer)
+        observed.removeLatest()
+        observed.endSession()
+        assertEquals(4, listener.log.count { it == "changed" })
+    }
+
+    @Test
+    fun addEmitsBeerAddedBeforeChange() = runBlocking {
+        val beer = observed.addBeer()
+        assertEquals(listOf("added:${beer.sessionId}", "changed"), listener.log)
+    }
+
+    @Test
+    fun undoingOnlyBeerEmitsSessionClosed() = runBlocking {
+        val beer = observed.addBeer()
+        listener.log.clear()
+        observed.undo(beer)
+        assertEquals(listOf("closed:${beer.sessionId}", "changed"), listener.log)
+    }
+
+    @Test
+    fun staleCloseIsEmittedBeforeNewSessionBeer() = runBlocking {
+        val old = observed.addBeer()
+        now += SessionRules.DEFAULT_INACTIVITY_MS
+        listener.log.clear()
+        val fresh = observed.addBeer()
+        assertEquals(listOf("closed:${old.sessionId}", "added:${fresh.sessionId}", "changed"), listener.log)
+    }
+
+    @Test
+    fun endSessionEmitsClosed() = runBlocking {
+        val beer = observed.addBeer()
+        listener.log.clear()
+        observed.endSession()
+        assertEquals(listOf("closed:${beer.sessionId}", "changed"), listener.log)
+    }
+
+    @Test
+    fun finishPreviousSetsFinishedAtOnlyOnce() = runBlocking {
+        val first = repo.addBeer()
+        now += 60_000
+        repo.addBeer(finishPrevious = true)
+        assertEquals(now, beers.rows.value.first { it.id == first.id }.finishedAt)
+        now += 60_000
+        repo.addBeer()
+        assertEquals(now - 60_000, beers.rows.value.first { it.id == first.id }.finishedAt)
+    }
+
+    @Test
+    fun plainAddDoesNotFinishPrevious() = runBlocking {
+        val first = repo.addBeer()
+        repo.addBeer()
+        assertNull(beers.rows.value.first { it.id == first.id }.finishedAt)
     }
 
     @Test
