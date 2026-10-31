@@ -23,6 +23,7 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import com.cansin.app.R
 import com.cansin.app.data.Note
+import com.cansin.app.data.Session
 import com.cansin.app.domain.AmountInput
 import com.cansin.app.domain.NoteRules
 import java.time.Instant
@@ -31,6 +32,7 @@ import java.time.ZoneId
 @Composable
 fun NoteEditDialog(
     note: Note,
+    session: Session?,
     formatAmount: (Long) -> String,
     onSave: (Note) -> Unit,
     onDelete: () -> Unit,
@@ -41,6 +43,7 @@ fun NoteEditDialog(
     var amount by rememberSaveable { mutableStateOf(note.amountMinor?.let(formatAmount).orEmpty()) }
     var time by rememberSaveable { mutableLongStateOf(note.editedTime ?: note.createdAt) }
     var pickingTime by rememberSaveable { mutableStateOf(false) }
+    var side by rememberSaveable { mutableStateOf(note.side) }
     val parsed = NoteRules.parseAmount(amount)
     val valid = NoteRules.cleanText(text) != null && parsed != AmountInput.Invalid
 
@@ -74,6 +77,7 @@ fun NoteEditDialog(
                     singleLine = true,
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
                 )
+                if (session != null) SideChips(session, side, { side = it })
                 TextButton(onClick = { pickingTime = true }) {
                     Text(stringResource(R.string.note_time, formatTime(time)))
                 }
@@ -89,6 +93,7 @@ fun NoteEditDialog(
                             person = person,
                             amountMinor = (parsed as? AmountInput.Valid)?.minor,
                             editedTime = time.takeIf { it != note.createdAt },
+                            side = side,
                         ),
                     )
                 },

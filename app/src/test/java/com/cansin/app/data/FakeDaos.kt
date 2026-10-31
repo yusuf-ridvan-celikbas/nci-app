@@ -1,5 +1,6 @@
 package com.cansin.app.data
 
+import com.cansin.app.domain.BeerSize
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.map
@@ -17,6 +18,9 @@ class FakeSessionDao : SessionDao {
     override suspend fun delete(id: Long) {
         rows.value = rows.value.filterNot { it.id == id }
     }
+    override suspend fun update(session: Session) {
+        rows.value = rows.value.map { if (it.id == session.id) session else it }
+    }
 }
 
 class FakeBeerDao : BeerDao {
@@ -26,6 +30,9 @@ class FakeBeerDao : BeerDao {
     override suspend fun insert(event: BeerEvent): Long = nextId++.also { rows.value += event.copy(id = it) }
     override suspend fun latest(sessionId: Long) =
         rows.value.filter { it.sessionId == sessionId }.maxWithOrNull(compareBy({ it.at }, { it.id }))
+    override suspend fun latestOnSide(sessionId: Long, side: Side) =
+        rows.value.filter { it.sessionId == sessionId && it.side == side }.maxWithOrNull(compareBy({ it.at }, { it.id }))
+    override suspend fun countOnSide(sessionId: Long, side: Side) = rows.value.count { it.sessionId == sessionId && it.side == side }
     override suspend fun delete(id: Long): Int {
         val before = rows.value.size
         rows.value = rows.value.filterNot { it.id == id }
@@ -61,3 +68,6 @@ class FakeNoteDao : NoteDao {
     override suspend fun count(sessionId: Long) = rows.value.count { it.sessionId == sessionId }
     override suspend fun lastCreatedAt(sessionId: Long) = rows.value.filter { it.sessionId == sessionId }.maxOfOrNull { it.createdAt }
 }
+
+suspend fun SessionRepository.add(finishPrevious: Boolean = false, size: BeerSize? = null): BeerEvent =
+    checkNotNull(addBeer(finishPrevious, size))

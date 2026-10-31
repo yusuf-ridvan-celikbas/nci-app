@@ -72,6 +72,8 @@ object Palettes {
         inverseSurface = 0xFFE5E2E1, inverseOnSurface = 0xFF303030,
     )
 
+    val versusRed: AccentTones get() = accents.getValue(Accent.RED).light
+    val versusBlue: AccentTones get() = accents.getValue(Accent.BLUE).light
     val danger: AccentPalette get() = accents.getValue(Accent.RED)
     val caution: AccentPalette get() = accents.getValue(Accent.AMBER)
 

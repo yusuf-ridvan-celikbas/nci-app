@@ -1,6 +1,7 @@
 package com.cansin.app.ui
 
 import android.text.format.DateFormat
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -13,6 +14,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -33,6 +35,7 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -41,6 +44,7 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import com.cansin.app.R
 import com.cansin.app.data.Note
+import com.cansin.app.data.Side
 import com.cansin.app.domain.AmountInput
 import com.cansin.app.domain.NoteRules
 import java.text.DecimalFormatSymbols
@@ -64,7 +68,7 @@ fun NotesScreen(viewModel: NotesViewModel, onBack: () -> Unit) {
                 },
             )
         },
-        bottomBar = { QuickAdd(onAdd = viewModel::add) },
+        bottomBar = { QuickAdd(state, onAdd = viewModel::add) },
     ) { padding ->
         Column(Modifier.fillMaxSize().padding(padding)) {
             if (state.notes.isEmpty()) {
@@ -76,21 +80,26 @@ fun NotesScreen(viewModel: NotesViewModel, onBack: () -> Unit) {
             }
             LazyColumn(Modifier.weight(1f)) {
                 items(state.notes, key = { it.id }) { note ->
-                    NoteRow(note, format) { editing = note }
+                    NoteRow(note, state, format) { editing = note }
                     HorizontalDivider()
                 }
             }
-            Text(
-                stringResource(R.string.tab_total, format(state.totalMinor)),
-                style = MaterialTheme.typography.titleMedium,
-                modifier = Modifier.fillMaxWidth().padding(16.dp),
-            )
+            Column(Modifier.fillMaxWidth().padding(16.dp)) {
+                if (state.versus) {
+                    val totals = state.totals
+                    listOf(Side.RED to totals.red, Side.BLUE to totals.blue, null to totals.shared).forEach { (side, amount) ->
+                        Text(stringResource(R.string.tab_side_total, sideName(state.session, side), format(amount)))
+                    }
+                }
+                Text(stringResource(R.string.tab_total, format(state.totals.total)), style = MaterialTheme.typography.titleMedium)
+            }
         }
     }
 
     editing?.let { note ->
         NoteEditDialog(
             note = note,
+            session = state.session.takeIf { state.versus },
             formatAmount = format,
             onSave = { viewModel.update(it); editing = null },
             onDelete = { viewModel.delete(note); editing = null },
@@ -109,7 +118,7 @@ internal fun rememberAmountFormat(): (Long) -> String {
 internal fun formatTime(millis: Long): String = DateFormat.getTimeFormat(LocalContext.current).format(Date(millis))
 
 @Composable
-private fun NoteRow(note: Note, format: (Long) -> String, onClick: () -> Unit) {
+private fun NoteRow(note: Note, state: NotesState, format: (Long) -> String, onClick: () -> Unit) {
     Row(
         modifier = Modifier.fillMaxWidth().clickable(onClick = onClick).padding(horizontal = 16.dp, vertical = 12.dp),
         verticalAlignment = Alignment.Top,
@@ -129,50 +138,65 @@ private fun NoteRow(note: Note, format: (Long) -> String, onClick: () -> Unit) {
             note.person?.let {
                 Text(it, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
             }
+            if (state.versus) {
+                val colors = sideColor(note.side)
+                Text(
+                    sideName(state.session, note.side),
+                    style = MaterialTheme.typography.labelSmall,
+                    color = colors?.second ?: MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier
+                        .background(colors?.first ?: Color.Transparent, RoundedCornerShape(4.dp))
+                        .padding(horizontal = 6.dp, vertical = 2.dp),
+                )
+            }
         }
         note.amountMinor?.let { Text(format(it), style = MaterialTheme.typography.bodyLarge) }
     }
 }
 
 @Composable
-private fun QuickAdd(onAdd: (String, Long?) -> Unit) {
+private fun QuickAdd(state: NotesState, onAdd: (String, Long?, Side?) -> Unit) {
     var text by rememberSaveable { mutableStateOf("") }
+    var side by rememberSaveable { mutableStateOf<Side?>(null) }
     var amount by rememberSaveable { mutableStateOf("") }
     val parsed = NoteRules.parseAmount(amount)
 
     fun submit() {
         if (NoteRules.cleanText(text) == null || parsed == AmountInput.Invalid) return
-        onAdd(text, (parsed as? AmountInput.Valid)?.minor)
+        onAdd(text, (parsed as? AmountInput.Valid)?.minor, side)
         text = ""
         amount = ""
     }
 
-    Row(
-        modifier = Modifier.fillMaxWidth().navigationBarsPadding().imePadding().padding(8.dp),
-        horizontalArrangement = Arrangement.spacedBy(8.dp),
-        verticalAlignment = Alignment.CenterVertically,
-    ) {
-        OutlinedTextField(
-            value = text,
-            onValueChange = { text = it.take(Note.MAX_TEXT) },
-            placeholder = { Text(stringResource(R.string.note_hint)) },
-            singleLine = true,
-            keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done),
-            keyboardActions = KeyboardActions(onDone = { submit() }),
-            modifier = Modifier.weight(1f),
-        )
-        OutlinedTextField(
-            value = amount,
-            onValueChange = { amount = it.take(13) },
-            placeholder = { Text(stringResource(R.string.amount_hint)) },
-            singleLine = true,
-            isError = parsed == AmountInput.Invalid,
-            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal, imeAction = ImeAction.Done),
-            keyboardActions = KeyboardActions(onDone = { submit() }),
-            modifier = Modifier.width(96.dp),
-        )
-        IconButton(onClick = ::submit) {
-            Icon(painterResource(R.drawable.ic_send), stringResource(R.string.add_note))
+    Column(Modifier.fillMaxWidth().navigationBarsPadding().imePadding().padding(8.dp)) {
+        if (state.versus) SideChips(state.session, side, { side = it })
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            OutlinedTextField(
+                value = text,
+                onValueChange = { text = it.take(Note.MAX_TEXT) },
+                placeholder = { Text(stringResource(R.string.note_hint)) },
+                singleLine = true,
+                keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done),
+                keyboardActions = KeyboardActions(onDone = { submit() }),
+                modifier = Modifier.weight(1f),
+            )
+            OutlinedTextField(
+                value = amount,
+                onValueChange = { amount = it.take(13) },
+                placeholder = { Text(stringResource(R.string.amount_hint)) },
+                singleLine = true,
+                isError = parsed == AmountInput.Invalid,
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal, imeAction = ImeAction.Done),
+                keyboardActions = KeyboardActions(onDone = { submit() }),
+                modifier = Modifier.width(96.dp),
+            )
+            IconButton(onClick = ::submit) {
+                Icon(painterResource(R.drawable.ic_send), stringResource(R.string.add_note))
+            }
         }
     }
 }

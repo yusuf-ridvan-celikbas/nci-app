@@ -11,6 +11,7 @@ import com.cansin.app.domain.BodyProfile
 import com.cansin.app.domain.Drink
 import com.cansin.app.domain.PromilleEstimate
 import com.cansin.app.domain.PromilleModel
+import com.cansin.app.domain.VersusRules
 import com.cansin.app.prefs.SettingsStore
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -44,7 +45,7 @@ class PromilleViewModel(
     private val now = MutableStateFlow(clock())
 
     private val beers = repository.openSession.flatMapLatest { session ->
-        if (session == null) flowOf(emptyList()) else repository.beers(session.id)
+        if (session == null) flowOf(emptyList()) else repository.beers(session.id).map { list -> list.filter { VersusRules.isMine(it, session) } }
     }
 
     val state: StateFlow<PromilleState> = combine(

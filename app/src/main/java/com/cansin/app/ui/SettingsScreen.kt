@@ -21,6 +21,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -36,6 +37,7 @@ import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
 import com.cansin.app.R
+import com.cansin.app.data.FriendProfile
 import com.cansin.app.domain.BeerSize
 import com.cansin.app.domain.BodyProfile
 import com.cansin.app.prefs.Accent
@@ -56,6 +58,7 @@ class SettingsActions(
     val onOpenNotificationSettings: () -> Unit,
     val onBeerSize: (BeerSize) -> Unit,
     val onProfile: (BodyProfile?) -> Unit,
+    val onDeleteFriend: (Long) -> Unit,
 )
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -65,6 +68,7 @@ fun SettingsScreen(
     language: Language,
     dynamicAvailable: Boolean,
     notificationAccess: NotificationAccess,
+    friends: List<FriendProfile>,
     actions: SettingsActions,
 ) {
     Scaffold(
@@ -99,6 +103,10 @@ fun SettingsScreen(
             BeerSection(settings.beerSize, actions.onBeerSize)
             HorizontalDivider(Modifier.padding(vertical = 16.dp))
             ProfileSection(settings.profile, actions.onProfile)
+            if (friends.isNotEmpty()) {
+                HorizontalDivider(Modifier.padding(vertical = 16.dp))
+                FriendsSection(friends, actions.onDeleteFriend)
+            }
             HorizontalDivider(Modifier.padding(vertical = 16.dp))
             ReminderSection(settings, notificationAccess, actions)
         }
@@ -156,6 +164,19 @@ private fun ProfileSection(profile: BodyProfile?, onChange: (BodyProfile?) -> Un
             },
             onDismiss = { editing = false },
         )
+    }
+}
+
+@Composable
+private fun FriendsSection(friends: List<FriendProfile>, onDelete: (Long) -> Unit) {
+    SectionHeader(R.string.section_friends)
+    friends.forEach { friend ->
+        Row(Modifier.fillMaxWidth().heightIn(min = 48.dp), verticalAlignment = Alignment.CenterVertically) {
+            Text(friend.name, Modifier.weight(1f))
+            TextButton(onClick = { onDelete(friend.id) }) {
+                Text(stringResource(R.string.action_delete))
+            }
+        }
     }
 }
 

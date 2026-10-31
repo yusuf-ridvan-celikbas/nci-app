@@ -43,6 +43,9 @@ import com.cansin.app.ui.PromilleTicker
 import com.cansin.app.ui.PromilleViewModel
 import com.cansin.app.ui.SettingsActions
 import com.cansin.app.ui.SettingsScreen
+import com.cansin.app.ui.VersusScreen
+import com.cansin.app.ui.VersusSetupDialog
+import com.cansin.app.ui.VersusViewModel
 import com.cansin.app.ui.theme.CansinTheme
 import com.cansin.app.ui.theme.dynamicColorAvailable
 import com.cansin.app.widget.CounterWidget
@@ -58,6 +61,7 @@ class MainActivity : ComponentActivity() {
     private val counter: CounterViewModel by viewModels { CounterViewModel.factory(app.sessionRepository) }
     private val notes: NotesViewModel by viewModels { NotesViewModel.factory(app.sessionRepository) }
     private val promille: PromilleViewModel by viewModels { PromilleViewModel.factory(app.sessionRepository, app.settingsStore) }
+    private val versus: VersusViewModel by viewModels { VersusViewModel.factory(app.sessionRepository, app.friendRepository) }
     private var resumed by mutableStateOf(false)
     private var notificationAccess by mutableStateOf(NotificationAccess(permissionGranted = false, enabled = false))
 
@@ -110,6 +114,9 @@ class MainActivity : ComponentActivity() {
             enableEdgeToEdge(style, style)
         }
         var screen by rememberSaveable { mutableStateOf(Screen.COUNTER) }
+        var editingSides by rememberSaveable { mutableStateOf(false) }
+        val versusState by versus.state.collectAsState()
+        val friends by versus.friends.collectAsState()
         BackHandler(screen != Screen.COUNTER) { screen = Screen.COUNTER }
 
         CansinTheme(dark, settings.accent) {
@@ -123,6 +130,7 @@ class MainActivity : ComponentActivity() {
                     language = AppLocale.current(this, settings.language),
                     dynamicAvailable = dynamicColorAvailable,
                     notificationAccess = notificationAccess,
+                    friends = friends,
                     actions = settingsActions(onBack = { screen = Screen.COUNTER }),
                 )
                 screen == Screen.TAB -> NotesScreen(notes, onBack = { screen = Screen.COUNTER })
@@ -130,13 +138,34 @@ class MainActivity : ComponentActivity() {
                     PromilleTicker(promille, resumed)
                     PromilleScreen(promille, onBack = { screen = Screen.COUNTER })
                 }
+                versusState.session != null -> VersusScreen(
+                    viewModel = versus,
+                    onOpenSettings = { screen = Screen.SETTINGS },
+                    onOpenTab = { screen = Screen.TAB },
+                    onEditSides = { editingSides = true },
+                    promilleCard = { PromilleSlot(onOpen = { screen = Screen.PROMILLE }) },
+                )
                 else -> CounterScreen(
                     viewModel = counter,
                     title = stringResource(settings.appName.label),
                     defaultSize = settings.beerSize,
                     onOpenSettings = { screen = Screen.SETTINGS },
                     onOpenTab = { screen = Screen.TAB },
+                    onStartVersus = { editingSides = true },
                     promilleCard = { PromilleSlot(onOpen = { screen = Screen.PROMILLE }) },
+                )
+            }
+            if (editingSides && settings.ageConfirmed) {
+                val session = versusState.session
+                VersusSetupDialog(
+                    session = session,
+                    friends = friends,
+                    endsCurrentSession = session == null && counter.state.collectAsState().value.sessionActive,
+                    onSave = { red, blue, me ->
+                        versus.save(red, blue, me, start = session == null)
+                        editingSides = false
+                    },
+                    onDismiss = { editingSides = false },
                 )
             }
         }
@@ -186,6 +215,7 @@ class MainActivity : ComponentActivity() {
         },
         onBeerSize = { size -> update { setBeerSize(size) } },
         onProfile = { profile -> update { setProfile(profile) } },
+        onDeleteFriend = { id -> versus.deleteFriend(id) },
     )
 
     private fun update(block: suspend SettingsStore.() -> Unit) {

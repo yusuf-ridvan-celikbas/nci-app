@@ -6,7 +6,12 @@ import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
 import com.cansin.app.data.Note
+import com.cansin.app.data.Session
+import com.cansin.app.data.SessionMode
 import com.cansin.app.data.SessionRepository
+import com.cansin.app.data.Side
+import com.cansin.app.domain.TabTotals
+import com.cansin.app.domain.VersusRules
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -16,19 +21,20 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 
-data class NotesState(val notes: List<Note> = emptyList()) {
-    val totalMinor: Long get() = notes.sumOf { it.amountMinor ?: 0 }
+data class NotesState(val notes: List<Note> = emptyList(), val session: Session? = null) {
+    val versus: Boolean get() = session?.mode == SessionMode.VERSUS
+    val totals: TabTotals get() = VersusRules.totals(notes)
 }
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class NotesViewModel(private val repository: SessionRepository) : ViewModel() {
     val state: StateFlow<NotesState> = repository.openSession
         .flatMapLatest { session ->
-            if (session == null) flowOf(NotesState()) else repository.notes(session.id).map(::NotesState)
+            if (session == null) flowOf(NotesState()) else repository.notes(session.id).map { NotesState(it, session) }
         }
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), NotesState())
 
-    fun add(text: String, amountMinor: Long?) = viewModelScope.launch { repository.addNote(text, amountMinor) }
+    fun add(text: String, amountMinor: Long?, side: Side?) = viewModelScope.launch { repository.addNote(text, amountMinor, side) }
 
     fun update(note: Note) = viewModelScope.launch { repository.updateNote(note) }
 

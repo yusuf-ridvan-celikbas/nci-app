@@ -46,7 +46,7 @@ class Reminders(
             }
             ReminderReceiver.ACTION_ANOTHER -> {
                 notifier.dismiss()
-                if (current) repository().addBeer(finishPrevious = true)
+                if (current) repository().addMyBeer(finishPrevious = true)
             }
             ReminderReceiver.ACTION_SNOOZE -> {
                 notifier.dismiss()

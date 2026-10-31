@@ -36,7 +36,7 @@ class CounterViewModel(private val repository: SessionRepository) : ViewModel() 
 
     fun refresh() = viewModelScope.launch { repository.closeIfStale() }
 
-    fun add(size: BeerSize? = null) = viewModelScope.launch { added.send(repository.addBeer(size = size)) }
+    fun add(size: BeerSize? = null) = viewModelScope.launch { repository.addBeer(size = size)?.let { added.send(it) } }
 
     fun undo(event: BeerEvent) = viewModelScope.launch { repository.undo(event) }
 

@@ -44,9 +44,11 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.cansin.app.R
+import com.cansin.app.data.BeerEvent
 import com.cansin.app.domain.BeerSize
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 
@@ -60,27 +62,13 @@ fun CounterScreen(
     defaultSize: BeerSize,
     onOpenSettings: () -> Unit,
     onOpenTab: () -> Unit,
+    onStartVersus: () -> Unit,
     promilleCard: @Composable () -> Unit,
 ) {
     val state by viewModel.state.collectAsState()
     var pickingSize by rememberSaveable { mutableStateOf(false) }
     val snackbar = remember { SnackbarHostState() }
-    val addedText = stringResource(R.string.beer_added)
-    val undoText = stringResource(R.string.undo)
-
-    LaunchedEffect(viewModel) {
-        viewModel.beerAdded.collectLatest { event ->
-            coroutineScope {
-                val timeout = launch {
-                    delay(UNDO_WINDOW_MS)
-                    snackbar.currentSnackbarData?.dismiss()
-                }
-                val result = snackbar.showSnackbar(addedText, undoText, duration = SnackbarDuration.Indefinite)
-                timeout.cancel()
-                if (result == SnackbarResult.ActionPerformed) viewModel.undo(event)
-            }
-        }
-    }
+    UndoEffect(viewModel.beerAdded, snackbar, viewModel::undo)
 
     Scaffold(
         topBar = {
@@ -92,6 +80,9 @@ fun CounterScreen(
                     }
                 },
                 actions = {
+                    IconButton(onClick = onStartVersus) {
+                        Icon(painterResource(R.drawable.ic_versus), stringResource(R.string.versus_start))
+                    }
                     IconButton(onClick = onOpenSettings) {
                         Icon(painterResource(R.drawable.ic_settings), stringResource(R.string.settings))
                     }
@@ -145,6 +136,25 @@ fun CounterScreen(
             },
             onDismiss = { pickingSize = false },
         )
+    }
+}
+
+@Composable
+internal fun UndoEffect(events: Flow<BeerEvent>, snackbar: SnackbarHostState, onUndo: (BeerEvent) -> Unit) {
+    val addedText = stringResource(R.string.beer_added)
+    val undoText = stringResource(R.string.undo)
+    LaunchedEffect(events) {
+        events.collectLatest { event ->
+            coroutineScope {
+                val timeout = launch {
+                    delay(UNDO_WINDOW_MS)
+                    snackbar.currentSnackbarData?.dismiss()
+                }
+                val result = snackbar.showSnackbar(addedText, undoText, duration = SnackbarDuration.Indefinite)
+                timeout.cancel()
+                if (result == SnackbarResult.ActionPerformed) onUndo(event)
+            }
+        }
     }
 }
 

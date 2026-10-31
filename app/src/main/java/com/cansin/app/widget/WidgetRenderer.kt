@@ -36,10 +36,18 @@ object WidgetRenderer {
 
     private fun build(context: Context, settings: Settings, snapshot: CounterSnapshot, wide: Boolean): RemoteViews {
         val views = RemoteViews(context.packageName, if (wide) R.layout.widget_wide else R.layout.widget_small)
-        views.setTextViewText(R.id.widget_count, snapshot.count.toString())
+        if (snapshot.versus) {
+            views.setTextViewText(R.id.widget_count, context.getString(R.string.versus_score, snapshot.red, snapshot.blue))
+            views.setContentDescription(R.id.widget_count, context.getString(R.string.versus_score_description, snapshot.red, snapshot.blue))
+            views.setContentDescription(R.id.widget_add, context.getString(R.string.versus_open))
+            views.setOnClickPendingIntent(R.id.widget_add, openAppIntent(context))
+        } else {
+            views.setTextViewText(R.id.widget_count, snapshot.count.toString())
+            views.setContentDescription(R.id.widget_count, null)
+            views.setContentDescription(R.id.widget_add, context.getString(R.string.add_beer))
+            views.setOnClickPendingIntent(R.id.widget_add, addIntent(context))
+        }
         views.setTextViewText(R.id.widget_add_label, context.getString(R.string.plus_one))
-        views.setContentDescription(R.id.widget_add, context.getString(R.string.add_beer))
-        views.setOnClickPendingIntent(R.id.widget_add, addIntent(context))
         views.setOnClickPendingIntent(R.id.widget_count, openAppIntent(context))
         if (wide) {
             views.setTextViewText(R.id.widget_title, context.getString(settings.appName.label))

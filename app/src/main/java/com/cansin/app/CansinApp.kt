@@ -3,6 +3,7 @@ package com.cansin.app
 import android.app.Application
 import com.cansin.app.data.AppDatabase
 import com.cansin.app.data.BeerEvent
+import com.cansin.app.data.FriendRepository
 import com.cansin.app.data.SessionListener
 import com.cansin.app.data.SessionRepository
 import com.cansin.app.prefs.SettingsStore
@@ -17,6 +18,7 @@ class CansinApp : Application() {
     val appScope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
     private val database by lazy { AppDatabase.build(this) }
     val settingsStore: SettingsStore by lazy { SettingsStore(this) }
+    val friendRepository: FriendRepository by lazy { FriendRepository(database.friendDao()) }
     val reminders: Reminders by lazy { Reminders(this, settingsStore, { sessionRepository }) }
 
     val sessionRepository: SessionRepository by lazy {
@@ -26,7 +28,9 @@ class CansinApp : Application() {
             database.noteDao(),
             listener = object : SessionListener {
                 override suspend fun onChanged() = CounterWidget.refreshAll(this@CansinApp)
-                override suspend fun onBeerAdded(event: BeerEvent) = reminders.onBeerAdded(event.sessionId)
+                override suspend fun onBeerAdded(event: BeerEvent, mine: Boolean) {
+                    if (mine) reminders.onBeerAdded(event.sessionId)
+                }
                 override suspend fun onSessionClosed(sessionId: Long) = reminders.onSessionClosed(sessionId)
             },
             defaultSize = { settingsStore.settings.first().beerSize },

@@ -15,6 +15,11 @@ data class Session(
     val startedAt: Long,
     val endedAt: Long? = null,
     val mode: SessionMode = SessionMode.SOLO,
+    val redName: String? = null,
+    val blueName: String? = null,
+    val redFriendId: Long? = null,
+    val blueFriendId: Long? = null,
+    val meSide: Side? = null,
 )
 
 @Entity(
@@ -61,6 +66,7 @@ data class Note(
     val amountMinor: Long? = null,
     val createdAt: Long,
     val editedTime: Long? = null,
+    val side: Side? = null,
 ) {
     companion object {
         const val MAX_TEXT = 1000

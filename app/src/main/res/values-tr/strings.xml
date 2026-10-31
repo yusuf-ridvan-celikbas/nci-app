@@ -128,4 +128,24 @@
     <string name="beer_finished">Bitiş: %1$s</string>
     <string name="beer_finished_unset">Bitiş: ayarlanmadı</string>
     <string name="action_not_finished">Bitmedi</string>
+    <string name="versus_title">Kapışma</string>
+    <string name="versus_start">Kapışma başlat</string>
+    <string name="versus_edit">Tarafları düzenle</string>
+    <string name="side_red">Kırmızı</string>
+    <string name="side_blue">Mavi</string>
+    <string name="side_shared">Ortak</string>
+    <string name="versus_ends_session">Kapışma başlatmak mevcut oturumu bitirir.</string>
+    <string name="versus_me">Sen hangi taraftasın?</string>
+    <string name="versus_me_none">Hiçbiri</string>
+    <string name="versus_me_note">Promil tahmini ve hatırlatmalar yalnızca senin tarafını kullanır.</string>
+    <string name="versus_save_friend">Arkadaş olarak kaydet</string>
+    <string name="versus_name_me">%1$s (sen)</string>
+    <string name="versus_add">%1$s için bira ekle</string>
+    <string name="versus_remove">%1$s için son birayı sil</string>
+    <string name="versus_score">%1$d–%2$d</string>
+    <string name="versus_score_description">Kırmızı %1$d, Mavi %2$d</string>
+    <string name="versus_open">Kapışmayı aç</string>
+    <string name="action_start">Başlat</string>
+    <string name="tab_side_total">%1$s: %2$s</string>
+    <string name="section_friends">Arkadaşlar</string>
 </resources>

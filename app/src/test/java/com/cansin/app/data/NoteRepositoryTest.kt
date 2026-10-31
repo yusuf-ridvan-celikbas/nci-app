@@ -32,7 +32,7 @@ class NoteRepositoryTest {
 
     @Test
     fun noteJoinsOpenSession() = runBlocking {
-        val beer = repo.addBeer()
+        val beer = repo.add()
         assertEquals(beer.sessionId, repo.addNote("round", null)!!.sessionId)
     }
 
@@ -60,7 +60,7 @@ class NoteRepositoryTest {
 
     @Test
     fun sessionWithNotesIsNotDeletedWhenLastBeerUndone() = runBlocking {
-        val beer = repo.addBeer()
+        val beer = repo.add()
         repo.addNote("keep me", null)
         repo.undo(beer)
         assertEquals(beer.sessionId, repo.openSession.first()?.id)
@@ -82,12 +82,12 @@ class NoteRepositoryTest {
 
     @Test
     fun noteCountsAsActivityForAutoClose() = runBlocking {
-        val beer = repo.addBeer()
+        val beer = repo.add()
         now += SessionRules.DEFAULT_INACTIVITY_MS - 1_000
         repo.addNote("still here", null)
         now += 2_000
-        assertEquals(beer.sessionId, repo.addBeer().sessionId)
+        assertEquals(beer.sessionId, repo.add().sessionId)
         now += SessionRules.DEFAULT_INACTIVITY_MS
-        assertNotEquals(beer.sessionId, repo.addBeer().sessionId)
+        assertNotEquals(beer.sessionId, repo.add().sessionId)
     }
 }

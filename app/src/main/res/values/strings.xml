@@ -134,4 +134,24 @@
     <string name="beer_finished">Finished: %1$s</string>
     <string name="beer_finished_unset">Finished: not set</string>
     <string name="action_not_finished">Not finished</string>
+    <string name="versus_title">Versus</string>
+    <string name="versus_start">Start Versus</string>
+    <string name="versus_edit">Edit sides</string>
+    <string name="side_red">Red</string>
+    <string name="side_blue">Blue</string>
+    <string name="side_shared">Shared</string>
+    <string name="versus_ends_session">Starting Versus ends the current session.</string>
+    <string name="versus_me">Which side are you?</string>
+    <string name="versus_me_none">Neither</string>
+    <string name="versus_me_note">The blood alcohol estimate and reminders use only your side.</string>
+    <string name="versus_save_friend">Save as friend</string>
+    <string name="versus_name_me">%1$s (you)</string>
+    <string name="versus_add">Add beer for %1$s</string>
+    <string name="versus_remove">Remove last beer for %1$s</string>
+    <string name="versus_score">%1$d–%2$d</string>
+    <string name="versus_score_description">Red %1$d, Blue %2$d</string>
+    <string name="versus_open">Open Versus</string>
+    <string name="action_start">Start</string>
+    <string name="tab_side_total">%1$s: %2$s</string>
+    <string name="section_friends">Friends</string>
 </resources>

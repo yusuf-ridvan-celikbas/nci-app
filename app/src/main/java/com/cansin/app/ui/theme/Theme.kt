@@ -29,6 +29,16 @@ fun alertColors(dark: Boolean): AlertColors {
     return AlertColors(Color(danger.primary), Color(danger.onPrimary), Color(caution.container), Color(caution.onContainer))
 }
 
+@Immutable
+data class SideColors(val red: Color, val onRed: Color, val blue: Color, val onBlue: Color)
+
+val VersusColors = SideColors(
+    Color(Palettes.versusRed.primary),
+    Color(Palettes.versusRed.onPrimary),
+    Color(Palettes.versusBlue.primary),
+    Color(Palettes.versusBlue.onPrimary),
+)
+
 @Composable
 fun CansinTheme(dark: Boolean, accent: Accent, content: @Composable () -> Unit) {
     CompositionLocalProvider(LocalAlertColors provides alertColors(dark)) {

@@ -22,6 +22,24 @@ interface SessionDao {
 
     @Query("DELETE FROM session WHERE id = :id")
     suspend fun delete(id: Long)
+
+    @Update
+    suspend fun update(session: Session)
+}
+
+@Dao
+interface FriendDao {
+    @Query("SELECT * FROM friend_profile ORDER BY name COLLATE NOCASE")
+    fun observeAll(): Flow<List<FriendProfile>>
+
+    @Insert
+    suspend fun insert(friend: FriendProfile): Long
+
+    @Query("DELETE FROM friend_profile WHERE id = :id")
+    suspend fun delete(id: Long)
+
+    @Query("UPDATE session SET redFriendId = CASE WHEN redFriendId = :id THEN NULL ELSE redFriendId END, blueFriendId = CASE WHEN blueFriendId = :id THEN NULL ELSE blueFriendId END WHERE redFriendId = :id OR blueFriendId = :id")
+    suspend fun unlink(id: Long)
 }
 
 @Dao
@@ -52,6 +70,12 @@ interface BeerDao {
 
     @Query("SELECT * FROM beer_event WHERE sessionId = :sessionId ORDER BY at DESC, id DESC LIMIT 1")
     suspend fun latest(sessionId: Long): BeerEvent?
+
+    @Query("SELECT * FROM beer_event WHERE sessionId = :sessionId AND side = :side ORDER BY at DESC, id DESC LIMIT 1")
+    suspend fun latestOnSide(sessionId: Long, side: Side): BeerEvent?
+
+    @Query("SELECT COUNT(*) FROM beer_event WHERE sessionId = :sessionId AND side = :side")
+    suspend fun countOnSide(sessionId: Long, side: Side): Int
 
     @Query("DELETE FROM beer_event WHERE id = :id")
     suspend fun delete(id: Long): Int

@@ -23,9 +23,9 @@ class SessionRepositoryTest {
 
     @Test
     fun firstTapStartsSessionAndLaterTapsReuseIt() = runBlocking {
-        val first = repo.addBeer()
+        val first = repo.add()
         now += 60_000
-        val second = repo.addBeer()
+        val second = repo.add()
         assertEquals(first.sessionId, second.sessionId)
         assertEquals(1, sessions.rows.value.size)
         assertEquals(2, openCount())
@@ -40,7 +40,7 @@ class SessionRepositoryTest {
 
     @Test
     fun removingLastBeerDeletesEmptySession() = runBlocking {
-        repo.addBeer()
+        repo.add()
         repo.removeLatest()
         repo.removeLatest()
         assertNull(repo.openSession.first())
@@ -50,9 +50,9 @@ class SessionRepositoryTest {
 
     @Test
     fun removeLatestRemovesNewestOnly() = runBlocking {
-        repo.addBeer()
+        repo.add()
         now += 1_000
-        val newest = repo.addBeer()
+        val newest = repo.add()
         repo.removeLatest()
         assertEquals(1, openCount())
         assertEquals(false, beers.rows.value.any { it.id == newest.id })
@@ -60,8 +60,8 @@ class SessionRepositoryTest {
 
     @Test
     fun undoIsIdempotent() = runBlocking {
-        repo.addBeer()
-        val event = repo.addBeer()
+        repo.add()
+        val event = repo.add()
         repo.undo(event)
         repo.undo(event)
         assertEquals(1, openCount())
@@ -69,15 +69,15 @@ class SessionRepositoryTest {
 
     @Test
     fun undoOfOnlyBeerDeletesSession() = runBlocking {
-        repo.undo(repo.addBeer())
+        repo.undo(repo.add())
         assertEquals(0, sessions.rows.value.size)
     }
 
     @Test
     fun staleSessionClosesAtLastBeerAndNewTapStartsNewSession() = runBlocking {
-        val old = repo.addBeer()
+        val old = repo.add()
         now += SessionRules.DEFAULT_INACTIVITY_MS
-        val fresh = repo.addBeer()
+        val fresh = repo.add()
         assertNotEquals(old.sessionId, fresh.sessionId)
         assertEquals(old.at, sessions.rows.value.first { it.id == old.sessionId }.endedAt)
         assertEquals(1, openCount())
@@ -85,7 +85,7 @@ class SessionRepositoryTest {
 
     @Test
     fun closeIfStaleEndsInactiveSession() = runBlocking {
-        val beer = repo.addBeer()
+        val beer = repo.add()
         now += SessionRules.DEFAULT_INACTIVITY_MS - 1
         repo.closeIfStale()
         assertEquals(beer.sessionId, repo.openSession.first()?.id)
@@ -96,7 +96,7 @@ class SessionRepositoryTest {
 
     @Test
     fun removeLatestDoesNotTouchStaleSession() = runBlocking {
-        repo.addBeer()
+        repo.add()
         now += SessionRules.DEFAULT_INACTIVITY_MS
         repo.removeLatest()
         assertEquals(1, beers.rows.value.size)
@@ -104,7 +104,7 @@ class SessionRepositoryTest {
 
     @Test
     fun endSessionSetsEndTime() = runBlocking {
-        val beer = repo.addBeer()
+        val beer = repo.add()
         now += 5_000
         repo.endSession()
         assertEquals(now, sessions.rows.value.first { it.id == beer.sessionId }.endedAt)
@@ -114,15 +114,15 @@ class SessionRepositoryTest {
     @Test
     fun snapshotReflectsOpenSession() = runBlocking {
         assertEquals(CounterSnapshot(0, null), repo.snapshot())
-        repo.addBeer()
+        repo.add()
         now += 1_000
-        val last = repo.addBeer()
+        val last = repo.add()
         assertEquals(CounterSnapshot(2, last.at, last.sessionId), repo.snapshot())
     }
 
     @Test
     fun snapshotTreatsStaleSessionAsEmptyWithoutWriting() = runBlocking {
-        repo.addBeer()
+        repo.add()
         now += SessionRules.DEFAULT_INACTIVITY_MS
         assertEquals(CounterSnapshot(0, null), repo.snapshot())
         assertNull(sessions.rows.value.single().endedAt)
@@ -131,7 +131,7 @@ class SessionRepositoryTest {
     private class RecordingListener : SessionListener {
         val log = mutableListOf<String>()
         override suspend fun onChanged() { log += "changed" }
-        override suspend fun onBeerAdded(event: BeerEvent) { log += "added:${event.sessionId}" }
+        override suspend fun onBeerAdded(event: BeerEvent, mine: Boolean) { log += "added:${event.sessionId}" }
         override suspend fun onSessionClosed(sessionId: Long) { log += "closed:$sessionId" }
     }
 
@@ -140,7 +140,7 @@ class SessionRepositoryTest {
 
     @Test
     fun everyWriteNotifiesChange() = runBlocking {
-        val beer = observed.addBeer()
+        val beer = observed.add()
         observed.undo(beer)
         observed.removeLatest()
         observed.endSession()
@@ -149,13 +149,13 @@ class SessionRepositoryTest {
 
     @Test
     fun addEmitsBeerAddedBeforeChange() = runBlocking {
-        val beer = observed.addBeer()
+        val beer = observed.add()
         assertEquals(listOf("added:${beer.sessionId}", "changed"), listener.log)
     }
 
     @Test
     fun undoingOnlyBeerEmitsSessionClosed() = runBlocking {
-        val beer = observed.addBeer()
+        val beer = observed.add()
         listener.log.clear()
         observed.undo(beer)
         assertEquals(listOf("closed:${beer.sessionId}", "changed"), listener.log)
@@ -163,16 +163,16 @@ class SessionRepositoryTest {
 
     @Test
     fun staleCloseIsEmittedBeforeNewSessionBeer() = runBlocking {
-        val old = observed.addBeer()
+        val old = observed.add()
         now += SessionRules.DEFAULT_INACTIVITY_MS
         listener.log.clear()
-        val fresh = observed.addBeer()
+        val fresh = observed.add()
         assertEquals(listOf("closed:${old.sessionId}", "added:${fresh.sessionId}", "changed"), listener.log)
     }
 
     @Test
     fun endSessionEmitsClosed() = runBlocking {
-        val beer = observed.addBeer()
+        val beer = observed.add()
         listener.log.clear()
         observed.endSession()
         assertEquals(listOf("closed:${beer.sessionId}", "changed"), listener.log)
@@ -180,25 +180,25 @@ class SessionRepositoryTest {
 
     @Test
     fun finishPreviousSetsFinishedAtOnlyOnce() = runBlocking {
-        val first = repo.addBeer()
+        val first = repo.add()
         now += 60_000
-        repo.addBeer(finishPrevious = true)
+        repo.add(finishPrevious = true)
         assertEquals(now, beers.rows.value.first { it.id == first.id }.finishedAt)
         now += 60_000
-        repo.addBeer()
+        repo.add()
         assertEquals(now - 60_000, beers.rows.value.first { it.id == first.id }.finishedAt)
     }
 
     @Test
     fun plainAddDoesNotFinishPrevious() = runBlocking {
-        val first = repo.addBeer()
-        repo.addBeer()
+        val first = repo.add()
+        repo.add()
         assertNull(beers.rows.value.first { it.id == first.id }.finishedAt)
     }
 
     @Test
     fun concurrentTapsAreSerialized() = runBlocking(Dispatchers.Default) {
-        (1..200).map { async { repo.addBeer() } }.awaitAll()
+        (1..200).map { async { repo.add() } }.awaitAll()
         assertEquals(1, sessions.rows.value.size)
         assertEquals(200, openCount())
     }
@@ -206,21 +206,21 @@ class SessionRepositoryTest {
     @Test
     fun beerUsesDefaultSizeUnlessOverridden() = runBlocking {
         val sized = SessionRepository(sessions, beers, notes, clock = { now }, defaultSize = { BeerSize(330, 4.5) })
-        assertEquals(BeerSize(330, 4.5), sized.addBeer().let { BeerSize(it.sizeMl, it.abv) })
-        assertEquals(BeerSize(568, 6.0), sized.addBeer(size = BeerSize(568, 6.0)).let { BeerSize(it.sizeMl, it.abv) })
+        assertEquals(BeerSize(330, 4.5), sized.add().let { BeerSize(it.sizeMl, it.abv) })
+        assertEquals(BeerSize(568, 6.0), sized.add(size = BeerSize(568, 6.0)).let { BeerSize(it.sizeMl, it.abv) })
         assertEquals(listOf(330, 568), beers.rows.value.map { it.sizeMl })
     }
 
     @Test
     fun outOfRangeSizeIsClamped() = runBlocking {
-        val event = repo.addBeer(size = BeerSize(50_000, 99.0))
+        val event = repo.add(size = BeerSize(50_000, 99.0))
         assertEquals(2_000, event.sizeMl)
         assertEquals(20.0, event.abv, 0.0)
     }
 
     @Test
     fun updateBeerClampsTimesAndSize() = runBlocking {
-        val beer = repo.addBeer()
+        val beer = repo.add()
         repo.updateBeer(beer.copy(at = now + 60_000, finishedAt = beer.at - 60_000, sizeMl = 5, abv = 50.0))
         val stored = beers.rows.value.single()
         assertEquals(now, stored.at)
