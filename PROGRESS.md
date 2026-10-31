@@ -1,6 +1,6 @@
 # Progress
 
-Current phase: **P11 + widget v2/drink timer on master (user-tested on device). Not pushed (no remote yet). Next: P12 (iOS, needs a Mac) or P13 design.**
+Current phase: **P12 iOS port written (ios/), uncommitted; core logic tested on Linux Swift, app/widget NOT compiled yet (needs a Mac + Xcode). Next: build on a Mac, fix compile issues, device test; then P13 design.**
 
 ## Phases
 - [x] Setup (project, wrapper, git, CLAUDE.md)
@@ -15,7 +15,7 @@ Current phase: **P11 + widget v2/drink timer on master (user-tested on device). 
 - [x] P9 Water reminder
 - [x] P10 History & stats
 - [x] P11 Export & hardening
-- [ ] P12 iOS port
+- [~] P12 iOS port (code written; awaiting first Xcode build)
 - [ ] P13 Online friends (design first)
 
 ## Code map
@@ -91,6 +91,14 @@ Current phase: **P11 + widget v2/drink timer on master (user-tested on device). 
 - P4: Notification: title = chosen app name, text localized; VISIBILITY_PRIVATE with public version "Reminder"; two channels (default, silent = IMPORTANCE_LOW) since channel sound can't change later. Actions verify session_id == open session, else ignored.
 - P4: "Yes, got another" sets finishedAt on the latest beer (only if unset) and adds a beer. Interval changes apply from the next scheduling.
 - P3: updatePeriodMillis=0 (no periodic wakeups). Widget picker label is static ("Counter"/"Sayaç"); in-widget title follows app name.
+
+## P12 iOS (2026-10-31)
+- Layout: `ios/project.yml` (XcodeGen), `ios/CansinCore` (SPM: models + all pure rules, 31 XCTest ported from Kotlin, run in Docker swift:6.0), `ios/Shared` (app + widget: SwiftData records/AppStore, Repository, SettingsStore, Reminders/DrinkTimer/Effects, Palette), `ios/App` (SwiftUI screens), `ios/Widget` (widget + AppIntents). Strings generated from Android strings.xml by `ios/tools/gen_strings.py` (+5 iOS-only keys).
+- No third-party code. System frameworks only (SwiftUI, SwiftData, WidgetKit, AppIntents, UserNotifications, Charts). XcodeGen is a Mac build tool only — confirm OK, else hand-made .xcodeproj.
+- Security: App Group store + defaults; `default-data-protection = NSFileProtectionComplete` (store dir also created with .complete); no CloudKit (`cloudKitDatabase: .none`); no ATS keys; no network code; PrivacyInfo.xcprivacy (no tracking/collection; UserDefaults reason 1C8F.1). Widget intents + notification actions require unlock (store unreadable while locked); widget shows "Unlock to see your session" then. Intents not discoverable in Shortcuts.
+- iOS differences (decided while user away – confirm): app name setting changes in-app/widget/notification title only (iOS can't rename the home-screen label); language uses the iOS per-app language in Settings (button opens it); no "Dynamic" accent; age gate "Exit" can't quit the app (App Store rule) → shows a decline message; one widget page shared by all widget instances (intents don't know the instance); widget timeline adds an entry at last activity + 6 h so a stale session shows empty; reminders: pending notification survives reboot (no boot receiver), category has hiddenPreviewsBodyPlaceholder "Reminder"; URL scheme `cansin://tab|app` (only navigates, ignored before age gate).
+- IDs: random Int64 < 2^53 (SwiftData has no autoincrement); times epoch millis like Android; export JSON format identical.
+- Not done: compile/run (no Mac), size report, iOS unit tests for Repository (needs SwiftData → Mac).
 
 ## Widget v2 report (branch)
 - Release APK 1.62 MB (+5 KB). Permissions unchanged; no new exported components (receiver stays exported=false). Lint clean except version notices. Tests: 116/116. Not tested on device.

@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+  <key>beers_count</key>
+  <dict>
+    <key>NSStringLocalizedFormatKey</key>
+    <string>%#@n@</string>
+    <key>n</key>
+    <dict>
+      <key>NSStringFormatSpecTypeKey</key>
+      <string>NSStringPluralRuleType</string>
+      <key>NSStringFormatValueTypeKey</key>
+      <string>ld</string>
+      <key>one</key>
+      <string>%ld bira</string>
+      <key>other</key>
+      <string>%ld bira</string>
+    </dict>
+  </dict>
+  <key>notes_count</key>
+  <dict>
+    <key>NSStringLocalizedFormatKey</key>
+    <string>%#@n@</string>
+    <key>n</key>
+    <dict>
+      <key>NSStringFormatSpecTypeKey</key>
+      <string>NSStringPluralRuleType</string>
+      <key>NSStringFormatValueTypeKey</key>
+      <string>ld</string>
+      <key>one</key>
+      <string>%ld not</string>
+      <key>other</key>
+      <string>%ld not</string>
+    </dict>
+  </dict>
+  <key>stats_sessions</key>
+  <dict>
+    <key>NSStringLocalizedFormatKey</key>
+    <string>%#@n@</string>
+    <key>n</key>
+    <dict>
+      <key>NSStringFormatSpecTypeKey</key>
+      <string>NSStringPluralRuleType</string>
+      <key>NSStringFormatValueTypeKey</key>
+      <string>ld</string>
+      <key>one</key>
+      <string>%ld oturum</string>
+      <key>other</key>
+      <string>%ld oturum</string>
+    </dict>
+  </dict>
+  <key>water_every</key>
+  <dict>
+    <key>NSStringLocalizedFormatKey</key>
+    <string>%#@n@</string>
+    <key>n</key>
+    <dict>
+      <key>NSStringFormatSpecTypeKey</key>
+      <string>NSStringPluralRuleType</string>
+      <key>NSStringFormatValueTypeKey</key>
+      <string>ld</string>
+      <key>one</key>
+      <string>Her biradan sonra hatırlat</string>
+      <key>other</key>
+      <string>Her %ld birada bir hatırlat</string>
+    </dict>
+  </dict>
+</dict>
+</plist>

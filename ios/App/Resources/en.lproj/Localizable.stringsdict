@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+  <key>beers_count</key>
+  <dict>
+    <key>NSStringLocalizedFormatKey</key>
+    <string>%#@n@</string>
+    <key>n</key>
+    <dict>
+      <key>NSStringFormatSpecTypeKey</key>
+      <string>NSStringPluralRuleType</string>
+      <key>NSStringFormatValueTypeKey</key>
+      <string>ld</string>
+      <key>one</key>
+      <string>%ld beer</string>
+      <key>other</key>
+      <string>%ld beers</string>
+    </dict>
+  </dict>
+  <key>notes_count</key>
+  <dict>
+    <key>NSStringLocalizedFormatKey</key>
+    <string>%#@n@</string>
+    <key>n</key>
+    <dict>
+      <key>NSStringFormatSpecTypeKey</key>
+      <string>NSStringPluralRuleType</string>
+      <key>NSStringFormatValueTypeKey</key>
+      <string>ld</string>
+      <key>one</key>
+      <string>%ld note</string>
+      <key>other</key>
+      <string>%ld notes</string>
+    </dict>
+  </dict>
+  <key>stats_sessions</key>
+  <dict>
+    <key>NSStringLocalizedFormatKey</key>
+    <string>%#@n@</string>
+    <key>n</key>
+    <dict>
+      <key>NSStringFormatSpecTypeKey</key>
+      <string>NSStringPluralRuleType</string>
+      <key>NSStringFormatValueTypeKey</key>
+      <string>ld</string>
+      <key>one</key>
+      <string>%ld session</string>
+      <key>other</key>
+      <string>%ld sessions</string>
+    </dict>
+  </dict>
+  <key>water_every</key>
+  <dict>
+    <key>NSStringLocalizedFormatKey</key>
+    <string>%#@n@</string>
+    <key>n</key>
+    <dict>
+      <key>NSStringFormatSpecTypeKey</key>
+      <string>NSStringPluralRuleType</string>
+      <key>NSStringFormatValueTypeKey</key>
+      <string>ld</string>
+      <key>one</key>
+      <string>Remind me after every beer</string>
+      <key>other</key>
+      <string>Remind me every %ld beers</string>
+    </dict>
+  </dict>
+</dict>
+</plist>
