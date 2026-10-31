@@ -187,4 +187,12 @@
     <string name="detail_beers">Bira: %1$d</string>
     <string name="delete_session_title">Bu oturum silinsin mi?</string>
     <string name="delete_session_body">Biraları, suyu ve notları bu telefondan silinir. Geri alınamaz.</string>
+    <string name="section_data">Veriler</string>
+    <string name="export_data">Verileri dışa aktar</string>
+    <string name="export_body">Oturumların, biraların, suyun, notların ve arkadaşlarınla bir JSON dosyası oluşturur ve paylaşım menüsünü açar. Yalnızca güvendiğin uygulama ve kişilerle paylaş.</string>
+    <string name="export_include_profile">Vücut profilini ekle (hassas)</string>
+    <string name="action_share">Paylaş</string>
+    <string name="delete_all_data">Tüm verileri sil</string>
+    <string name="delete_all_title">Tüm veriler silinsin mi?</string>
+    <string name="delete_all_body">Tüm oturumlar, biralar, su, notlar, arkadaşlar, vücut profilin ve hatırlatma ayarları bu telefondan silinir. Uygulama adı, dil ve renkler korunur. Geri alınamaz.</string>
 </resources>

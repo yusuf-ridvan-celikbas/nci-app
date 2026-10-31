@@ -249,6 +249,8 @@ class MainActivity : ComponentActivity() {
         onDeleteFriend = { id -> versus.deleteFriend(id) },
         onWaterEnabled = { on -> update { setWaterEnabled(on) } },
         onWaterEvery = { n -> update { setWaterEvery(n) } },
+        onExport = { includeProfile -> lifecycleScope.launch { startActivity(app.dataManager.export(includeProfile)) } },
+        onDeleteAll = { lifecycleScope.launch { app.dataManager.deleteAll() } },
     )
 
     private fun update(block: suspend SettingsStore.() -> Unit) {

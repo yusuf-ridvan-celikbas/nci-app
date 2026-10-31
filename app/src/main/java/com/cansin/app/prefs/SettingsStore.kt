@@ -119,6 +119,11 @@ class SettingsStore(private val context: Context) {
     suspend fun setWaterEnabled(value: Boolean) = edit { it[WATER_ENABLED] = value }
     suspend fun setWaterEvery(value: Int) = edit { it[WATER_EVERY] = WaterRules.clamp(value) }
 
+    suspend fun clearUserData() = edit { p ->
+        val keep = setOf(AGE_CONFIRMED, APP_NAME, LANGUAGE, THEME_MODE, ACCENT)
+        p.asMap().keys.filterNot { it in keep }.forEach { p.remove(it) }
+    }
+
     suspend fun dismissProfilePrompt() = edit { it[PROFILE_PROMPT_DISMISSED] = true }
 
     suspend fun setScheduledReminder(at: Long?, sessionId: Long?) = edit {

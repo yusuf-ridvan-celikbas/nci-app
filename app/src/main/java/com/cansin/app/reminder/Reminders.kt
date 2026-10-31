@@ -78,7 +78,7 @@ class Reminders(
         alarms.setAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, at, ReminderReceiver.intent(context, ReminderReceiver.ACTION_REMIND, sessionId))
     }
 
-    private suspend fun cancel() {
+    suspend fun cancel() {
         alarms.cancel(ReminderReceiver.intent(context, ReminderReceiver.ACTION_REMIND, 0))
         store.setScheduledReminder(null, null)
         notifier.dismiss()

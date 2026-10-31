@@ -67,6 +67,8 @@ class SettingsActions(
     val onDeleteFriend: (Long) -> Unit,
     val onWaterEnabled: (Boolean) -> Unit,
     val onWaterEvery: (Int) -> Unit,
+    val onExport: (Boolean) -> Unit,
+    val onDeleteAll: () -> Unit,
 )
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -119,6 +121,8 @@ fun SettingsScreen(
             }
             HorizontalDivider(Modifier.padding(vertical = 16.dp))
             ReminderSection(settings, notificationAccess, actions)
+            HorizontalDivider(Modifier.padding(vertical = 16.dp))
+            DataSection(actions.onExport, actions.onDeleteAll)
         }
     }
 }

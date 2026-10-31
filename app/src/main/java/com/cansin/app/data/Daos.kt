@@ -69,6 +69,24 @@ interface WaterDao {
 }
 
 @Dao
+interface ExportDao {
+    @Query("SELECT * FROM session ORDER BY startedAt")
+    suspend fun sessions(): List<Session>
+
+    @Query("SELECT * FROM beer_event ORDER BY at, id")
+    suspend fun beers(): List<BeerEvent>
+
+    @Query("SELECT * FROM water_event ORDER BY at, id")
+    suspend fun water(): List<WaterEvent>
+
+    @Query("SELECT * FROM note ORDER BY createdAt, id")
+    suspend fun notes(): List<Note>
+
+    @Query("SELECT * FROM friend_profile ORDER BY id")
+    suspend fun friends(): List<FriendProfile>
+}
+
+@Dao
 interface FriendDao {
     @Query("SELECT * FROM friend_profile ORDER BY name COLLATE NOCASE")
     fun observeAll(): Flow<List<FriendProfile>>

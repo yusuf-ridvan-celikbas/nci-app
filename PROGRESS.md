@@ -1,6 +1,6 @@
 # Progress
 
-Current phase: **P10 done (installed on device, awaiting user check) → awaiting review before P11**
+Current phase: **P11 done (NOT installed on device – user asleep; P10 installed) → awaiting review before P12 (iOS)**
 
 ## Phases
 - [x] Setup (project, wrapper, git, CLAUDE.md)
@@ -14,7 +14,7 @@ Current phase: **P10 done (installed on device, awaiting user check) → awaitin
 - [x] P8 Versus
 - [x] P9 Water reminder
 - [x] P10 History & stats
-- [ ] P11 Export & hardening
+- [x] P11 Export & hardening
 - [ ] P12 iOS port
 - [ ] P13 Online friends (design first)
 
@@ -36,6 +36,7 @@ Current phase: **P10 done (installed on device, awaiting user check) → awaitin
 - P8: `domain/VersusRules.kt` (VersusSetup, TabTotals, cleanName, fits, meSide, isMine, noteSide, totals); `data/FriendRepository.kt` + FriendDao; repository startVersus/updateVersus/addBeer(side)/addMyBeer/removeLatest(side); `ui/VersusScreen.kt`, `ui/VersusSetupDialog.kt`, `ui/VersusViewModel.kt`, `ui/SideUi.kt` (sideName, sideColor, SideChips); `UndoEffect` shared in CounterScreen.kt; theme `VersusColors` (fixed RED/BLUE light tones)
 - P9: `domain/WaterRules.kt` (beersSinceWater, shouldNudge, clamp 1–10); WaterDao; repository addWater/undoWater/water(); `ui/WaterViewModel.kt`, `ui/WaterBar.kt` (count + Water +1 + nudge card); UndoEffect now generic
 - P10: `domain/StatsRules.kt` (durationMs, paceMin, peak, session, overview); `data/HistoryRepository.kt` (SessionDao.observeHistory → SessionSummary with beer/note/water counts, observe(id), deleteEnded; BeerDao.observeEnded); `ui/HistoryViewModel.kt`, `ui/HistoryScreen.kt` (Sessions | Stats tabs), `ui/SessionDetailScreen.kt` (delete with confirm), `ui/BarChart.kt` (Canvas, no lib)
+- P11: `domain/ExportJson.kt` (hand-written JSON writer, unit-tested escaping), ExportDao (all rows), `system/DataManager.kt` (export → cache/export/cansin-export.json via FileProvider + ACTION_SEND chooser; deleteAll), `ui/DataSection.kt` (Settings → Data)
 - `ui/ReminderSection.kt` settings section incl. POST_NOTIFICATIONS rationale + request
 - `CansinApp` = manual DI (appScope, db, SettingsStore, Reminders, SessionRepository with SessionListener → widget refresh + reminders)
 - Tests: app/src/test (fake DAOs, SessionRepositoryTest, SessionRulesTest, SettingsTest, PaletteContrastTest, WidgetLayoutTest, ReminderPolicyTest, NoteRepositoryTest, NoteRulesTest)
@@ -62,6 +63,8 @@ Current phase: **P10 done (installed on device, awaiting user check) → awaitin
 - P5: Amount = Long minor units (cents/kuruş), no currency; input accepts "12.5"/"12,50", max 1,000,000.00, ≤2 decimals; shown with locale decimal separator. (Chosen while user away – confirm.)
 - P5: A note with no open session starts one. Session is "empty" only with 0 beers AND 0 notes (undo/−1/delete/end use this). Notes count as activity for 6 h auto-close.
 - P5: Edited time stored in editedTime (createdAt kept); picker time resolves to the date closest to createdAt (handles midnight). Notes list ordered by COALESCE(editedTime, createdAt). Note delete added (not in spec, needed for typos).
+- P11: Export: JSON format "cansin-export" v1, sessions with nested beers/water/notes + friends; body profile only if the user ticks it (default off). No storage permission: file in cacheDir/export (replaced each export, wiped on delete-all), shared via non-exported FileProvider (grantUriPermissions, read-only grant on the share intent).
+- P11: Delete all data: cancels reminders, Room clearAllTables, wipes export cache, clears DataStore except age_confirmed, app_name, language, theme_mode, accent (so the launcher alias + locale stay consistent), refreshes widgets. Confirm dialog.
 - P10: History lists ended sessions only (open one is on the main screen). Delete only works on ended sessions (SQL guard), FK CASCADE removes beers/notes/water. History icon in counter + versus top bars; back from detail → history.
 - P10: Stats count only *my* beers (solo, or my versus side); versus sessions without a me side are skipped. Avg pace = total span / total intervals (sessions with ≥2 beers). Water ratio = water / my beers. Peak ‰ recomputed with the *current* body profile (noted on screen + disclaimer). Charts: last 20 sessions, beers and peak ‰; a11y description lists values. No records/badges (store policy).
 - P9: Water reminder is an in-app nudge card (no notification): shown when ≥ N of *my* beers since the last water; "Not now" hides it until the next beer (in-memory). On by default, N=2 (prefs water_enabled, water_every). Water +1 needs an open session (solo, or versus with a me side), has 5 s undo. Water counts for session activity (6 h) and keeps a session from being auto-deleted. No DB schema change (WaterEvent existed in v1).
@@ -84,6 +87,13 @@ Current phase: **P10 done (installed on device, awaiting user check) → awaitin
 - P4: Notification: title = chosen app name, text localized; VISIBILITY_PRIVATE with public version "Reminder"; two channels (default, silent = IMPORTANCE_LOW) since channel sound can't change later. Actions verify session_id == open session, else ignored.
 - P4: "Yes, got another" sets finishedAt on the latest beer (only if unset) and adds a beer. Interval changes apply from the next scheduling.
 - P3: updatePeriodMillis=0 (no periodic wakeups). Widget picker label is static ("Counter"/"Sayaç"); in-widget title follows app name.
+
+## P11 report / audit (2026-10-31)
+- Release APK 1.62 MB (+18 KB); AAB 4.13 MB (all ABIs; Play splits per device). Largest: classes.dex 2.68 MB (uncompressed). Target < 5 MB OK.
+- Permissions (merged release manifest): POST_NOTIFICATIONS, RECEIVE_BOOT_COMPLETED, AndroidX DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION (signature). No INTERNET.
+- Exported: LauncherSoy/LauncherSalgam aliases (launcher), CounterWidget (system widget broadcasts only), androidx ProfileInstallReceiver (guarded by android.permission.DUMP = adb/shell only). Everything else exported=false (MainActivity, WidgetActionReceiver, ReminderReceiver, BootReceiver, FileProvider, InitializationProvider, Room MultiInstanceInvalidationService).
+- allowBackup=false + dataExtractionRules; no Log calls in app source (+ R8 strips Log). R8 mapping at app/build/outputs/mapping/release/mapping.txt (35 MB) – archive it per release (not in git).
+- Lint clean except version notices. Tests: 111/111. Export/delete-all NOT yet tested on device.
 
 ## P10 report
 - Release APK 1.60 MB (+20 KB). Permissions unchanged. Lint clean except version notices. Tests: 107/107. No schema change. Delete is local and irreversible (confirm dialog).
@@ -132,4 +142,5 @@ Current phase: **P10 done (installed on device, awaiting user check) → awaitin
 - P8: Shared tab amounts are shown separately, not split 50/50 — split wanted?
 - P9: Water nudge default ON — OK? Should it also fire as a notification when reminders are on?
 - P10: Counter top bar now has 4 icons; long app name (SoyTuTentación) may truncate – switch to start-aligned title if so.
+- P11: Delete-all keeps age confirmation + appearance – OK, or wipe everything (age gate again)?
 - Release signing: no keystore yet; will use untracked signing.properties.

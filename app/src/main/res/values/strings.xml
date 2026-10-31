@@ -193,4 +193,12 @@
     <string name="detail_beers">Beers: %1$d</string>
     <string name="delete_session_title">Delete this session?</string>
     <string name="delete_session_body">Its beers, water and notes are removed from this phone. This can’t be undone.</string>
+    <string name="section_data">Data</string>
+    <string name="export_data">Export data</string>
+    <string name="export_body">Creates a JSON file with your sessions, beers, water, notes and friends, and opens the share sheet. Only share it with apps and people you trust.</string>
+    <string name="export_include_profile">Include body profile (sensitive)</string>
+    <string name="action_share">Share</string>
+    <string name="delete_all_data">Delete all data</string>
+    <string name="delete_all_title">Delete all data?</string>
+    <string name="delete_all_body">All sessions, beers, water, notes, friends, your body profile and reminder settings are removed from this phone. App name, language and colours are kept. This can’t be undone.</string>
 </resources>

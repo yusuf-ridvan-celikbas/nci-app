@@ -17,6 +17,7 @@ abstract class AppDatabase : RoomDatabase() {
     abstract fun noteDao(): NoteDao
     abstract fun friendDao(): FriendDao
     abstract fun waterDao(): WaterDao
+    abstract fun exportDao(): ExportDao
 
     companion object {
         fun build(context: Context): AppDatabase =
