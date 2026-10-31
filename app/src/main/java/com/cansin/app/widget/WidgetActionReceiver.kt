@@ -7,6 +7,7 @@ import android.content.Context
 import android.content.Intent
 import com.cansin.app.CansinApp
 import com.cansin.app.domain.TimerRules
+import com.cansin.app.prefs.hideCounts
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 
@@ -20,13 +21,9 @@ class WidgetActionReceiver : BroadcastReceiver() {
         val pending = goAsync()
         app.appScope.launch {
             try {
+                val hidden = app.settingsStore.settings.first().hideCounts
                 when (action) {
-                    ACTION_ADD -> app.sessionRepository.addBeer()
-                    ACTION_WATER -> app.sessionRepository.addWater()
-                    ACTION_TIMER -> {
-                        val running = TimerRules.isCurrent(app.settingsStore.timerState.first(), app.sessionRepository.snapshot().sessionId)
-                        if (running) app.drinkTimer.stop() else app.drinkTimer.start()
-                    }
+                    ACTION_ADD, ACTION_WATER, ACTION_TIMER -> if (!hidden) counting(app, action)
                     ACTION_PREV, ACTION_NEXT -> {
                         val page = TimerRules.page(app.settingsStore.widgetPage(widgetId))
                         val next = TimerRules.step(page, if (action == ACTION_NEXT) 1 else -1)
@@ -36,6 +33,17 @@ class WidgetActionReceiver : BroadcastReceiver() {
                 CounterWidget.refreshAll(app)
             } finally {
                 pending.finish()
+            }
+        }
+    }
+
+    private suspend fun counting(app: CansinApp, action: String) {
+        when (action) {
+            ACTION_ADD -> app.sessionRepository.addBeer()
+            ACTION_WATER -> app.sessionRepository.addWater()
+            ACTION_TIMER -> {
+                val running = TimerRules.isCurrent(app.settingsStore.timerState.first(), app.sessionRepository.snapshot().sessionId)
+                if (running) app.drinkTimer.stop() else app.drinkTimer.start()
             }
         }
     }

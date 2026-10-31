@@ -51,6 +51,7 @@ import com.cansin.app.prefs.AppName
 import com.cansin.app.prefs.Language
 import com.cansin.app.prefs.Settings
 import com.cansin.app.prefs.ThemeMode
+import com.cansin.app.system.AppLock
 import kotlin.math.roundToInt
 
 class SettingsActions(
@@ -74,6 +75,9 @@ class SettingsActions(
     val onCareLateHour: (Int) -> Unit,
     val onHomePlace: (String?) -> Unit,
     val onLimits: (Int?, Long?) -> Unit,
+    val lock: AppLock,
+    val onPinHidesWidget: (Boolean) -> Unit,
+    val onPinChanged: () -> Unit,
     val onExport: (Boolean) -> Unit,
     val onDeleteAll: () -> Unit,
 )
@@ -139,6 +143,8 @@ fun SettingsScreen(
             }
             HorizontalDivider(Modifier.padding(vertical = 16.dp))
             ReminderSection(settings, notificationAccess, actions)
+            HorizontalDivider(Modifier.padding(vertical = 16.dp))
+            PinSection(settings, actions.lock, actions.onPinHidesWidget, actions.onPinChanged)
             HorizontalDivider(Modifier.padding(vertical = 16.dp))
             DataSection(actions.onExport, actions.onDeleteAll)
         }

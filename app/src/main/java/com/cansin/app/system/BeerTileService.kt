@@ -10,6 +10,7 @@ import com.cansin.app.CansinApp
 import com.cansin.app.MainActivity
 import com.cansin.app.R
 import com.cansin.app.domain.QuickAction
+import com.cansin.app.prefs.hideCounts
 import com.cansin.app.widget.CounterWidget
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
@@ -30,7 +31,7 @@ class BeerTileService : TileService() {
         app.appScope.launch {
             val settings = app.settingsStore.settings.first()
             val snapshot = app.sessionRepository.snapshot()
-            if (QuickAction.tileAddsDirectly(settings.ageConfirmed, snapshot.versus)) {
+            if (QuickAction.tileAddsDirectly(settings.ageConfirmed, snapshot.versus) && !settings.hideCounts) {
                 app.sessionRepository.addBeer()
                 CounterWidget.refreshAll(app)
                 render()
@@ -45,11 +46,11 @@ class BeerTileService : TileService() {
         val settings = app.settingsStore.settings.first()
         val snapshot = app.sessionRepository.snapshot()
         val context = AppLocale.localized(app, settings.language)
-        val direct = QuickAction.tileAddsDirectly(settings.ageConfirmed, snapshot.versus)
+        val direct = QuickAction.tileAddsDirectly(settings.ageConfirmed, snapshot.versus) && !settings.hideCounts
         tile.label = context.getString(R.string.tile_label)
         tile.state = if (snapshot.sessionId != null) Tile.STATE_ACTIVE else Tile.STATE_INACTIVE
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-            tile.subtitle = if (direct) snapshot.count.toString() else context.getString(R.string.tile_open_app)
+            tile.subtitle = if (direct && !settings.hideCounts) snapshot.count.toString() else context.getString(R.string.tile_open_app)
         }
         tile.updateTile()
     }

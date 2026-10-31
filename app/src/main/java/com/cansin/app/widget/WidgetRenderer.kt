@@ -20,6 +20,7 @@ import com.cansin.app.domain.TimerRules
 import com.cansin.app.domain.TimerState
 import com.cansin.app.domain.WidgetPage
 import com.cansin.app.prefs.Settings
+import com.cansin.app.prefs.hideCounts
 import com.cansin.app.prefs.ThemeMode
 import com.cansin.app.system.AppLocale
 import com.cansin.app.ui.theme.colorScheme
@@ -94,7 +95,16 @@ object WidgetRenderer {
                 button(views, context.getString(R.string.plus_one), context.getString(R.string.water_add), intent)
             }
         }
-        if (wide) {
+        val hidden = data.settings.hideCounts
+        if (hidden) {
+            views.setTextViewText(R.id.widget_value, context.getString(R.string.widget_hidden))
+            views.setContentDescription(R.id.widget_value, context.getString(R.string.widget_hidden_description))
+            button(views, context.getString(R.string.widget_open), context.getString(R.string.widget_open_app), openApp(context, tab = false))
+            if (wide) {
+                views.setViewVisibility(R.id.widget_sub, View.GONE)
+                views.setViewVisibility(R.id.widget_timer_row, View.GONE)
+            }
+        } else if (wide) {
             val sub = when (page) {
                 WidgetPage.TAB -> context.resources.getQuantityString(R.plurals.notes_count, snapshot.notes, snapshot.notes)
                 else -> ""

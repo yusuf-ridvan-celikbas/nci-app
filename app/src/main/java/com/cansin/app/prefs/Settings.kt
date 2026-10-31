@@ -64,6 +64,8 @@ data class Settings(
     val homePlace: String? = null,
     val beerLimit: Int? = null,
     val budgetMinor: Long? = null,
+    val pinSet: Boolean = false,
+    val pinHidesWidget: Boolean = true,
 ) {
     companion object {
         const val DEFAULT_REMINDER_INTERVAL_MIN = 10
@@ -71,6 +73,11 @@ data class Settings(
         const val MAX_REMINDER_INTERVAL_MIN = 60
     }
 }
+
+/** Hide counts on widget + tile when a PIN is set (user option, default on). */
+val Settings.hideCounts: Boolean get() = pinSet && pinHidesWidget
+
+data class PinAttempts(val fails: Int = 0, val lastFailAt: Long? = null)
 
 data class ReminderState(val nextAt: Long? = null, val sessionId: Long? = null, val stoppedSessionId: Long? = null)
 

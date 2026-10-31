@@ -1,5 +1,6 @@
 package com.cansin.app
 
+import com.cansin.app.system.AppLock
 import android.app.Application
 import com.cansin.app.data.AppDatabase
 import com.cansin.app.data.BeerEvent
@@ -28,6 +29,7 @@ class CansinApp : Application() {
     val dataManager: DataManager by lazy {
         DataManager(this, database, settingsStore, { reminders.cancel() }, { CounterWidget.refreshAll(this) })
     }
+    val appLock: AppLock by lazy { AppLock(settingsStore) }
     val drinkTimer: DrinkTimer by lazy { DrinkTimer(settingsStore, { sessionRepository }) }
     val reminders: Reminders by lazy { Reminders(this, settingsStore, { sessionRepository }) }
 

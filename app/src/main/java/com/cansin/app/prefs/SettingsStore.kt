@@ -58,6 +58,10 @@ private val CARE_LATE_HOUR = intPreferencesKey("care_late_hour")
 private val HOME_PLACE = stringPreferencesKey("home_place")
 private val BEER_LIMIT = intPreferencesKey("beer_limit")
 private val BUDGET_MINOR = longPreferencesKey("budget_minor")
+private val PIN_HASH = stringPreferencesKey("pin_hash")
+private val PIN_HIDES_WIDGET = booleanPreferencesKey("pin_hides_widget")
+private val PIN_FAILS = intPreferencesKey("pin_fails")
+private val PIN_LAST_FAIL = longPreferencesKey("pin_last_fail_at")
 private val TIMER_BEER = longPreferencesKey("timer_beer_id")
 private val TIMER_SESSION = longPreferencesKey("timer_session_id")
 private val TIMER_STARTED = longPreferencesKey("timer_started_at")
@@ -92,6 +96,8 @@ class SettingsStore(private val context: Context) {
             homePlace = CareRules.cleanHome(p[HOME_PLACE]),
             beerLimit = CareRules.cleanBeerLimit(p[BEER_LIMIT]),
             budgetMinor = CareRules.cleanBudget(p[BUDGET_MINOR]),
+            pinSet = p[PIN_HASH] != null,
+            pinHidesWidget = p[PIN_HIDES_WIDGET] ?: true,
         )
     }
 
@@ -177,6 +183,29 @@ class SettingsStore(private val context: Context) {
     suspend fun setCareEnabled(value: Boolean) = edit { it[CARE_ENABLED] = value }
     suspend fun setCareLateHour(value: Int) = edit { it[CARE_LATE_HOUR] = CareRules.clampLateHour(value) }
     suspend fun setHomePlace(value: String?) = edit { it.putOrRemove(HOME_PLACE, CareRules.cleanHome(value)) }
+
+    suspend fun pinHash(): String? = context.dataStore.data.first()[PIN_HASH]
+
+    suspend fun pinAttempts(): PinAttempts = context.dataStore.data.first().let { PinAttempts(it[PIN_FAILS] ?: 0, it[PIN_LAST_FAIL]) }
+
+    /** New hash (or null to remove) always resets the wrong-try counter. */
+    suspend fun setPinHash(hash: String?) = edit {
+        it.putOrRemove(PIN_HASH, hash)
+        it.remove(PIN_FAILS)
+        it.remove(PIN_LAST_FAIL)
+    }
+
+    suspend fun recordPinFail(at: Long) = edit {
+        it[PIN_FAILS] = (it[PIN_FAILS] ?: 0) + 1
+        it[PIN_LAST_FAIL] = at
+    }
+
+    suspend fun resetPinFails() = edit {
+        it.remove(PIN_FAILS)
+        it.remove(PIN_LAST_FAIL)
+    }
+
+    suspend fun setPinHidesWidget(value: Boolean) = edit { it[PIN_HIDES_WIDGET] = value }
 
     suspend fun setLimits(beers: Int?, budgetMinor: Long?) = edit {
         it.putOrRemove(BEER_LIMIT, CareRules.cleanBeerLimit(beers))

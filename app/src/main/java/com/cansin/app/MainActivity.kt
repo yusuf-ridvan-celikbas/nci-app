@@ -63,6 +63,8 @@ import com.cansin.app.ui.CareCard
 import com.cansin.app.ui.CareTicker
 import com.cansin.app.ui.CareViewModel
 import com.cansin.app.domain.QuickAction
+import com.cansin.app.domain.PinRules
+import com.cansin.app.ui.LockScreen
 import com.cansin.app.ui.theme.dynamicColorAvailable
 import com.cansin.app.widget.CounterWidget
 import kotlinx.coroutines.flow.first
@@ -84,6 +86,7 @@ class MainActivity : ComponentActivity() {
     private var resumed by mutableStateOf(false)
     private var openTabRequest by mutableStateOf(false)
     private var quickAction by mutableStateOf<QuickAction?>(null)
+    private var locked by mutableStateOf(true)
     private var notificationAccess by mutableStateOf(NotificationAccess(permissionGranted = false, enabled = false))
 
     override fun attachBaseContext(newBase: Context) {
@@ -117,7 +120,16 @@ class MainActivity : ComponentActivity() {
 
     override fun onStart() {
         super.onStart()
+        val lock = app.appLock
+        val pinSet = runBlocking { store.settings.first().pinSet }
+        if (PinRules.shouldLock(pinSet, lock.stoppedAt, System.currentTimeMillis())) lock.unlocked = false
+        locked = pinSet && !lock.unlocked
         counter.refresh()
+    }
+
+    override fun onStop() {
+        app.appLock.stoppedAt = System.currentTimeMillis()
+        super.onStop()
     }
 
     override fun onResume() {
@@ -151,9 +163,14 @@ class MainActivity : ComponentActivity() {
         val friends by versus.friends.collectAsState()
         var detailId by rememberSaveable { mutableStateOf<Long?>(null) }
         LaunchedEffect(detailId) { history.select(detailId) }
-        LaunchedEffect(quickAction, settings.ageConfirmed) {
+        val showLock = settings.pinSet && locked
+        LaunchedEffect(settings.pinSet) {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) setRecentsScreenshotEnabled(!settings.pinSet)
+            if (!settings.pinSet) locked = false
+        }
+        LaunchedEffect(quickAction, settings.ageConfirmed, showLock) {
             val action = quickAction ?: return@LaunchedEffect
-            if (!settings.ageConfirmed) return@LaunchedEffect
+            if (!settings.ageConfirmed || showLock) return@LaunchedEffect
             quickAction = null
             when (action) {
                 QuickAction.BEER -> { screen = Screen.COUNTER; counter.add() }
@@ -171,6 +188,12 @@ class MainActivity : ComponentActivity() {
 
         CansinTheme(dark, settings.accent) { CompositionLocalProvider(LocalCurrency provides settings.currency) {
             when {
+                showLock -> LockScreen(
+                    title = stringResource(settings.appName.label),
+                    lock = app.appLock,
+                    onUnlocked = { locked = false },
+                    onDeleteAll = { lifecycleScope.launch { app.dataManager.deleteAll() } },
+                )
                 !settings.ageConfirmed -> AgeGateScreen(
                     onConfirm = { update { confirmAge() } },
                     onDecline = { finish() },
@@ -315,6 +338,9 @@ class MainActivity : ComponentActivity() {
         onCareLateHour = { h -> update { setCareLateHour(h) } },
         onHomePlace = { home -> update { setHomePlace(home) } },
         onLimits = { beers, budget -> update { setLimits(beers, budget) } },
+        lock = app.appLock,
+        onPinHidesWidget = { on -> update { setPinHidesWidget(on) } },
+        onPinChanged = { lifecycleScope.launch { CounterWidget.refreshAll(app) } },
         onExport = { includeProfile -> lifecycleScope.launch { startActivity(app.dataManager.export(includeProfile)) } },
         onDeleteAll = { lifecycleScope.launch { app.dataManager.deleteAll() } },
     )
