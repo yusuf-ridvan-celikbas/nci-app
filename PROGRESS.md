@@ -1,6 +1,6 @@
 # Progress
 
-Current phase: **P12 iOS port written (ios/), uncommitted; core logic tested on Linux Swift, app/widget NOT compiled yet (needs a Mac + Xcode). Next: build on a Mac, fix compile issues, device test; then P13 design.**
+Current phase: **P12 iOS port on branch feature/p12-ios (64203b3); core logic tested on Linux Swift, app/widget NOT compiled yet (needs a Mac + Xcode). Next: build on a Mac, fix compile issues, device test. P13 design proposal in docs/p13-design.md, waiting for user answers (no code yet).**
 
 ## Phases
 - [x] Setup (project, wrapper, git, CLAUDE.md)
@@ -16,7 +16,7 @@ Current phase: **P12 iOS port written (ios/), uncommitted; core logic tested on 
 - [x] P10 History & stats
 - [x] P11 Export & hardening
 - [~] P12 iOS port (code written; awaiting first Xcode build)
-- [ ] P13 Online friends (design first)
+- [~] P13 Online friends (design proposal docs/p13-design.md, awaiting approval) (design first)
 
 ## Code map
 - `data/` Entities.kt (all 5 Room entities, enums stored as TEXT), Daos.kt (SessionDao, BeerDao), AppDatabase.kt (v1, schema in app/schemas), SessionRepository.kt (all writes behind one Mutex)
