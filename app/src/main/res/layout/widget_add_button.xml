@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/widget_add"
+    android:layout_width="56dp"
+    android:layout_height="56dp"
+    android:layout_marginTop="4dp"
+    tools:ignore="MergeRootFrame">
+
+    <ImageView
+        android:id="@+id/widget_add_bg"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:importantForAccessibility="no"
+        android:src="@drawable/widget_circle" />
+
+    <TextView
+        android:id="@+id/widget_add_label"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:gravity="center"
+        android:importantForAccessibility="no"
+        android:textSize="20sp"
+        android:textStyle="bold" />
+</FrameLayout>

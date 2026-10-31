@@ -110,6 +110,34 @@ class SessionRepositoryTest {
     }
 
     @Test
+    fun snapshotReflectsOpenSession() = runBlocking {
+        assertEquals(CounterSnapshot(0, null), repo.snapshot())
+        repo.addBeer()
+        now += 1_000
+        val last = repo.addBeer()
+        assertEquals(CounterSnapshot(2, last.at), repo.snapshot())
+    }
+
+    @Test
+    fun snapshotTreatsStaleSessionAsEmptyWithoutWriting() = runBlocking {
+        repo.addBeer()
+        now += SessionRules.DEFAULT_INACTIVITY_MS
+        assertEquals(CounterSnapshot(0, null), repo.snapshot())
+        assertNull(sessions.rows.value.single().endedAt)
+    }
+
+    @Test
+    fun everyWriteNotifiesChange() = runBlocking {
+        var changes = 0
+        val notifying = SessionRepository(sessions, beers, clock = { now }, onChange = { changes++ })
+        val beer = notifying.addBeer()
+        notifying.undo(beer)
+        notifying.removeLatest()
+        notifying.endSession()
+        assertEquals(4, changes)
+    }
+
+    @Test
     fun concurrentTapsAreSerialized() = runBlocking(Dispatchers.Default) {
         (1..200).map { async { repo.addBeer() } }.awaitAll()
         assertEquals(1, sessions.rows.value.size)

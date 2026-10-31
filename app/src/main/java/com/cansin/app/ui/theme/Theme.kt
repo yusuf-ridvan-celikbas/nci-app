@@ -1,5 +1,6 @@
 package com.cansin.app.ui.theme
 
+import android.content.Context
 import android.os.Build
 import androidx.compose.material3.ColorScheme
 import androidx.compose.material3.MaterialTheme
@@ -16,14 +17,15 @@ val dynamicColorAvailable = Build.VERSION.SDK_INT >= Build.VERSION_CODES.S
 
 @Composable
 fun CansinTheme(dark: Boolean, accent: Accent, content: @Composable () -> Unit) {
-    val scheme = if (accent == Accent.DYNAMIC && dynamicColorAvailable) {
-        val context = LocalContext.current
+    MaterialTheme(colorScheme = colorScheme(LocalContext.current, accent, dark), content = content)
+}
+
+fun colorScheme(context: Context, accent: Accent, dark: Boolean): ColorScheme =
+    if (accent == Accent.DYNAMIC && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
         if (dark) dynamicDarkColorScheme(context) else dynamicLightColorScheme(context)
     } else {
         schemeFor(accent, dark)
     }
-    MaterialTheme(colorScheme = scheme, content = content)
-}
 
 private fun schemeFor(accent: Accent, dark: Boolean): ColorScheme {
     val palette = Palettes.of(accent)

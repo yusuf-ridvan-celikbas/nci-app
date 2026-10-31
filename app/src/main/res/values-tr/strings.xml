@@ -33,4 +33,7 @@
     <string name="color_green">Yeşil</string>
     <string name="color_purple">Mor</string>
     <string name="color_dynamic">Dinamik (duvar kağıdından)</string>
+    <string name="widget_name">Sayaç</string>
+    <string name="widget_description">Hızlı +1 ile bira sayacı</string>
+    <string name="widget_since_last">Sonuncudan beri:</string>
 </resources>

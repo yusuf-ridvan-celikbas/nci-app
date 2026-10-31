@@ -39,4 +39,7 @@
     <string name="color_green">Green</string>
     <string name="color_purple">Purple</string>
     <string name="color_dynamic">Dynamic (from wallpaper)</string>
+    <string name="widget_name">Counter</string>
+    <string name="widget_description">Beer count with a quick +1</string>
+    <string name="widget_since_last">Since last:</string>
 </resources>

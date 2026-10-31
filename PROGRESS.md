@@ -1,12 +1,12 @@
 # Progress
 
-Current phase: **P2 done (device check of name/language switch pending by user) → awaiting review before P3**
+Current phase: **P3 done (on-device widget check pending by user) → awaiting review before P4**
 
 ## Phases
 - [x] Setup (project, wrapper, git, CLAUDE.md)
 - [x] P1 Core counter
 - [x] P2 Settings & personalization
-- [ ] P3 Widget
+- [x] P3 Widget
 - [ ] P4 Reminder
 - [ ] P5 Notes / tab
 - [ ] P6 Beer size
@@ -26,8 +26,9 @@ Current phase: **P2 done (device check of name/language switch pending by user) 
 - `ui/SettingsScreen.kt` grouped radio lists; `ui/theme/Palettes.kt` 6 accents light/dark + shared neutrals (Long ARGB, unit-tested for AA)
 - `ui/` CounterScreen (top bar: app name + settings), CounterViewModel, AgeGateScreen, theme/Theme.kt (scheme from palette or dynamic)
 - Navigation: rememberSaveable flag in MainActivity + BackHandler (no navigation lib)
-- `CansinApp` = manual DI (lazy db, repository, prefs)
-- Tests: app/src/test (fake DAOs, SessionRepositoryTest, SessionRulesTest, SettingsTest, PaletteContrastTest)
+- `widget/` CounterWidget (exported AppWidgetProvider, system actions only; refreshAll), WidgetActionReceiver (exported=false, ACTION_ADD → addBeer), WidgetRenderer (RemoteViews, colors from ui/theme colorScheme, localized via AppLocale.localized), WidgetLayout (pure helpers)
+- `CansinApp` = manual DI (appScope, lazy db, repository with onChange → widget refresh, settings store)
+- Tests: app/src/test (fake DAOs, SessionRepositoryTest, SessionRulesTest, SettingsTest, PaletteContrastTest, WidgetLayoutTest)
 
 ## Decisions
 - Toolchain: JDK 17, AGP 9.4.1 + Gradle 9.6.0 wrapper, Kotlin 2.2.10 + KSP 2.3.11, compile/targetSdk 37, minSdk 26. Kotlin 2.4.x / AGP 9.5 deferred.
@@ -44,7 +45,15 @@ Current phase: **P2 done (device check of name/language switch pending by user) 
 - P2: MainActivity exported=false; launcher = 2 activity-aliases (LauncherSoy default enabled, LauncherSalgam disabled). Application label/icon stay SoyTuTentación (system app-info).
 - P2: localeFilters en+tr (drops library translations); AAB language split disabled so in-app switch always has TR strings.
 - P2: Dynamic color option only shown on API 31+. Secondary/tertiary roles reuse the accent; neutrals are grey and shared by all accents.
-- Launcher icons: adaptive vectors (amber mug / şalgam glass), placeholders until final art.
+- Launcher icon: "nCi" logo (app-logo/nci-app-logo.jpg.jpeg) traced to vector adaptive icon, maroon #7B1F2D / cream #FFF5E3; same icon for both aliases (user choice).
+- P3: Widget uses RemoteViews, not Glance (user-approved: no dependency). +1 goes through a non-exported receiver via explicit immutable PendingIntent; the exported provider only refreshes. Rapid taps serialized by repository Mutex.
+- P3: Repository has onChange callback → every write refreshes widgets; settings changes refresh too. snapshot() is read-only and shows a stale (>6 h) session as 0.
+- P3: One provider, two layouts: small (count + +1) and wide ≥250dp (name, count, "since last" Chronometer, +1). API 31+: responsive size map + setColorInt light/dark pair (follows system night automatically); API 26–30: layout from min width option, colors fixed at render time.
+- P3: updatePeriodMillis=0 (no periodic wakeups). Widget picker label is static ("Counter"/"Sayaç"); in-widget title follows app name.
+
+## P3 report
+- Release APK 1.15 MB (+4 KB), AAB 2.8 MB. Permissions: none. Exported: 2 launcher aliases, CounterWidget, profileinstaller receiver. Lint: clean except version notices. Tests: 27/27.
+- Known limits: on API 26–30 widget colors don't flip with system dark mode until the next refresh; dynamic-color widget doesn't refresh on wallpaper change; a session that goes stale while idle shows its old count until the next refresh (no alarm, battery).
 
 ## P2 report
 - Release APK (unsigned) 1.15 MB; AAB 2.8 MB. Permissions unchanged (none). Exported: 2 launcher aliases + profileinstaller receiver. Lint: clean except version notices. Tests: 21/21.

@@ -33,6 +33,7 @@ import com.cansin.app.ui.SettingsActions
 import com.cansin.app.ui.SettingsScreen
 import com.cansin.app.ui.theme.CansinTheme
 import com.cansin.app.ui.theme.dynamicColorAvailable
+import com.cansin.app.widget.CounterWidget
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
@@ -109,6 +110,7 @@ class MainActivity : ComponentActivity() {
         onLanguage = { language ->
             lifecycleScope.launch {
                 store.setLanguage(language)
+                CounterWidget.refreshAll(app)
                 AppLocale.apply(this@MainActivity, language)
             }
         },
@@ -117,6 +119,9 @@ class MainActivity : ComponentActivity() {
     )
 
     private fun update(block: suspend SettingsStore.() -> Unit) {
-        lifecycleScope.launch { store.block() }
+        lifecycleScope.launch {
+            store.block()
+            CounterWidget.refreshAll(app)
+        }
     }
 }
