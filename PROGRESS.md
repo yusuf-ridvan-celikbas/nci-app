@@ -1,6 +1,6 @@
 # Progress
 
-Current phase: **P12 iOS port on branch feature/p12-ios (64203b3); core logic tested on Linux Swift, app/widget NOT compiled yet (needs a Mac + Xcode). Next: build on a Mac, fix compile issues, device test. P13 = offline result cards (Option A) on branch feature/p13-cards: Android done, iOS core codec done, iOS UI for it not yet.**
+Current phase: **P14–P17 done on feature/p14-plus (next P18 PIN lock). Earlier: P12 iOS port on branch feature/p12-ios (64203b3); core logic tested on Linux Swift, app/widget NOT compiled yet (needs a Mac + Xcode). Next: build on a Mac, fix compile issues, device test. P13 = offline result cards (Option A) on branch feature/p13-cards: Android done, iOS core codec done, iOS UI for it not yet.**
 
 ## Phases
 - [x] Setup (project, wrapper, git, CLAUDE.md)
@@ -17,6 +17,10 @@ Current phase: **P12 iOS port on branch feature/p12-ios (64203b3); core logic te
 - [x] P11 Export & hardening
 - [~] P12 iOS port (code written; awaiting first Xcode build)
 - [x] P13 Friends, offline (Option A result cards; Android done, iOS core only) (design first)
+- Plan P14–P23 (2026-11-01, user-approved; file ~/.claude/plans/bright-swimming-diffie.md), branch feature/p14-plus:
+  - [x] P14 Currency  - [x] P15 Quick tile + shortcuts  - [x] P16 Care messages  - [x] P17 Self-set limits
+  - [ ] P18 PIN lock  - [ ] P19 Settle up  - [ ] P20 Stats extras  - [ ] checkpoint: phone test + merge
+  - [ ] P21 Restore backup  - [ ] P22 Other drinks (DB v4)  - [ ] P23 Group mode 2–6 (DB v5, no winner/race)
 
 ## Code map
 - `data/` Entities.kt (all 5 Room entities, enums stored as TEXT), Daos.kt (SessionDao, BeerDao), AppDatabase.kt (v1, schema in app/schemas), SessionRepository.kt (all writes behind one Mutex)
@@ -91,6 +95,13 @@ Current phase: **P12 iOS port on branch feature/p12-ios (64203b3); core logic te
 - P4: Notification: title = chosen app name, text localized; VISIBILITY_PRIVATE with public version "Reminder"; two channels (default, silent = IMPORTANCE_LOW) since channel sound can't change later. Actions verify session_id == open session, else ignored.
 - P4: "Yes, got another" sets finishedAt on the latest beer (only if unset) and adds a beer. Interval changes apply from the next scheduling.
 - P3: updatePeriodMillis=0 (no periodic wakeups). Widget picker label is static ("Counter"/"Sayaç"); in-widget title follows app name.
+
+## P14–P17 report (2026-11-01, Android only; iOS later on a Mac)
+- P14: `domain/Currency.kt` (NONE/TRY/EUR/USD/GBP, display only; ₺ after, $/£ before, € by language). Pref `currency`; `LocalCurrency` provided in MainActivity; `rememberAmountFormat` adds the symbol, `rememberPlainAmountFormat` for edit fields; widget tab page; export adds top-level `currency` only when set.
+- P15: `system/BeerTileService` (exported, guarded by BIND_QUICK_SETTINGS_TILE; unlockAndRun when locked; adds directly only if age confirmed and not versus, else opens app; subtitle = count on API 29+). Static shortcuts `res/xml/shortcuts.xml` on both launcher aliases → MainActivity extra `com.cansin.app.SHORTCUT` (beer/water/tab, parsed by `domain/QuickActions.kt`, run only after age gate).
+- P16/P17: `domain/CareRules.kt` + `ui/CareViewModel.kt`, `ui/CareCard.kt` (one card in the promille slot of counter + versus), `ui/CareSection.kt` (Settings → Looking after you). Priority: own beer limit > own budget > late (default 01:00, choices 22–03, until 06:00; "Not now" = 1 h) > slow down (≥5 of my beers; no numbers, also covers EN health caution). Limits work even with kind reminders off. Budget compares my spend (solo: whole tab; versus: my side + shared). "Way home": saved home text → https maps transit directions; none → geo search "bus stop". Taxi = existing geo search. Prefs: care_enabled, care_late_hour, home_place (≤100, no control chars), beer_limit (1–20), budget_minor.
+- Release APK 1.67 MB (+23 KB). Permissions unchanged, no INTERNET. Lint 0 errors. Tests 131/131. Not tested on device.
+- Remote added: origin https://github.com/yusuf-ridvan-celikbas/nci-app.git (nothing pushed yet).
 
 ## P13 report (2026-10-31) — offline result cards, no network
 - User: "no internet, no privacy worries" → Option A. INTERNET permission still absent (verified merged release manifest).
@@ -168,6 +179,7 @@ water"); decode finds the code anywhere in pasted text, caps text 5000 / payload
 - P7: Verify TR limits (2026 bill may lower NORMAL to 0.20) and set lastVerified before release.
 - P8: Shared tab amounts are shown separately, not split 50/50 — split wanted?
 - P9: Water nudge default ON — OK? Should it also fire as a notification when reminders are on?
+- P16: slow-down threshold fixed at 5 of my beers, late default 01:00 — OK?
 - P10: Counter top bar now has 4 icons; long app name (SoyTuTentación) may truncate – switch to start-aligned title if so.
 - P11: Delete-all keeps age confirmation + appearance – OK, or wipe everything (age gate again)?
 - Release signing: no keystore yet; will use untracked signing.properties.
