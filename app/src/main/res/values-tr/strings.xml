@@ -208,4 +208,16 @@
     <string name="timer_idle">Zamanlayıcı</string>
     <string name="setting_timer">İçme zamanlayıcısı</string>
     <string name="setting_timer_note">Birayı gerçekten içmeye başladığında başlat; durdurmak bitiş saatini tahmin için kaydeder. Tüm zamanlayıcıları gizlemek için kapat.</string>
+    <string name="history_friends">Arkadaşlar</string>
+    <string name="friends_empty">Henüz arkadaş sonucu yok. Bir arkadaşından oturum sonucunu paylaşmasını iste, sonra buraya yapıştır.</string>
+    <string name="friends_import">Sonuç içe aktar</string>
+    <string name="friends_import_hint">Aldığın mesajı yapıştır</string>
+    <string name="friends_import_invalid">Bu metinde geçerli bir sonuç bulunamadı.</string>
+    <string name="friends_imported">Sonuç içe aktarıldı</string>
+    <string name="friends_duplicate">Bu sonuç zaten içe aktarılmış</string>
+    <string name="friends_note">Sonuçlar bu telefonda kalır. Uygulama hiçbir yere bir şey göndermez; paylaşımı sen yaparsın.</string>
+    <string name="share_result">Sonucu paylaş</string>
+    <string name="share_name">Adın</string>
+    <string name="share_body">Yalnızca adın, gün, bira sayın, süre ve su paylaşılır. Kime gideceğini sen seçersin.</string>
+    <string name="share_message">Oturum sonucum. İçe aktarmak için bu mesajı uygulamada Geçmiş → Arkadaşlar bölümüne yapıştır:\n%1$s</string>
 </resources>

@@ -47,6 +47,6 @@ class ExportJsonTest {
     @Test
     fun emptyExport() {
         val json = ExportJson.build(ExportData(emptyList(), emptyList(), emptyList(), emptyList(), emptyList(), null), true, 0)
-        assertEquals("{\"format\":\"cansin-export\",\"version\":1,\"exportedAt\":0,\"sessions\":[],\"friends\":[]}", json)
+        assertEquals("{\"format\":\"cansin-export\",\"version\":1,\"exportedAt\":0,\"sessions\":[],\"friends\":[],\"friendResults\":[]}", json)
     }
 }

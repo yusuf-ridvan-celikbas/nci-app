@@ -27,6 +27,7 @@ class DataManager(
         val data = ExportData(
             dao.sessions(), dao.beers(), dao.water(), dao.notes(), dao.friends(),
             store.settings.first().profile,
+            database.friendResultDao().all(),
         )
         val json = ExportJson.build(data, includeProfile, System.currentTimeMillis())
         exportDir.deleteRecursively()

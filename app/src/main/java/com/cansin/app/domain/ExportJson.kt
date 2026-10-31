@@ -2,6 +2,7 @@ package com.cansin.app.domain
 
 import com.cansin.app.data.BeerEvent
 import com.cansin.app.data.FriendProfile
+import com.cansin.app.data.FriendResult
 import com.cansin.app.data.Note
 import com.cansin.app.data.Session
 import com.cansin.app.data.WaterEvent
@@ -13,6 +14,7 @@ data class ExportData(
     val notes: List<Note>,
     val friends: List<FriendProfile>,
     val profile: BodyProfile?,
+    val friendResults: List<FriendResult> = emptyList(),
 )
 
 object ExportJson {
@@ -54,6 +56,9 @@ object ExportJson {
                 )
             },
             "friends" to data.friends.map { linkedMapOf("id" to it.id, "name" to it.name) },
+            "friendResults" to data.friendResults.map {
+                linkedMapOf("name" to it.name, "day" to it.day, "beers" to it.beers, "durationMin" to it.durationMin, "water" to it.water)
+            },
         )
         val profile = data.profile
         if (includeProfile && profile != null) {

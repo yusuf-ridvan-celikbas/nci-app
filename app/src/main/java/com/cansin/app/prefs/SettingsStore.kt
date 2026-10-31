@@ -13,6 +13,7 @@ import androidx.datastore.preferences.core.longPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
 import com.cansin.app.domain.BeerRules
+import com.cansin.app.domain.ResultCards
 import com.cansin.app.domain.BeerSize
 import com.cansin.app.domain.BodyProfile
 import com.cansin.app.domain.License
@@ -48,6 +49,7 @@ private val PROFILE_PROMPT_DISMISSED = booleanPreferencesKey("profile_prompt_dis
 private val WATER_ENABLED = booleanPreferencesKey("water_enabled")
 private val WATER_EVERY = intPreferencesKey("water_every")
 private val TIMER_ENABLED = booleanPreferencesKey("timer_enabled")
+private val SHARE_NAME = stringPreferencesKey("share_name")
 private val TIMER_BEER = longPreferencesKey("timer_beer_id")
 private val TIMER_SESSION = longPreferencesKey("timer_session_id")
 private val TIMER_STARTED = longPreferencesKey("timer_started_at")
@@ -75,6 +77,7 @@ class SettingsStore(private val context: Context) {
             waterEnabled = p[WATER_ENABLED] ?: true,
             waterEvery = WaterRules.clamp(p[WATER_EVERY] ?: WaterRules.DEFAULT_EVERY),
             timerEnabled = p[TIMER_ENABLED] ?: true,
+            shareName = ResultCards.cleanName(p[SHARE_NAME]),
         )
     }
 
@@ -156,6 +159,8 @@ class SettingsStore(private val context: Context) {
         val keep = setOf(AGE_CONFIRMED, APP_NAME, LANGUAGE, THEME_MODE, ACCENT)
         p.asMap().keys.filterNot { it in keep }.forEach { p.remove(it) }
     }
+
+    suspend fun setShareName(value: String?) = edit { it.putOrRemove(SHARE_NAME, ResultCards.cleanName(value)) }
 
     suspend fun dismissProfilePrompt() = edit { it[PROFILE_PROMPT_DISMISSED] = true }
 

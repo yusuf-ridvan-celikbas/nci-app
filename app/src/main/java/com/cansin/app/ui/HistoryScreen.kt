@@ -73,13 +73,18 @@ fun HistoryScreen(viewModel: HistoryViewModel, onBack: () -> Unit, onOpen: (Long
             PrimaryTabRow(selectedTabIndex = tab) {
                 Tab(selected = tab == 0, onClick = { tab = 0 }, text = { Text(stringResource(R.string.history_sessions)) })
                 Tab(selected = tab == 1, onClick = { tab = 1 }, text = { Text(stringResource(R.string.history_stats)) })
+                Tab(selected = tab == 2, onClick = { tab = 2 }, text = { Text(stringResource(R.string.history_friends)) })
             }
-            if (tab == 0) {
-                val summaries by viewModel.summaries.collectAsState()
-                summaries?.let { SessionList(it, onOpen) }
-            } else {
-                val overview by viewModel.overview.collectAsState()
-                overview?.let { Stats(it) }
+            when (tab) {
+                0 -> {
+                    val summaries by viewModel.summaries.collectAsState()
+                    summaries?.let { SessionList(it, onOpen) }
+                }
+                1 -> {
+                    val overview by viewModel.overview.collectAsState()
+                    overview?.let { Stats(it) }
+                }
+                else -> FriendResultsTab(viewModel)
             }
         }
     }

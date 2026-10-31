@@ -6,12 +6,16 @@ import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
 import com.cansin.app.data.BeerEvent
+import com.cansin.app.data.FriendResult
+import com.cansin.app.data.ImportResult
 import com.cansin.app.data.HistoryRepository
 import com.cansin.app.data.Note
 import com.cansin.app.data.Session
 import com.cansin.app.data.SessionSummary
 import com.cansin.app.data.WaterEvent
 import com.cansin.app.domain.Overview
+import com.cansin.app.domain.ResultCard
+import com.cansin.app.domain.ResultCards
 import com.cansin.app.domain.SessionStats
 import com.cansin.app.domain.StatsRules
 import com.cansin.app.prefs.SettingsStore
@@ -29,6 +33,9 @@ import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
+import java.time.Instant
+import java.time.LocalDate
+import java.time.ZoneId
 
 data class SessionDetail(
     val session: Session,
@@ -39,7 +46,7 @@ data class SessionDetail(
 )
 
 @OptIn(ExperimentalCoroutinesApi::class)
-class HistoryViewModel(private val history: HistoryRepository, settingsStore: SettingsStore) : ViewModel() {
+class HistoryViewModel(private val history: HistoryRepository, private val settingsStore: SettingsStore) : ViewModel() {
     private val profile = settingsStore.settings.map { it.profile }.distinctUntilChanged()
 
     val summaries: StateFlow<List<SessionSummary>?> = history.summaries
@@ -64,6 +71,28 @@ class HistoryViewModel(private val history: HistoryRepository, settingsStore: Se
     }
 
     fun delete(id: Long) = viewModelScope.launch { history.delete(id) }
+
+    val friendResults: StateFlow<List<FriendResult>?> = history.friendResultList
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), null)
+
+    val shareName: StateFlow<String?> = settingsStore.settings.map { it.shareName }
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), null)
+
+    fun parseCard(text: String): ResultCard? = ResultCards.decode(text, LocalDate.now())
+
+    fun importCard(card: ResultCard, onDone: (ImportResult) -> Unit) = viewModelScope.launch { onDone(history.importResult(card)) }
+
+    fun deleteFriendResult(id: Long) = viewModelScope.launch { history.deleteFriendResult(id) }
+
+    /** Card for my side of an ended session; null if there is no "me" (Versus without a side) or no name. */
+    fun shareCard(detail: SessionDetail, name: String): ResultCard? {
+        val stats = detail.stats ?: return null
+        val duration = StatsRules.durationMs(detail.session) ?: return null
+        val day = Instant.ofEpochMilli(detail.session.startedAt).atZone(ZoneId.systemDefault()).toLocalDate()
+        return ResultCards.card(name, day, stats.beers, duration, detail.water.size)
+    }
+
+    fun saveShareName(name: String) = viewModelScope.launch { settingsStore.setShareName(name) }
 
     private fun detailFlow(id: Long): Flow<SessionDetail?> = combine(
         history.session(id),

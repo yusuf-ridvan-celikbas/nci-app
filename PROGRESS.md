@@ -1,6 +1,6 @@
 # Progress
 
-Current phase: **P12 iOS port on branch feature/p12-ios (64203b3); core logic tested on Linux Swift, app/widget NOT compiled yet (needs a Mac + Xcode). Next: build on a Mac, fix compile issues, device test. P13 design proposal in docs/p13-design.md, waiting for user answers (no code yet).**
+Current phase: **P12 iOS port on branch feature/p12-ios (64203b3); core logic tested on Linux Swift, app/widget NOT compiled yet (needs a Mac + Xcode). Next: build on a Mac, fix compile issues, device test. P13 = offline result cards (Option A) on branch feature/p13-cards: Android done, iOS core codec done, iOS UI for it not yet.**
 
 ## Phases
 - [x] Setup (project, wrapper, git, CLAUDE.md)
@@ -16,7 +16,7 @@ Current phase: **P12 iOS port on branch feature/p12-ios (64203b3); core logic te
 - [x] P10 History & stats
 - [x] P11 Export & hardening
 - [~] P12 iOS port (code written; awaiting first Xcode build)
-- [~] P13 Online friends (design proposal docs/p13-design.md, awaiting approval) (design first)
+- [x] P13 Friends, offline (Option A result cards; Android done, iOS core only) (design first)
 
 ## Code map
 - `data/` Entities.kt (all 5 Room entities, enums stored as TEXT), Daos.kt (SessionDao, BeerDao), AppDatabase.kt (v1, schema in app/schemas), SessionRepository.kt (all writes behind one Mutex)
@@ -91,6 +91,18 @@ Current phase: **P12 iOS port on branch feature/p12-ios (64203b3); core logic te
 - P4: Notification: title = chosen app name, text localized; VISIBILITY_PRIVATE with public version "Reminder"; two channels (default, silent = IMPORTANCE_LOW) since channel sound can't change later. Actions verify session_id == open session, else ignored.
 - P4: "Yes, got another" sets finishedAt on the latest beer (only if unset) and adds a beer. Interval changes apply from the next scheduling.
 - P3: updatePeriodMillis=0 (no periodic wakeups). Widget picker label is static ("Counter"/"Sayaç"); in-widget title follows app name.
+
+## P13 report (2026-10-31) — offline result cards, no network
+- User: "no internet, no privacy worries" → Option A. INTERNET permission still absent (verified merged release manifest).
+- `domain/ResultCards.kt`: code `cansin:1:` + base64url(UTF-8 "name
+day
+beers
+durationMin
+water"); decode finds the code anywhere in pasted text, caps text 5000 / payload 400, strict UTF-8, exact 5 fields, ranges (beers/water ≤100, duration ≤72 h, day 2020-01-01..today+1), name ≤30 with no control/bidi chars, must already be trimmed. Kotlin + Swift (`CansinCore/ResultCards.swift`) share an Android-generated fixture test.
+- Data: Room v3 (AutoMigration 2→3) `friend_result` (name, day ISO, beers, durationMin, water, importedAt), unique index on all card fields → re-import = "already imported". Included in export JSON as `friendResults` (additive, still format v1) and wiped by delete-all (clearAllTables).
+- UI: Session detail → share icon (only when the session has my side) → name (saved as DataStore `share_name`) + preview → ACTION_SEND text/plain chooser. History → Friends tab: Import (user pastes into a text field — app never reads the clipboard), preview, list with delete; note "results stay on this phone". No rankings/totals over friends (store policy).
+- Release APK 1.64 MB (+20 KB). Permissions unchanged. Lint 0 errors (2 version notices). Tests: Android 122/122, Swift core 36/36. Not tested on device; DB 2→3 migration not yet verified on device.
+- iOS: core codec only; Friends tab/share UI + `friendResults` export + SwiftData record still to do.
 
 ## P12 iOS (2026-10-31)
 - Layout: `ios/project.yml` (XcodeGen), `ios/CansinCore` (SPM: models + all pure rules, 31 XCTest ported from Kotlin, run in Docker swift:6.0), `ios/Shared` (app + widget: SwiftData records/AppStore, Repository, SettingsStore, Reminders/DrinkTimer/Effects, Palette), `ios/App` (SwiftUI screens), `ios/Widget` (widget + AppIntents). Strings generated from Android strings.xml by `ios/tools/gen_strings.py` (+5 iOS-only keys).

@@ -40,6 +40,8 @@ import com.cansin.app.domain.StatsRules
 fun SessionDetailScreen(viewModel: HistoryViewModel, onBack: () -> Unit) {
     val detail by viewModel.detail.collectAsState()
     var confirmDelete by rememberSaveable { mutableStateOf(false) }
+    var sharing by rememberSaveable { mutableStateOf(false) }
+    val shareName by viewModel.shareName.collectAsState()
     val format = rememberAmountFormat()
 
     Scaffold(
@@ -52,6 +54,11 @@ fun SessionDetailScreen(viewModel: HistoryViewModel, onBack: () -> Unit) {
                     }
                 },
                 actions = {
+                    if (detail?.stats != null) {
+                        IconButton(onClick = { sharing = true }) {
+                            Icon(painterResource(R.drawable.ic_share), stringResource(R.string.share_result))
+                        }
+                    }
                     TextButton(onClick = { confirmDelete = true }, enabled = detail != null) {
                         Text(stringResource(R.string.action_delete))
                     }
@@ -107,6 +114,16 @@ fun SessionDetailScreen(viewModel: HistoryViewModel, onBack: () -> Unit) {
                 }
             }
         }
+    }
+
+    val current = detail
+    if (sharing && current != null) {
+        ShareResultDialog(
+            initialName = shareName,
+            build = { viewModel.shareCard(current, it) },
+            onNameUsed = { viewModel.saveShareName(it) },
+            onDismiss = { sharing = false },
+        )
     }
 
     if (confirmDelete) {

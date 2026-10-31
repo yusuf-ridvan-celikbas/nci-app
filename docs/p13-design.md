@@ -1,6 +1,8 @@
 # P13 Online friends — design proposal (for approval, nothing implemented)
 
-Status: draft 2026-10-31. Implementation starts only after the open questions at the end are answered.
+Status: 2026-10-31 user chose **Option A (no internet)**. Implemented on Android as: paste-only import (no QR, no camera,
+no dependency), shared fields name/day/beers/duration/water (my side only; Versus without a me side can't share),
+friend results in History → Friends, never mixed into stats. Option B is not planned.
 
 ## 1. Goal and limits
 Let friends see each other's **finished session results** (e.g. "Ali · Fri 31 Oct · 4 beers · 3 h 10 min").

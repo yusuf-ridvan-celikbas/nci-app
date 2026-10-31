@@ -7,9 +7,9 @@ import androidx.room.Room
 import androidx.room.RoomDatabase
 
 @Database(
-    entities = [Session::class, BeerEvent::class, WaterEvent::class, Note::class, FriendProfile::class],
-    version = 2,
-    autoMigrations = [AutoMigration(from = 1, to = 2)],
+    entities = [Session::class, BeerEvent::class, WaterEvent::class, Note::class, FriendProfile::class, FriendResult::class],
+    version = 3,
+    autoMigrations = [AutoMigration(from = 1, to = 2), AutoMigration(from = 2, to = 3)],
 )
 abstract class AppDatabase : RoomDatabase() {
     abstract fun sessionDao(): SessionDao
@@ -18,6 +18,7 @@ abstract class AppDatabase : RoomDatabase() {
     abstract fun friendDao(): FriendDao
     abstract fun waterDao(): WaterDao
     abstract fun exportDao(): ExportDao
+    abstract fun friendResultDao(): FriendResultDao
 
     companion object {
         fun build(context: Context): AppDatabase =

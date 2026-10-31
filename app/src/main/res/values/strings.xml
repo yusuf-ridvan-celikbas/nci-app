@@ -214,4 +214,16 @@
     <string name="timer_idle">Start timer</string>
     <string name="setting_timer">Drinking timer</string>
     <string name="setting_timer_note">Start the timer when you actually begin a beer; stopping it saves the finish time for the estimate. Turn off to hide all timers.</string>
+    <string name="history_friends">Friends</string>
+    <string name="friends_empty">No friend results yet. Ask a friend to share a session result, then paste it here.</string>
+    <string name="friends_import">Import result</string>
+    <string name="friends_import_hint">Paste the message you received</string>
+    <string name="friends_import_invalid">No valid result found in this text.</string>
+    <string name="friends_imported">Result imported</string>
+    <string name="friends_duplicate">This result was already imported</string>
+    <string name="friends_note">Results stay on this phone. The app never sends anything anywhere; you share by yourself.</string>
+    <string name="share_result">Share result</string>
+    <string name="share_name">Your name</string>
+    <string name="share_body">Shares only your name, the day, your beer count, duration and water. You choose who gets it.</string>
+    <string name="share_message">My session result. To import it, paste this message into the app under History → Friends:\n%1$s</string>
 </resources>
