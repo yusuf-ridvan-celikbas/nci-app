@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <application
+        android:name=".CansinApp"
+        android:allowBackup="false"
+        android:dataExtractionRules="@xml/data_extraction_rules"
+        android:fullBackupContent="false"
+        android:icon="@mipmap/ic_launcher_soy"
+        android:label="@string/name_soy"
+        android:localeConfig="@xml/locales_config"
+        android:supportsRtl="true"
+        android:theme="@style/Theme.Cansin"
+        tools:targetApi="33">
+        <activity
+            android:name=".MainActivity"
+            android:exported="false" />
+
+        <activity-alias
+            android:name=".LauncherSoy"
+            android:enabled="true"
+            android:exported="true"
+            android:icon="@mipmap/ic_launcher_soy"
+            android:label="@string/name_soy"
+            android:targetActivity=".MainActivity">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity-alias>
+
+        <activity-alias
+            android:name=".LauncherSalgam"
+            android:enabled="false"
+            android:exported="true"
+            android:icon="@mipmap/ic_launcher_salgam"
+            android:label="@string/name_salgam"
+            android:targetActivity=".MainActivity">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity-alias>
+    </application>
+
+</manifest>

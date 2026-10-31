@@ -1,0 +1,118 @@
+package com.cansin.app.ui
+
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.navigationBarsPadding
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material3.Button
+import androidx.compose.material3.CenterAlignedTopAppBar
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarDuration
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
+import androidx.compose.material3.SnackbarResult
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import com.cansin.app.R
+import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.launch
+
+private const val UNDO_WINDOW_MS = 5_000L
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun CounterScreen(viewModel: CounterViewModel, title: String, onOpenSettings: () -> Unit) {
+    val state by viewModel.state.collectAsState()
+    val snackbar = remember { SnackbarHostState() }
+    val addedText = stringResource(R.string.beer_added)
+    val undoText = stringResource(R.string.undo)
+
+    LaunchedEffect(viewModel) {
+        viewModel.beerAdded.collectLatest { event ->
+            coroutineScope {
+                val timeout = launch {
+                    delay(UNDO_WINDOW_MS)
+                    snackbar.currentSnackbarData?.dismiss()
+                }
+                val result = snackbar.showSnackbar(addedText, undoText, duration = SnackbarDuration.Indefinite)
+                timeout.cancel()
+                if (result == SnackbarResult.ActionPerformed) viewModel.undo(event)
+            }
+        }
+    }
+
+    Scaffold(
+        topBar = {
+            CenterAlignedTopAppBar(
+                title = { Text(title) },
+                actions = {
+                    IconButton(onClick = onOpenSettings) {
+                        Icon(painterResource(R.drawable.ic_settings), stringResource(R.string.settings))
+                    }
+                },
+            )
+        },
+        snackbarHost = { SnackbarHost(snackbar) },
+        bottomBar = {
+            OutlinedButton(
+                onClick = { viewModel.endSession() },
+                enabled = state.sessionActive,
+                modifier = Modifier.fillMaxWidth().navigationBarsPadding().padding(16.dp),
+            ) { Text(stringResource(R.string.end_session)) }
+        },
+    ) { padding ->
+        Column(
+            modifier = Modifier.fillMaxSize().padding(padding).padding(24.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.spacedBy(24.dp, Alignment.CenterVertically),
+        ) {
+            Text(
+                text = stringResource(if (state.sessionActive) R.string.counter_label else R.string.no_session),
+                style = MaterialTheme.typography.titleMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+            Text(text = state.count.toString(), style = MaterialTheme.typography.displayLarge)
+            val addDescription = stringResource(R.string.add_beer)
+            Button(
+                onClick = { viewModel.add() },
+                shape = CircleShape,
+                modifier = Modifier.size(200.dp).semantics { contentDescription = addDescription },
+            ) { Text(stringResource(R.string.plus_one), fontSize = 64.sp) }
+            Text(
+                text = stringResource(R.string.counter_prompt),
+                style = MaterialTheme.typography.bodyLarge,
+                textAlign = TextAlign.Center,
+            )
+            val removeDescription = stringResource(R.string.remove_beer)
+            OutlinedButton(
+                onClick = { viewModel.removeLatest() },
+                enabled = state.count > 0,
+                modifier = Modifier.semantics { contentDescription = removeDescription },
+            ) { Text(stringResource(R.string.minus_one), fontSize = 24.sp) }
+        }
+    }
+}

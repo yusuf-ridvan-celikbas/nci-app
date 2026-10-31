@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="counter_prompt">Barmenden sipariş verdin mi? Hemen dokun.</string>
+    <string name="counter_label">Bu oturumdaki biralar</string>
+    <string name="add_beer">Bir bira ekle</string>
+    <string name="remove_beer">Bir bira çıkar</string>
+    <string name="end_session">Oturumu bitir</string>
+    <string name="no_session">Aktif oturum yok</string>
+    <string name="beer_added">Bira eklendi</string>
+    <string name="undo">Geri al</string>
+    <string name="age_title">18 yaşında veya daha büyük müsün?</string>
+    <string name="age_body">Bu uygulama, yasal içki içme yaşındaki yetişkinler için kişisel bir içecek ve hesap takipçisidir.</string>
+    <string name="age_confirm">18 yaşında veya daha büyüğüm</string>
+    <string name="age_decline">Çık</string>
+
+    <string name="settings">Ayarlar</string>
+    <string name="back">Geri</string>
+    <string name="section_general">Genel</string>
+    <string name="section_appearance">Görünüm</string>
+    <string name="setting_app_name">Uygulama adı</string>
+    <string name="name_change_note">Ana ekran simgesinin güncellenmesi birkaç saniye sürebilir.</string>
+    <string name="setting_language">Dil</string>
+    <string name="language_system">Sistem varsayılanı</string>
+    <string name="setting_theme_mode">Tema</string>
+    <string name="theme_system">Sistem</string>
+    <string name="theme_light">Açık</string>
+    <string name="theme_dark">Koyu</string>
+    <string name="setting_color">Renk</string>
+    <string name="color_amber">Kehribar</string>
+    <string name="color_red">Kırmızı</string>
+    <string name="color_blue">Mavi</string>
+    <string name="color_yellow">Sarı</string>
+    <string name="color_green">Yeşil</string>
+    <string name="color_purple">Mor</string>
+    <string name="color_dynamic">Dinamik (duvar kağıdından)</string>
+</resources>

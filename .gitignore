@@ -1,0 +1,29 @@
+# Gradle / build
+.gradle/
+build/
+/captures
+.externalNativeBuild/
+.cxx/
+.kotlin/
+
+# IDE
+.idea/
+*.iml
+.DS_Store
+
+# Local config & secrets
+local.properties
+signing.properties
+*.jks
+*.keystore
+*.p12
+*.pem
+*.env
+google-services.json
+
+# Outputs
+*.apk
+*.aab
+*.ap_
+*.dex
+/app/release/
