@@ -303,4 +303,13 @@
     <string name="calendar_month_spent">Bu ayki hesap toplamı: %1$s</string>
     <string name="calendar_avg_spent">Oturum başına ortalama hesap: %1$s</string>
     <string name="calendar_chart_spent">Aylık hesap toplamı (son 6 ay)</string>
+    <string name="restore_data">Yedekten geri yükle</string>
+    <string name="restore_title">Tüm veriler değiştirilsin mi?</string>
+    <string name="restore_body">Yedekte %1$s var. Bu telefondaki tüm oturumlar, notlar ve arkadaşlar yedekteki verilerle değiştirilecek. Ayarların ve PIN\'in olduğu gibi kalır.</string>
+    <string name="restore_confirm">Değiştir</string>
+    <string name="restore_done">Yedek geri yüklendi.</string>
+    <string name="restore_not_ours">Bu dosya bu uygulamanın yedeği değil.</string>
+    <string name="restore_newer">Bu yedek daha yeni bir uygulama sürümünden. Önce uygulamayı güncelle.</string>
+    <string name="restore_too_large">Bu dosya çok büyük.</string>
+    <string name="restore_invalid">Yedek bozuk ya da bu uygulamanın okuyamadığı değerler içeriyor. Hiçbir şey değiştirilmedi.</string>
 </resources>

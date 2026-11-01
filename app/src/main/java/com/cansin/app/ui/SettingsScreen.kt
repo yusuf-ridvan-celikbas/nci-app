@@ -79,6 +79,8 @@ class SettingsActions(
     val onPinHidesWidget: (Boolean) -> Unit,
     val onPinChanged: () -> Unit,
     val onExport: (Boolean) -> Unit,
+    val onReadBackup: suspend (android.net.Uri) -> com.cansin.app.domain.RestoreResult,
+    val onRestore: suspend (com.cansin.app.domain.RestoreData) -> Unit,
     val onDeleteAll: () -> Unit,
 )
 
@@ -146,7 +148,7 @@ fun SettingsScreen(
             HorizontalDivider(Modifier.padding(vertical = 16.dp))
             PinSection(settings, actions.lock, actions.onPinHidesWidget, actions.onPinChanged)
             HorizontalDivider(Modifier.padding(vertical = 16.dp))
-            DataSection(actions.onExport, actions.onDeleteAll)
+            DataSection(actions.onExport, actions.onReadBackup, actions.onRestore, actions.onDeleteAll)
         }
     }
 }

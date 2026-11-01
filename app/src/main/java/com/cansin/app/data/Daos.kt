@@ -88,6 +88,37 @@ interface ExportDao {
     suspend fun friends(): List<FriendProfile>
 }
 
+/** Replace-all restore (P21); used only inside one transaction. */
+@Dao
+interface RestoreDao {
+    @Query("DELETE FROM session")
+    suspend fun clearSessions()
+
+    @Query("DELETE FROM friend_profile")
+    suspend fun clearFriends()
+
+    @Query("DELETE FROM friend_result")
+    suspend fun clearFriendResults()
+
+    @Insert
+    suspend fun insert(session: Session): Long
+
+    @Insert
+    suspend fun insert(friend: FriendProfile): Long
+
+    @Insert
+    suspend fun insertBeers(beers: List<BeerEvent>)
+
+    @Insert
+    suspend fun insertWater(water: List<WaterEvent>)
+
+    @Insert
+    suspend fun insertNotes(notes: List<Note>)
+
+    @Insert
+    suspend fun insertFriendResults(results: List<FriendResult>)
+}
+
 @Dao
 interface FriendDao {
     @Query("SELECT * FROM friend_profile ORDER BY name COLLATE NOCASE")

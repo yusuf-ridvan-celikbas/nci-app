@@ -311,4 +311,13 @@
     <string name="calendar_month_spent">Tab total this month: %1$s</string>
     <string name="calendar_avg_spent">Average tab per session: %1$s</string>
     <string name="calendar_chart_spent">Tab total per month (last 6)</string>
+    <string name="restore_data">Restore from backup</string>
+    <string name="restore_title">Replace all data?</string>
+    <string name="restore_body">The backup has %1$s. All sessions, notes and friends on this phone will be replaced by it. Your settings and PIN stay.</string>
+    <string name="restore_confirm">Replace</string>
+    <string name="restore_done">Backup restored.</string>
+    <string name="restore_not_ours">This file is not a backup from this app.</string>
+    <string name="restore_newer">This backup is from a newer app version. Update the app first.</string>
+    <string name="restore_too_large">This file is too large.</string>
+    <string name="restore_invalid">The backup is damaged or has values this app can\'t read. Nothing was changed.</string>
 </resources>

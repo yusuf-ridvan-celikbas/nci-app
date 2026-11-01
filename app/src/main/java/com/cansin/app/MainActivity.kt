@@ -342,6 +342,8 @@ class MainActivity : ComponentActivity() {
         onPinHidesWidget = { on -> update { setPinHidesWidget(on) } },
         onPinChanged = { lifecycleScope.launch { CounterWidget.refreshAll(app) } },
         onExport = { includeProfile -> lifecycleScope.launch { startActivity(app.dataManager.export(includeProfile)) } },
+        onReadBackup = { uri -> app.dataManager.readBackup(uri) },
+        onRestore = { data -> app.dataManager.restore(data) },
         onDeleteAll = { lifecycleScope.launch { app.dataManager.deleteAll() } },
     )
 
