@@ -301,4 +301,14 @@
     </plurals>
     <string name="settle_each">%s each</string>
     <string name="settle_share">Share</string>
+    <string name="calendar_prev">Previous month</string>
+    <string name="calendar_next">Next month</string>
+    <string name="calendar_day_session">%1$d, has a session</string>
+    <plurals name="calendar_month_sessions">
+        <item quantity="one">%1$d session this month</item>
+        <item quantity="other">%1$d sessions this month</item>
+    </plurals>
+    <string name="calendar_month_spent">Tab total this month: %1$s</string>
+    <string name="calendar_avg_spent">Average tab per session: %1$s</string>
+    <string name="calendar_chart_spent">Tab total per month (last 6)</string>
 </resources>

@@ -36,6 +36,7 @@ import androidx.compose.ui.unit.dp
 import com.cansin.app.R
 import com.cansin.app.data.SessionMode
 import com.cansin.app.data.SessionSummary
+import com.cansin.app.domain.DaySession
 import com.cansin.app.domain.Overview
 import com.cansin.app.domain.StatsRules
 import java.util.Date
@@ -82,7 +83,8 @@ fun HistoryScreen(viewModel: HistoryViewModel, onBack: () -> Unit, onOpen: (Long
                 }
                 1 -> {
                     val overview by viewModel.overview.collectAsState()
-                    overview?.let { Stats(it) }
+                    val days by viewModel.daySessions.collectAsState()
+                    overview?.let { Stats(it, days.orEmpty(), onOpen) }
                 }
                 else -> FriendResultsTab(viewModel)
             }
@@ -96,6 +98,7 @@ private fun SessionList(summaries: List<SessionSummary>, onOpen: (Long) -> Unit)
         Text(stringResource(R.string.history_empty), Modifier.padding(16.dp), color = MaterialTheme.colorScheme.onSurfaceVariant)
         return
     }
+    val amount = rememberAmountFormat()
     LazyColumn {
         items(summaries, key = { it.session.id }) { summary ->
             val session = summary.session
@@ -110,6 +113,7 @@ private fun SessionList(summaries: List<SessionSummary>, onOpen: (Long) -> Unit)
                         pluralStringResource(R.plurals.beers_count, summary.beers, summary.beers),
                         StatsRules.durationMs(session)?.let { formatDuration(it) },
                         pluralStringResource(R.plurals.notes_count, summary.notes, summary.notes),
+                        summary.spentMinor.takeIf { it > 0 }?.let { amount(it) },
                     ).joinToString(" · "),
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
@@ -121,8 +125,8 @@ private fun SessionList(summaries: List<SessionSummary>, onOpen: (Long) -> Unit)
 }
 
 @Composable
-private fun Stats(overview: Overview) {
-    if (overview.sessions == 0) {
+private fun Stats(overview: Overview, days: List<DaySession>, onOpen: (Long) -> Unit) {
+    if (days.isEmpty()) {
         Text(stringResource(R.string.history_empty), Modifier.padding(16.dp), color = MaterialTheme.colorScheme.onSurfaceVariant)
         return
     }
@@ -130,6 +134,9 @@ private fun Stats(overview: Overview) {
         Modifier.verticalScroll(rememberScrollState()).padding(16.dp),
         verticalArrangement = Arrangement.spacedBy(12.dp),
     ) {
+        MonthCalendar(days, onOpen)
+        if (overview.sessions == 0) return@Column
+        HorizontalDivider()
         Text(pluralStringResource(R.plurals.stats_sessions, overview.sessions, overview.sessions))
         overview.avgBeers?.let { Text(stringResource(R.string.stats_avg_beers, formatDecimal(it))) }
         overview.avgPaceMin?.let { Text(stringResource(R.string.stats_pace, formatDecimal(it))) }

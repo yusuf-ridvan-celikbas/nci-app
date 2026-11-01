@@ -293,4 +293,14 @@
     </plurals>
     <string name="settle_each">kişi başı %s</string>
     <string name="settle_share">Paylaş</string>
+    <string name="calendar_prev">Önceki ay</string>
+    <string name="calendar_next">Sonraki ay</string>
+    <string name="calendar_day_session">%1$d, oturum var</string>
+    <plurals name="calendar_month_sessions">
+        <item quantity="one">Bu ay %1$d oturum</item>
+        <item quantity="other">Bu ay %1$d oturum</item>
+    </plurals>
+    <string name="calendar_month_spent">Bu ayki hesap toplamı: %1$s</string>
+    <string name="calendar_avg_spent">Oturum başına ortalama hesap: %1$s</string>
+    <string name="calendar_chart_spent">Aylık hesap toplamı (son 6 ay)</string>
 </resources>

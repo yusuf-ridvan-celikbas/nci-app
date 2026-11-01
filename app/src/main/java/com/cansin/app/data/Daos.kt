@@ -12,6 +12,7 @@ data class SessionSummary(
     val beers: Int,
     val notes: Int,
     val water: Int,
+    val spentMinor: Long = 0,
 )
 
 @Dao
@@ -38,7 +39,8 @@ interface SessionDao {
         "SELECT s.*, " +
             "(SELECT COUNT(*) FROM beer_event b WHERE b.sessionId = s.id) AS beers, " +
             "(SELECT COUNT(*) FROM note n WHERE n.sessionId = s.id) AS notes, " +
-            "(SELECT COUNT(*) FROM water_event w WHERE w.sessionId = s.id) AS water " +
+            "(SELECT COUNT(*) FROM water_event w WHERE w.sessionId = s.id) AS water, " +
+            "(SELECT COALESCE(SUM(n2.amountMinor), 0) FROM note n2 WHERE n2.sessionId = s.id) AS spentMinor " +
             "FROM session s WHERE s.endedAt IS NOT NULL ORDER BY s.startedAt DESC",
     )
     fun observeHistory(): Flow<List<SessionSummary>>

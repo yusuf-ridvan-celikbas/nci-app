@@ -13,6 +13,7 @@ import com.cansin.app.data.Note
 import com.cansin.app.data.Session
 import com.cansin.app.data.SessionSummary
 import com.cansin.app.data.WaterEvent
+import com.cansin.app.domain.DaySession
 import com.cansin.app.domain.Overview
 import com.cansin.app.domain.ResultCard
 import com.cansin.app.domain.ResultCards
@@ -56,6 +57,10 @@ class HistoryViewModel(private val history: HistoryRepository, private val setti
         StatsRules.overview(summaries.map { it.session }, beers, summaries.associate { it.session.id to it.water }, p)
     }
         .flowOn(Dispatchers.Default)
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), null)
+
+    val daySessions: StateFlow<List<DaySession>?> = history.summaries
+        .map { list -> list.map { DaySession(it.session.id, it.session.startedAt, it.spentMinor) } }
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), null)
 
     private val selected = MutableStateFlow<Long?>(null)
