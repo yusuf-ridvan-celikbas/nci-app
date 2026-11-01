@@ -103,6 +103,11 @@ Current phase: **P14–P26 done on Android (branch feature/p20-plus, local only,
 - Release APK 1.67 MB (+23 KB). Permissions unchanged, no INTERNET. Lint 0 errors. Tests 131/131. Not tested on device.
 - Remote added: origin https://github.com/yusuf-ridvan-celikbas/nci-app.git (nothing pushed yet).
 
+## Naming + game in Versus (2026-11-01, user request)
+- App name is now only **SalgamBalgam**: the app-name setting, the `AppName` enum and `LauncherAlias` are gone. The manifest has one launcher alias `.Launcher` (a new component name, so no persisted DISABLED state from the old `.LauncherSoy`/`.LauncherSalgam`). A home-screen icon pinned to the old alias has to be added again once.
+- The game is called **Soy tu Tentación** (brand, not translated), with "Truth or Dare" as the subtitle.
+- Truth or Dare is an option **inside Versus and Together** (wine-glass switch in the top bar). Versus stays the main view: compact sides are pinned on top and the game scrolls below; players sync with the sides/seats. The Game tab stays for solo play.
+
 ## P25–P26 report (2026-11-01)
 - P25: bottom `NavigationBar` (`ui/AppNavBar.kt`): Tonight (counter, or the open Versus/Together) · Tab · Game · History · Settings. History/Settings icons removed from the top bars, back arrows removed on root tabs; system back → Tonight. Promille/detail open on top without the bar. The outer Scaffold consumes insets so inner bottom bars don't double-pad.
 - P23 redesign (63a6fbf, user-approved on phone): full-width person rows, last drink/water "… ago", at the table, per-person drink timer (my seat = normal DrinkTimer; others in DataStore `group_timers`, strict codec `domain/SeatTimes.kt`, cleared on session end), long-press drink picker.

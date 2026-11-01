@@ -35,7 +35,6 @@ private val Context.dataStore by preferencesDataStore(
 )
 
 private val AGE_CONFIRMED = booleanPreferencesKey("age_confirmed")
-private val APP_NAME = stringPreferencesKey("app_name")
 private val LANGUAGE = stringPreferencesKey("language")
 private val THEME_MODE = stringPreferencesKey("theme_mode")
 private val ACCENT = stringPreferencesKey("accent")
@@ -79,7 +78,6 @@ class SettingsStore(private val context: Context) {
     val settings: Flow<Settings> = context.dataStore.data.map { p ->
         Settings(
             ageConfirmed = p[AGE_CONFIRMED] == true,
-            appName = enumOr(p[APP_NAME], AppName.SOY_TU_TENTACION),
             language = enumOr(p[LANGUAGE], Language.SYSTEM),
             themeMode = enumOr(p[THEME_MODE], ThemeMode.SYSTEM),
             accent = enumOr(p[ACCENT], Accent.AMBER),
@@ -154,7 +152,6 @@ class SettingsStore(private val context: Context) {
     }
 
     suspend fun confirmAge() = edit { it[AGE_CONFIRMED] = true }
-    suspend fun setAppName(value: AppName) = edit { it[APP_NAME] = value.name }
     suspend fun setLanguage(value: Language) = edit { it[LANGUAGE] = value.name }
     suspend fun setThemeMode(value: ThemeMode) = edit { it[THEME_MODE] = value.name }
     suspend fun setAccent(value: Accent) = edit { it[ACCENT] = value.name }
@@ -188,7 +185,7 @@ class SettingsStore(private val context: Context) {
     suspend fun setWaterEvery(value: Int) = edit { it[WATER_EVERY] = WaterRules.clamp(value) }
 
     suspend fun clearUserData() = edit { p ->
-        val keep = setOf(AGE_CONFIRMED, APP_NAME, LANGUAGE, THEME_MODE, ACCENT)
+        val keep = setOf(AGE_CONFIRMED, LANGUAGE, THEME_MODE, ACCENT)
         p.asMap().keys.filterNot { it in keep }.forEach { p.remove(it) }
     }
 

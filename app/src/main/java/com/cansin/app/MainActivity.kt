@@ -39,7 +39,6 @@ import com.cansin.app.prefs.Settings
 import com.cansin.app.prefs.SettingsStore
 import com.cansin.app.prefs.ThemeMode
 import com.cansin.app.system.AppLocale
-import com.cansin.app.system.LauncherAlias
 import com.cansin.app.ui.AgeGateScreen
 import com.cansin.app.ui.CounterScreen
 import com.cansin.app.ui.CounterViewModel
@@ -259,7 +258,7 @@ class MainActivity : ComponentActivity() {
             Box(Modifier.fillMaxSize().padding(inner).consumeWindowInsets(inner)) {
             when {
                 showLock -> LockScreen(
-                    title = stringResource(settings.appName.label),
+                    title = stringResource(R.string.name_salgam),
                     lock = app.appLock,
                     onUnlocked = { locked = false },
                     onDeleteAll = { lifecycleScope.launch { app.dataManager.deleteAll() } },
@@ -319,7 +318,7 @@ class MainActivity : ComponentActivity() {
                 )
                 else -> CounterScreen(
                     viewModel = counter,
-                    title = stringResource(settings.appName.label),
+                    title = stringResource(R.string.name_salgam),
                     defaultDrink = com.cansin.app.domain.Drinks.default(settings.defaultDrink, settings.beerSize),
                     beerSize = settings.beerSize,
                     onOpenTab = { screen = Screen.TAB },
@@ -437,10 +436,6 @@ class MainActivity : ComponentActivity() {
 
     private fun settingsActions(onBack: () -> Unit) = SettingsActions(
         onBack = onBack,
-        onAppName = { name ->
-            update { setAppName(name) }
-            LauncherAlias.apply(applicationContext, name)
-        },
         onLanguage = { language ->
             lifecycleScope.launch {
                 store.setLanguage(language)

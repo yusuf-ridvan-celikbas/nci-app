@@ -11,7 +11,7 @@
         android:dataExtractionRules="@xml/data_extraction_rules"
         android:fullBackupContent="false"
         android:icon="@mipmap/ic_launcher"
-        android:label="@string/name_soy"
+        android:label="@string/name_salgam"
         android:localeConfig="@xml/locales_config"
         android:supportsRtl="true"
         android:theme="@style/Theme.Cansin"
@@ -21,24 +21,7 @@
             android:exported="false" />
 
         <activity-alias
-            android:name=".LauncherSoy"
-            android:enabled="true"
-            android:exported="true"
-            android:icon="@mipmap/ic_launcher"
-            android:label="@string/name_soy"
-            android:targetActivity=".MainActivity">
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-                <category android:name="android.intent.category.LAUNCHER" />
-            </intent-filter>
-            <meta-data
-                android:name="android.app.shortcuts"
-                android:resource="@xml/shortcuts" />
-        </activity-alias>
-
-        <activity-alias
-            android:name=".LauncherSalgam"
-            android:enabled="false"
+            android:name=".Launcher"
             android:exported="true"
             android:icon="@mipmap/ic_launcher"
             android:label="@string/name_salgam"

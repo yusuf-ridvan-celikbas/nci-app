@@ -1,5 +1,5 @@
 # SPEC
-Native beer-counter app. Name undecided (vote): "SoyTuTentación" | "SalgamBalgam". Default: SoyTuTentación. Priorities: 1) security/privacy 2) minimal size/RAM/battery.
+Native beer-counter app. App name: "SalgamBalgam" (decided 2026-11-01). "Soy tu Tentación" is the name of the Truth or Dare game only. Priorities: 1) security/privacy 2) minimal size/RAM/battery.
 
 ## Rules
 - Build phases in order. Per phase: implement → unit-test domain logic → report (release size, permissions, security trade-offs).

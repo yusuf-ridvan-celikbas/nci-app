@@ -32,7 +32,7 @@ class ReminderNotifier(private val context: Context) {
             .build()
         val notification = Notification.Builder(context, channel)
             .setSmallIcon(R.drawable.ic_notification)
-            .setContentTitle(res.getString(settings.appName.label))
+            .setContentTitle(res.getString(R.string.name_salgam))
             .setContentText(res.getString(R.string.reminder_text))
             .setCategory(Notification.CATEGORY_REMINDER)
             .setVisibility(Notification.VISIBILITY_PRIVATE)

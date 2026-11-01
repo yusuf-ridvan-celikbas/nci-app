@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="name_soy" translatable="false">SoyTuTentación</string>
     <string name="name_salgam" translatable="false">SalgamBalgam</string>
     <string name="plus_one" translatable="false">+1</string>
     <string name="minus_one" translatable="false">−1</string>
@@ -21,7 +20,6 @@
     <string name="back">Back</string>
     <string name="section_general">General</string>
     <string name="section_appearance">Appearance</string>
-    <string name="setting_app_name">App name</string>
     <string name="name_change_note">The home screen icon may take a few seconds to update.</string>
     <string name="setting_language">Language</string>
     <string name="language_system">System default</string>

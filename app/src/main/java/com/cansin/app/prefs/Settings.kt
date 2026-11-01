@@ -8,11 +8,6 @@ import com.cansin.app.domain.CareRules
 import com.cansin.app.domain.Currency
 import com.cansin.app.domain.WaterRules
 
-enum class AppName(@StringRes val label: Int, val alias: String) {
-    SOY_TU_TENTACION(R.string.name_soy, "com.cansin.app.LauncherSoy"),
-    SALGAM_BALGAM(R.string.name_salgam, "com.cansin.app.LauncherSalgam"),
-}
-
 enum class Language(@StringRes val label: Int, val tag: String?) {
     SYSTEM(R.string.language_system, null),
     TURKISH(R.string.language_tr, "tr"),
@@ -44,7 +39,6 @@ enum class Accent(@StringRes val label: Int) {
 
 data class Settings(
     val ageConfirmed: Boolean = false,
-    val appName: AppName = AppName.SOY_TU_TENTACION,
     val language: Language = Language.SYSTEM,
     val themeMode: ThemeMode = ThemeMode.SYSTEM,
     val accent: Accent = Accent.AMBER,

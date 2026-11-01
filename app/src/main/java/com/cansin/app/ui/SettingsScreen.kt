@@ -47,7 +47,6 @@ import com.cansin.app.domain.BodyProfile
 import com.cansin.app.domain.Currency
 import com.cansin.app.domain.WaterRules
 import com.cansin.app.prefs.Accent
-import com.cansin.app.prefs.AppName
 import com.cansin.app.prefs.Language
 import com.cansin.app.prefs.Settings
 import com.cansin.app.prefs.ThemeMode
@@ -56,7 +55,6 @@ import kotlin.math.roundToInt
 
 class SettingsActions(
     val onBack: () -> Unit,
-    val onAppName: (AppName) -> Unit,
     val onLanguage: (Language) -> Unit,
     val onThemeMode: (ThemeMode) -> Unit,
     val onAccent: (Accent) -> Unit,
@@ -106,7 +104,6 @@ fun SettingsScreen(
             Modifier.padding(padding).verticalScroll(rememberScrollState()).padding(horizontal = 16.dp, vertical = 8.dp),
         ) {
             SectionHeader(R.string.section_general)
-            ChoiceGroup(R.string.setting_app_name, AppName.entries, settings.appName, { it.label }, actions.onAppName)
             Text(
                 stringResource(R.string.name_change_note),
                 style = MaterialTheme.typography.bodySmall,
