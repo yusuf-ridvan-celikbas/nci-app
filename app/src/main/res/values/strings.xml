@@ -404,4 +404,18 @@
     <string name="game_answerer_tag">answers</string>
     <string name="game_asker_desc">%1$s asks</string>
     <string name="game_card_pair">%1$s → %2$s · %3$s</string>
+    <string name="game_include_builtin">Built-in questions (written with AI)</string>
+    <string name="game_no_questions">No questions of this type. Switch on the built-in questions or add your own in My questions.</string>
+    <string name="game_import">Import from file</string>
+    <string name="game_import_help">How to make the file</string>
+    <string name="game_import_title">Question file</string>
+    <string name="game_import_steps">1. Open Excel, Google Sheets or Numbers.\n2. Column A: Truth or Dare (Doğruluk / Cesaret also work).\n3. Column B: your question or dare (up to 200 characters).\n4. A first row with titles is fine; it is skipped.\n5. Save as CSV: Excel → File → Save As → “CSV UTF-8”. Google Sheets → File → Download → CSV.\n6. Tap Import from file and pick it. Up to 300 questions in total.</string>
+    <string name="game_import_template">Get the template file</string>
+    <string name="game_import_result">Added: %1$d · Not readable: %2$d · Already in your list: %3$d · Over the limit: %4$d</string>
+    <string name="game_import_failed">This file can’t be read. Save it as “CSV UTF-8” (max 256 KB) and try again.</string>
+    <string name="game_csv_type">type</string>
+    <string name="game_csv_question">question</string>
+    <string name="game_csv_example_truth">What is your favourite memory with us?</string>
+    <string name="game_csv_example_dare">Sing the chorus of your favourite song.</string>
+    <string name="game_import_example">Column A: %1$s · Column B: %2$s</string>
 </resources>

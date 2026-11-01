@@ -131,6 +131,14 @@ fun GamePanel(viewModel: GameViewModel, state: GameState, showPacks: Boolean) {
             textAlign = TextAlign.Center,
         )
         val card = state.card
+        if (card == null && state.empty != null && !state.spinning) {
+            Text(
+                stringResource(R.string.game_no_questions),
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.error,
+                textAlign = TextAlign.Center,
+            )
+        }
         when {
             state.spinning -> Unit
             turn == null -> Button(onClick = viewModel::spin, modifier = Modifier.fillMaxWidth().heightIn(min = 52.dp)) {

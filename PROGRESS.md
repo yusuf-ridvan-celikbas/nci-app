@@ -103,6 +103,11 @@ Current phase: **P14–P26 done on Android (branch feature/p20-plus, local only,
 - Release APK 1.67 MB (+23 KB). Permissions unchanged, no INTERNET. Lint 0 errors. Tests 131/131. Not tested on device.
 - Remote added: origin https://github.com/yusuf-ridvan-celikbas/nci-app.git (nothing pushed yet).
 
+## Soy tu Tentación extras (2026-11-01, user requests)
+- Who asks whom: two-ended glass. The rim points at who answers, the foot at who asks (`GameRules.askerCandidates`/`askerTilt`; for odd counts it tilts toward the asker and the rim stays on the answerer). The headline reads "Ece asks Can" (TR "Soran: Ece · Cevaplayan: Can") and the card shows "Ece → Can · Truth".
+- Question sources (saved prefs `game_built_in`, `game_own`, never both off): switch "Built-in questions (written with AI)" plus "Include my own". If nothing can be drawn, a hint points to My questions.
+- Import own questions from CSV (`domain/QuestionImport.kt`): Excel/Sheets/Numbers "Save as CSV". Column A = Truth/Dare (or Doğruluk/Cesaret), column B = text. Accepts comma/semicolon/tab, quotes, line breaks in cells and an optional header. UTF-8 with a Windows-1254 fallback; max 256 KB. Strict: bad rows, duplicates and anything over 300 are counted and reported, never guessed. "How to make the file" guide + "Get the template file" (a UTF-8 CSV with BOM, shared via the existing FileProvider). The file comes from the system picker, so no permission is needed. No .xlsx (would need zip/XML parsing; CSV covers Excel).
+
 ## Naming + game in Versus (2026-11-01, user request)
 - App name is now only **SalgamBalgam**: the app-name setting, the `AppName` enum and `LauncherAlias` are gone. The manifest has one launcher alias `.Launcher` (a new component name, so no persisted DISABLED state from the old `.LauncherSoy`/`.LauncherSalgam`). A home-screen icon pinned to the old alias has to be added again once.
 - The game is called **Soy tu Tentación** (brand, not translated), with "Truth or Dare" as the subtitle.

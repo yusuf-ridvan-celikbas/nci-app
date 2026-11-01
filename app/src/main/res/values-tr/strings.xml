@@ -396,4 +396,18 @@
     <string name="game_answerer_tag">cevaplıyor</string>
     <string name="game_asker_desc">%1$s soruyor</string>
     <string name="game_card_pair">%1$s → %2$s · %3$s</string>
+    <string name="game_include_builtin">Hazır sorular (yapay zekâ ile yazıldı)</string>
+    <string name="game_no_questions">Bu türde soru yok. Hazır soruları aç ya da Sorularım’a kendi sorularını ekle.</string>
+    <string name="game_import">Dosyadan içe aktar</string>
+    <string name="game_import_help">Dosya nasıl hazırlanır</string>
+    <string name="game_import_title">Soru dosyası</string>
+    <string name="game_import_steps">1. Excel, Google E-Tablolar ya da Numbers’ı aç.\n2. A sütunu: Doğruluk ya da Cesaret (Truth / Dare da olur).\n3. B sütunu: sorun ya da görevin (en fazla 200 karakter).\n4. İlk satırda başlık olabilir; atlanır.\n5. CSV olarak kaydet: Excel → Dosya → Farklı Kaydet → “CSV UTF-8”. Google E-Tablolar → Dosya → İndir → CSV.\n6. Dosyadan içe aktar’a dokun ve dosyayı seç. Toplam en fazla 300 soru.</string>
+    <string name="game_import_template">Şablon dosyayı al</string>
+    <string name="game_import_result">Eklendi: %1$d · Okunamadı: %2$d · Zaten listede: %3$d · Sınırı aştı: %4$d</string>
+    <string name="game_import_failed">Bu dosya okunamıyor. “CSV UTF-8” olarak kaydet (en fazla 256 KB) ve tekrar dene.</string>
+    <string name="game_csv_type">tür</string>
+    <string name="game_csv_question">soru</string>
+    <string name="game_csv_example_truth">Bizimle ilgili en sevdiğin anı ne?</string>
+    <string name="game_csv_example_dare">En sevdiğin şarkının nakaratını söyle.</string>
+    <string name="game_import_example">A sütunu: %1$s · B sütunu: %2$s</string>
 </resources>

@@ -50,6 +50,8 @@ private val PROFILE_WEIGHT = intPreferencesKey("profile_weight_kg")
 private val PROFILE_LICENSE = stringPreferencesKey("profile_license")
 private val PROFILE_PROMPT_DISMISSED = booleanPreferencesKey("profile_prompt_dismissed")
 private val PIN_INFO_SEEN = booleanPreferencesKey("pin_info_seen")
+private val GAME_BUILT_IN = booleanPreferencesKey("game_built_in")
+private val GAME_OWN = booleanPreferencesKey("game_own")
 private val GROUP_TIMERS = stringPreferencesKey("group_timers")
 private val WATER_ENABLED = booleanPreferencesKey("water_enabled")
 private val WATER_EVERY = intPreferencesKey("water_every")
@@ -91,6 +93,8 @@ class SettingsStore(private val context: Context) {
             profile = readProfile(p),
             profilePromptDismissed = p[PROFILE_PROMPT_DISMISSED] == true,
             pinInfoSeen = p[PIN_INFO_SEEN] == true,
+            gameBuiltIn = p[GAME_BUILT_IN] ?: true,
+            gameOwn = (p[GAME_OWN] ?: true) || p[GAME_BUILT_IN] == false,
             waterEnabled = p[WATER_ENABLED] ?: true,
             waterEvery = WaterRules.clamp(p[WATER_EVERY] ?: WaterRules.DEFAULT_EVERY),
             timerEnabled = p[TIMER_ENABLED] ?: true,
@@ -230,6 +234,12 @@ class SettingsStore(private val context: Context) {
     suspend fun dismissProfilePrompt() = edit { it[PROFILE_PROMPT_DISMISSED] = true }
 
     suspend fun markPinInfoSeen() = edit { it[PIN_INFO_SEEN] = true }
+
+    /** Never both off: turning one source off turns the other on. */
+    suspend fun setGameSources(builtIn: Boolean, own: Boolean) = edit {
+        it[GAME_BUILT_IN] = builtIn
+        it[GAME_OWN] = own || !builtIn
+    }
 
     suspend fun setScheduledReminder(at: Long?, sessionId: Long?) = edit {
         it.putOrRemove(REMINDER_NEXT_AT, at)

@@ -24,7 +24,7 @@ import java.nio.ByteBuffer
 import java.nio.charset.CodingErrorAction
 
 /** InputStream.readNBytes is API 33+; minSdk is 26. */
-private fun InputStream.readNBytesCompat(max: Int): ByteArray {
+internal fun InputStream.readNBytesCompat(max: Int): ByteArray {
     val out = java.io.ByteArrayOutputStream()
     val buf = ByteArray(16 * 1024)
     while (out.size() < max) {

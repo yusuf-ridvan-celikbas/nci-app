@@ -53,4 +53,12 @@ class GameRepository(private val dao: CustomQuestionDao, private val clock: () -
     }
 
     suspend fun delete(id: Long) = dao.delete(id)
+
+    /** Already cleaned and checked by QuestionImport; the cap is enforced again here. */
+    suspend fun addAll(items: List<com.cansin.app.domain.ImportedQuestion>): Int {
+        val room = (CustomQuestion.MAX_COUNT - dao.count()).coerceAtLeast(0)
+        val now = clock()
+        items.take(room).forEach { dao.insert(CustomQuestion(kind = it.kind, text = it.text, createdAt = now)) }
+        return minOf(room, items.size)
+    }
 }

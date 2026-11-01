@@ -122,7 +122,7 @@ class MainActivity : ComponentActivity() {
     private val group: GroupViewModel by viewModels {
         GroupViewModel.factory(app.sessionRepository, app.settingsStore, app.drinkTimer, app.groupTimers) { CounterWidget.refreshAll(app) }
     }
-    private val game: GameViewModel by viewModels { GameViewModel.factory(app.gameRepository) }
+    private val game: GameViewModel by viewModels { GameViewModel.factory(app.gameRepository, app.settingsStore) }
     private val water: WaterViewModel by viewModels { WaterViewModel.factory(app.sessionRepository, app.settingsStore) }
     private val care: CareViewModel by viewModels { CareViewModel.factory(app.sessionRepository, app.settingsStore) }
     private val history: HistoryViewModel by viewModels { HistoryViewModel.factory(app.historyRepository, app.settingsStore) }

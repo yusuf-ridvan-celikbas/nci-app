@@ -148,7 +148,8 @@ private fun Setup(viewModel: GameViewModel, state: GameState, ownCount: Int, ses
             )
         }
     }
-    SwitchRow(R.string.game_include_own, state.includeOwn, viewModel::setIncludeOwn)
+    SwitchRow(R.string.game_include_builtin, state.includeBuiltIn) { viewModel.setIncludeBuiltIn(it) }
+    SwitchRow(R.string.game_include_own, state.includeOwn) { viewModel.setIncludeOwn(it) }
     OutlinedButton(onClick = onManage, modifier = Modifier.fillMaxWidth()) { Text(stringResource(R.string.game_my_questions, ownCount)) }
     SwitchRow(R.string.game_avoid_repeat, state.avoidRepeat, viewModel::setAvoidRepeat)
     Text(

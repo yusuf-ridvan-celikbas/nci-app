@@ -1,6 +1,17 @@
 package com.cansin.app.ui
 
+import android.content.ActivityNotFoundException
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.OutlinedButton
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.ui.platform.LocalContext
+import com.cansin.app.domain.QuestionImport
+import com.cansin.app.system.QuestionFiles
+import kotlinx.coroutines.launch
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -38,6 +49,26 @@ fun MyQuestionsDialog(viewModel: GameViewModel, own: List<CustomQuestion>, onDis
     var text by rememberSaveable { mutableStateOf("") }
     var error by rememberSaveable { mutableStateOf<Int?>(null) }
     val clean = GameRules.cleanQuestion(text)
+    var helping by rememberSaveable { mutableStateOf(false) }
+    var report by rememberSaveable { mutableStateOf<String?>(null) }
+    val context = LocalContext.current
+    val scope = rememberCoroutineScope()
+    val failed = stringResource(R.string.game_import_failed)
+    val resultFormat = stringResource(R.string.game_import_result)
+    val picker = rememberLauncherForActivityResult(ActivityResultContracts.OpenDocument()) { uri ->
+        if (uri != null) {
+            scope.launch {
+                val content = QuestionFiles.read(context, uri)
+                if (content == null) {
+                    report = failed
+                } else {
+                    viewModel.importOwn(content) { r, added ->
+                        report = String.format(resultFormat, added, r.invalid, r.duplicates, r.overLimit + (r.questions.size - added))
+                    }
+                }
+            }
+        }
+    }
 
     AlertDialog(
         onDismissRequest = onDismiss,
@@ -45,6 +76,11 @@ fun MyQuestionsDialog(viewModel: GameViewModel, own: List<CustomQuestion>, onDis
         text = {
             Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                 Text(stringResource(R.string.game_own_note), style = MaterialTheme.typography.bodySmall)
+                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    OutlinedButton(onClick = { report = null; picker.launch(CSV_TYPES) }) { Text(stringResource(R.string.game_import)) }
+                    TextButton(onClick = { helping = true }) { Text(stringResource(R.string.game_import_help)) }
+                }
+                report?.let { Text(it, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.primary) }
                 Row(Modifier.selectableGroup(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                     QuestionKind.entries.forEach { k ->
                         FilterChip(
@@ -89,6 +125,50 @@ fun MyQuestionsDialog(viewModel: GameViewModel, own: List<CustomQuestion>, onDis
                         }
                     }
                 }
+            }
+        },
+        confirmButton = { TextButton(onClick = onDismiss) { Text(stringResource(R.string.action_continue)) } },
+    )
+    if (helping) ImportHelpDialog(onDismiss = { helping = false })
+}
+
+/** Some apps label CSV as plain text, Excel CSV or a generic file. */
+private val CSV_TYPES = arrayOf(
+    "text/csv", "text/comma-separated-values", "application/csv", "text/plain",
+    "application/vnd.ms-excel", "application/octet-stream",
+)
+
+/** Step-by-step guide plus a ready template (header + one example per type) to open in Excel. */
+@Composable
+private fun ImportHelpDialog(onDismiss: () -> Unit) {
+    val context = LocalContext.current
+    val scope = rememberCoroutineScope()
+    val truth = stringResource(R.string.game_truth)
+    val dare = stringResource(R.string.game_dare)
+    val csv = QuestionImport.template(
+        stringResource(R.string.game_csv_type) to stringResource(R.string.game_csv_question),
+        listOf(truth to stringResource(R.string.game_csv_example_truth), dare to stringResource(R.string.game_csv_example_dare)),
+    )
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text(stringResource(R.string.game_import_title)) },
+        text = {
+            Column(Modifier.verticalScroll(rememberScrollState()), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                Text(stringResource(R.string.game_import_steps))
+                Text(
+                    stringResource(R.string.game_import_example, truth, stringResource(R.string.game_csv_example_truth)) + "\n" +
+                        stringResource(R.string.game_import_example, dare, stringResource(R.string.game_csv_example_dare)),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+                OutlinedButton(onClick = {
+                    scope.launch {
+                        try {
+                            context.startActivity(QuestionFiles.templateIntent(context, csv))
+                        } catch (_: ActivityNotFoundException) {
+                        }
+                    }
+                }) { Text(stringResource(R.string.game_import_template)) }
             }
         },
         confirmButton = { TextButton(onClick = onDismiss) { Text(stringResource(R.string.action_continue)) } },

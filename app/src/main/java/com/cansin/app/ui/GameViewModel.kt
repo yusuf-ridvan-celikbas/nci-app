@@ -13,6 +13,13 @@ import com.cansin.app.domain.GamePack
 import com.cansin.app.domain.GameRules
 import com.cansin.app.domain.ShuffleBag
 import com.cansin.app.domain.VersusRules
+import com.cansin.app.domain.QuestionImport
+import com.cansin.app.domain.QuestionImportResult
+import com.cansin.app.prefs.SettingsStore
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.withContext
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -32,6 +39,9 @@ data class GameState(
     val players: List<GamePlayer> = emptyList(),
     val pack: GamePack = GamePack.FRIENDS,
     val includeOwn: Boolean = true,
+    val includeBuiltIn: Boolean = true,
+    /** Set when Truth/Dare had nothing to draw (e.g. built-in off and no own questions of that kind). */
+    val empty: QuestionKind? = null,
     val avoidRepeat: Boolean = true,
     /** Who answers (the rim points at them). */
     val turn: Int? = null,
@@ -48,7 +58,11 @@ data class GameState(
 )
 
 /** Game state lives here (in memory) so switching tabs keeps it. Answers are never stored. */
-class GameViewModel(private val repository: GameRepository, private val random: Random = Random.Default) : ViewModel() {
+class GameViewModel(
+    private val repository: GameRepository,
+    private val store: SettingsStore,
+    private val random: Random = Random.Default,
+) : ViewModel() {
     private val ui = MutableStateFlow(GameState())
     val state: StateFlow<GameState> = ui.asStateFlow()
 
@@ -56,9 +70,20 @@ class GameViewModel(private val repository: GameRepository, private val random: 
 
     private val bags = mutableMapOf<QuestionKind, ShuffleBag>()
 
+    init {
+        viewModelScope.launch {
+            store.settings.map { it.gameBuiltIn to it.gameOwn }.distinctUntilChanged().collect { (builtIn, mine) ->
+                bags.clear()
+                ui.update { it.copy(includeBuiltIn = builtIn, includeOwn = mine, empty = null) }
+            }
+        }
+    }
+
     fun setPack(pack: GamePack) = ui.update { it.copy(pack = pack) }.also { bags.clear() }
 
-    fun setIncludeOwn(on: Boolean) = ui.update { it.copy(includeOwn = on) }.also { bags.clear() }
+    fun setIncludeOwn(on: Boolean) = viewModelScope.launch { store.setGameSources(builtIn = ui.value.includeBuiltIn || !on, own = on) }
+
+    fun setIncludeBuiltIn(on: Boolean) = viewModelScope.launch { store.setGameSources(builtIn = on, own = ui.value.includeOwn || !on) }
 
     fun setAvoidRepeat(on: Boolean) = ui.update { it.copy(avoidRepeat = on) }
 
@@ -98,10 +123,11 @@ class GameViewModel(private val repository: GameRepository, private val random: 
     fun draw(kind: QuestionKind, builtIn: List<String>) {
         val s = ui.value
         if (s.turn == null || s.spinning) return
-        val items = builtIn + if (s.includeOwn) own.value.filter { it.kind == kind }.map { it.text } else emptyList()
+        val items = (if (s.includeBuiltIn) builtIn else emptyList()) +
+            if (s.includeOwn) own.value.filter { it.kind == kind }.map { it.text } else emptyList()
         val bag = bags[kind]?.takeIf { it.source == items } ?: ShuffleBag(items, random).also { bags[kind] = it }
-        val text = bag.next() ?: return
-        ui.update { it.copy(card = GameCard(kind, text)) }
+        val text = bag.next()
+        ui.update { it.copy(card = text?.let { t -> GameCard(kind, t) }, empty = if (text == null) kind else null) }
     }
 
     fun addOwn(kind: QuestionKind, text: String, onResult: (Boolean) -> Unit) = viewModelScope.launch {
@@ -109,9 +135,21 @@ class GameViewModel(private val repository: GameRepository, private val random: 
         bags.remove(kind)
     }
 
+    /** Parses a picked CSV and adds the good rows; the report says what was skipped and why. */
+    fun importOwn(text: String, onResult: (QuestionImportResult, Int) -> Unit) = viewModelScope.launch {
+        val current = own.value
+        val result = withContext(Dispatchers.Default) {
+            QuestionImport.parse(text, current, (CustomQuestion.MAX_COUNT - current.size).coerceAtLeast(0))
+        }
+        val added = repository.addAll(result.questions)
+        bags.clear()
+        onResult(result, added)
+    }
+
     fun deleteOwn(id: Long) = viewModelScope.launch { repository.delete(id); bags.clear() }
 
     companion object {
-        fun factory(repository: GameRepository): ViewModelProvider.Factory = viewModelFactory { initializer { GameViewModel(repository) } }
+        fun factory(repository: GameRepository, store: SettingsStore): ViewModelProvider.Factory =
+            viewModelFactory { initializer { GameViewModel(repository, store) } }
     }
 }

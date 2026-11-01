@@ -50,6 +50,9 @@ data class Settings(
     val profile: BodyProfile? = null,
     val profilePromptDismissed: Boolean = false,
     val pinInfoSeen: Boolean = false,
+    /** Soy tu Tentación question sources; at least one is always on. */
+    val gameBuiltIn: Boolean = true,
+    val gameOwn: Boolean = true,
     val waterEnabled: Boolean = true,
     val waterEvery: Int = WaterRules.DEFAULT_EVERY,
     val timerEnabled: Boolean = true,
