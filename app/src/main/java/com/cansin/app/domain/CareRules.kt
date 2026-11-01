@@ -2,6 +2,7 @@ package com.cansin.app.domain
 
 import com.cansin.app.data.Note
 import com.cansin.app.data.Session
+import com.cansin.app.data.SessionMode
 import com.cansin.app.data.Side
 
 /** Kind, non-pushy care messages on the counter (P16/P17). One at a time; never praise or reward amounts. */
@@ -60,8 +61,12 @@ object CareRules {
         return null
     }
 
-    /** Solo: whole tab. Versus with my side: my side + shared items. Versus without a side: whole tab. */
+    /** Solo: whole tab. Versus/group with my side: my side + shared items. Without a side: whole tab. */
     fun mySpend(session: Session, notes: List<Note>): Long {
+        if (session.mode == SessionMode.GROUP) {
+            val me = session.meSide ?: return notes.sumOf { it.amountMinor ?: 0 }
+            return notes.filter { it.side == null || it.side == me }.sumOf { it.amountMinor ?: 0 }
+        }
         val totals = VersusRules.totals(notes)
         return when (VersusRules.meSide(session)) {
             Side.RED -> totals.red + totals.shared

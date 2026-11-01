@@ -81,6 +81,18 @@ class GroupRulesTest {
     }
 
     @Test
+    fun mySpendInGroupIsMySeatPlusShared() {
+        val group = Session(id = 7, startedAt = 0, mode = SessionMode.GROUP, meSide = Side.GREEN)
+        val notes = listOf(
+            Note(sessionId = 7, text = "a", amountMinor = 500, createdAt = 0, side = Side.GREEN),
+            Note(sessionId = 7, text = "b", amountMinor = 200, createdAt = 0),
+            Note(sessionId = 7, text = "c", amountMinor = 900, createdAt = 0, side = Side.RED),
+        )
+        assertEquals(700L, CareRules.mySpend(group, notes))
+        assertEquals(1_600L, CareRules.mySpend(group.copy(meSide = null), notes))
+    }
+
+    @Test
     fun orderedFollowsSides() {
         val mixed = listOf(GroupSeat(1, Side.AMBER), GroupSeat(1, Side.RED), GroupSeat(1, Side.PURPLE))
         assertEquals(listOf(Side.RED, Side.PURPLE, Side.AMBER), GroupRules.ordered(mixed).map { it.side })
