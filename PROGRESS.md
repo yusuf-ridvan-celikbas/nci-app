@@ -103,6 +103,11 @@ Current phase: **P14–P19 done (feature/p18-pin; next P20 stats extras). Earlie
 - Release APK 1.67 MB (+23 KB). Permissions unchanged, no INTERNET. Lint 0 errors. Tests 131/131. Not tested on device.
 - Remote added: origin https://github.com/yusuf-ridvan-celikbas/nci-app.git (nothing pushed yet).
 
+## Phone review (2026-11-01, step by step, debug builds over existing data)
+- Installed in order on the phone: P13 (DB 2→3 ran, app started, no crash) → P14 → P15 → P16 → P17 → P18 (currently on phone).
+- User approved: P14, P15, P16, P17. P13 + P18 installed but not yet confirmed. Next: user checks P18, then install P19 (bc7ae55), then merge approved features into master and push.
+- adb taps are blocked by the auto-mode classifier; screenshots work. Options offered: user taps + I screenshot, a permission rule, or scrcpy (not installed).
+
 ## P18–P19 report (2026-11-01)
 - P18: `domain/PinRules.kt` (4–6 digits, PBKDF2-SHA256 100k iterations, 16-byte salt, constant-time compare; backoff after 5 wrong: 30 s doubling, max 15 min; relock after 1 min in background / cold start / clock back), `system/AppLock.kt` (persisted wrong-try counter, process-level unlocked flag), `ui/LockScreen.kt` (forgot → delete all data, user-approved), `ui/PinSection.kt` (set / change / remove need current PIN). PIN on: recents preview off (API 33+), widget + tile show ••• and only open the app (option, default on), widget actions ignored. It's a privacy screen, not encryption (data already app-private, no backup). Delete-all removes the PIN.
 - P19: `domain/SettleRules.kt` (per-person totals case-insensitive A–Z, unnamed last; versus shared 50/50, odd cent to red; even split rounded up), `ui/SettleDialog.kt` (Tab → Settle up; share as text).
