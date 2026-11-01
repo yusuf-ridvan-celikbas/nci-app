@@ -1,6 +1,7 @@
 package com.cansin.app.data
 
 import com.cansin.app.domain.BeerSize
+import com.cansin.app.domain.DrinkChoice
 import com.cansin.app.domain.SessionRules
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
@@ -210,27 +211,37 @@ class SessionRepositoryTest {
 
     @Test
     fun beerUsesDefaultSizeUnlessOverridden() = runBlocking {
-        val sized = SessionRepository(sessions, beers, notes, water, clock = { now }, defaultSize = { BeerSize(330, 4.5) })
+        val sized = SessionRepository(sessions, beers, notes, water, clock = { now }, defaultDrink = { DrinkChoice(DrinkKind.BEER, BeerSize(330, 4.5)) })
         assertEquals(BeerSize(330, 4.5), sized.add().let { BeerSize(it.sizeMl, it.abv) })
         assertEquals(BeerSize(568, 6.0), sized.add(size = BeerSize(568, 6.0)).let { BeerSize(it.sizeMl, it.abv) })
         assertEquals(listOf(330, 568), beers.rows.value.map { it.sizeMl })
     }
 
     @Test
+    fun drinkKindIsStoredAndDefaultFollowsSetting() = runBlocking {
+        val wine = DrinkChoice(DrinkKind.WINE, BeerSize(150, 12.0))
+        val r = SessionRepository(sessions, beers, notes, water, clock = { now }, defaultDrink = { wine })
+        assertEquals(DrinkKind.WINE, r.addBeer()!!.kind)
+        assertEquals(DrinkKind.SHOT, r.addBeer(drink = DrinkChoice(DrinkKind.SHOT, BeerSize(40, 40.0)))!!.kind)
+        assertEquals(DrinkKind.WINE, r.addBeer(size = BeerSize(200, 13.0))!!.kind)
+        assertEquals(listOf(150, 40, 200), beers.rows.value.map { it.sizeMl })
+    }
+
+    @Test
     fun outOfRangeSizeIsClamped() = runBlocking {
         val event = repo.add(size = BeerSize(50_000, 99.0))
         assertEquals(2_000, event.sizeMl)
-        assertEquals(20.0, event.abv, 0.0)
+        assertEquals(80.0, event.abv, 0.0)
     }
 
     @Test
     fun updateBeerClampsTimesAndSize() = runBlocking {
         val beer = repo.add()
-        repo.updateBeer(beer.copy(at = now + 60_000, finishedAt = beer.at - 60_000, sizeMl = 5, abv = 50.0))
+        repo.updateBeer(beer.copy(at = now + 60_000, finishedAt = beer.at - 60_000, sizeMl = 5, abv = 95.0))
         val stored = beers.rows.value.single()
         assertEquals(now, stored.at)
         assertEquals(now, stored.finishedAt)
-        assertEquals(BeerSize(100, 20.0), BeerSize(stored.sizeMl, stored.abv))
+        assertEquals(BeerSize(20, 80.0), BeerSize(stored.sizeMl, stored.abv))
     }
 
     @Test

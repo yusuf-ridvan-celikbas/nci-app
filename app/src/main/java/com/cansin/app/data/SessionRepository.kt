@@ -2,6 +2,7 @@ package com.cansin.app.data
 
 import com.cansin.app.domain.BeerRules
 import com.cansin.app.domain.BeerSize
+import com.cansin.app.domain.DrinkChoice
 import com.cansin.app.domain.NoteRules
 import com.cansin.app.domain.SessionRules
 import com.cansin.app.domain.VersusRules
@@ -38,7 +39,7 @@ class SessionRepository(
     private val clock: () -> Long = System::currentTimeMillis,
     private val inactivityMs: Long = SessionRules.DEFAULT_INACTIVITY_MS,
     private val listener: SessionListener = object : SessionListener {},
-    private val defaultSize: suspend () -> BeerSize = { BeerSize.DEFAULT },
+    private val defaultDrink: suspend () -> DrinkChoice = { DrinkChoice.DEFAULT },
 ) {
     private sealed interface Event {
         data class BeerAdded(val event: BeerEvent, val mine: Boolean) : Event
@@ -84,24 +85,28 @@ class SessionRepository(
         session
     }
 
-    suspend fun addBeer(finishPrevious: Boolean = false, size: BeerSize? = null, side: Side = Side.SOLO): BeerEvent? {
-        val chosen = BeerRules.clamp(size ?: defaultSize())
+    /** [size] alone keeps the default kind (old long-press path); [drink] sets both. */
+    suspend fun addBeer(finishPrevious: Boolean = false, size: BeerSize? = null, side: Side = Side.SOLO, drink: DrinkChoice? = null): BeerEvent? {
+        val base = drink ?: defaultDrink().let { d -> size?.let { d.copy(size = it) } ?: d }
+        val chosen = base.copy(size = BeerRules.clamp(base.size))
         return write { insertBeer(finishPrevious, chosen) { side } }
     }
 
     suspend fun addMyBeer(finishPrevious: Boolean = false): BeerEvent? {
-        val chosen = BeerRules.clamp(defaultSize())
+        val d = defaultDrink()
+        val chosen = d.copy(size = BeerRules.clamp(d.size))
         return write { insertBeer(finishPrevious, chosen, VersusRules::meSide) }
     }
 
-    private suspend fun insertBeer(finishPrevious: Boolean, size: BeerSize, pickSide: (Session?) -> Side?): BeerEvent? {
+    private suspend fun insertBeer(finishPrevious: Boolean, drink: DrinkChoice, pickSide: (Session?) -> Side?): BeerEvent? {
+        val size = drink.size
         val now = clock()
         val active = activeSession(now)
         val side = pickSide(active) ?: return null
         if (!VersusRules.fits(side, active?.mode)) return null
         if (finishPrevious && active != null) beers.latestOnSide(active.id, side)?.let { beers.finish(it.id, now) }
         val session = active ?: Session(startedAt = now).let { it.copy(id = sessions.insert(it)) }
-        val event = BeerEvent(sessionId = session.id, side = side, sizeMl = size.sizeMl, abv = size.abv, at = now)
+        val event = BeerEvent(sessionId = session.id, side = side, sizeMl = size.sizeMl, abv = size.abv, at = now, kind = drink.kind)
         return event.copy(id = beers.insert(event)).also { pending += Event.BeerAdded(it, VersusRules.isMine(it, session)) }
     }
 

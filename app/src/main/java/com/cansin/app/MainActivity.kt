@@ -232,7 +232,8 @@ class MainActivity : ComponentActivity() {
                 else -> CounterScreen(
                     viewModel = counter,
                     title = stringResource(settings.appName.label),
-                    defaultSize = settings.beerSize,
+                    defaultDrink = com.cansin.app.domain.Drinks.default(settings.defaultDrink, settings.beerSize),
+                    beerSize = settings.beerSize,
                     onOpenSettings = { screen = Screen.SETTINGS },
                     onOpenTab = { screen = Screen.TAB },
                     onStartVersus = { editingSides = true },
@@ -334,6 +335,7 @@ class MainActivity : ComponentActivity() {
         onWaterEvery = { n -> update { setWaterEvery(n) } },
         onTimerEnabled = { on -> update { setTimerEnabled(on) } },
         onCurrency = { c -> update { setCurrency(c) } },
+        onDefaultDrink = { k -> update { setDefaultDrink(k) } },
         onCareEnabled = { on -> update { setCareEnabled(on) } },
         onCareLateHour = { h -> update { setCareLateHour(h) } },
         onHomePlace = { home -> update { setHomePlace(home) } },

@@ -12,7 +12,9 @@ import androidx.datastore.preferences.core.intPreferencesKey
 import androidx.datastore.preferences.core.longPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
+import com.cansin.app.data.DrinkKind
 import com.cansin.app.domain.BeerRules
+import com.cansin.app.domain.Drinks
 import com.cansin.app.domain.ResultCards
 import com.cansin.app.domain.BeerSize
 import com.cansin.app.domain.BodyProfile
@@ -57,6 +59,7 @@ private val CARE_ENABLED = booleanPreferencesKey("care_enabled")
 private val CARE_LATE_HOUR = intPreferencesKey("care_late_hour")
 private val HOME_PLACE = stringPreferencesKey("home_place")
 private val BEER_LIMIT = intPreferencesKey("beer_limit")
+private val DEFAULT_DRINK = stringPreferencesKey("default_drink")
 private val BUDGET_MINOR = longPreferencesKey("budget_minor")
 private val PIN_HASH = stringPreferencesKey("pin_hash")
 private val PIN_HIDES_WIDGET = booleanPreferencesKey("pin_hides_widget")
@@ -84,6 +87,7 @@ class SettingsStore(private val context: Context) {
             beerSize = BeerRules.clamp(
                 BeerSize(p[DEFAULT_SIZE_ML] ?: BeerSize.DEFAULT.sizeMl, p[DEFAULT_ABV] ?: BeerSize.DEFAULT.abv),
             ),
+            defaultDrink = enumOr(p[DEFAULT_DRINK], DrinkKind.BEER).takeIf { it in Drinks.DEFAULT_KINDS } ?: DrinkKind.BEER,
             profile = readProfile(p),
             profilePromptDismissed = p[PROFILE_PROMPT_DISMISSED] == true,
             waterEnabled = p[WATER_ENABLED] ?: true,
@@ -213,6 +217,8 @@ class SettingsStore(private val context: Context) {
     }
 
     suspend fun setCurrency(value: Currency) = edit { it[CURRENCY] = value.name }
+
+    suspend fun setDefaultDrink(value: DrinkKind) = edit { it[DEFAULT_DRINK] = value.name }
 
     suspend fun setShareName(value: String?) = edit { it.putOrRemove(SHARE_NAME, ResultCards.cleanName(value)) }
 

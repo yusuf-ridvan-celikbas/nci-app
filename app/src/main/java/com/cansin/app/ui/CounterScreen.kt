@@ -46,6 +46,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.cansin.app.R
 import com.cansin.app.domain.BeerSize
+import com.cansin.app.domain.DrinkChoice
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
@@ -59,7 +60,8 @@ private const val UNDO_WINDOW_MS = 5_000L
 fun CounterScreen(
     viewModel: CounterViewModel,
     title: String,
-    defaultSize: BeerSize,
+    defaultDrink: DrinkChoice,
+    beerSize: BeerSize,
     onOpenSettings: () -> Unit,
     onOpenTab: () -> Unit,
     onStartVersus: () -> Unit,
@@ -115,6 +117,9 @@ fun CounterScreen(
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
             Text(text = state.count.toString(), style = MaterialTheme.typography.displayLarge)
+            drinkBreakdown(state.kinds)?.let {
+                Text(it, style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+            }
             AddButton(onClick = { viewModel.add() }, onLongClick = { pickingSize = true })
             Text(
                 text = stringResource(R.string.counter_prompt),
@@ -132,10 +137,9 @@ fun CounterScreen(
     }
 
     if (pickingSize) {
-        BeerSizeDialog(
-            title = R.string.pick_size_title,
-            confirm = R.string.action_add,
-            initial = defaultSize,
+        DrinkDialog(
+            initial = defaultDrink,
+            beer = beerSize,
             onConfirm = {
                 pickingSize = false
                 viewModel.add(it)

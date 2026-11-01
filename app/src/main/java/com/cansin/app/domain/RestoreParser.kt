@@ -1,6 +1,7 @@
 package com.cansin.app.domain
 
 import com.cansin.app.data.BeerEvent
+import com.cansin.app.data.DrinkKind
 import com.cansin.app.data.FriendResult
 import com.cansin.app.data.Note
 import com.cansin.app.data.Session
@@ -95,7 +96,8 @@ object RestoreParser {
                 val side = enum<Side>(b["side"]).also { if (!VersusRules.fits(it, mode)) throw Bad() }
                 val size = int(b["sizeMl"]).also { if (it !in BeerRules.MIN_ML..BeerRules.MAX_ML) throw Bad() }
                 val abv = double(b["abv"]).also { if (it !in BeerRules.MIN_ABV..BeerRules.MAX_ABV) throw Bad() }
-                BeerEvent(sessionId = 0, side = side, sizeMl = size, abv = abv, at = time(b["at"]), finishedAt = b["finishedAt"]?.let { time(it) })
+                val kind = b["kind"]?.let { enum<DrinkKind>(it) } ?: DrinkKind.BEER
+                BeerEvent(sessionId = 0, side = side, sizeMl = size, abv = abv, at = time(b["at"]), finishedAt = b["finishedAt"]?.let { time(it) }, kind = kind)
             }
             val water = events(o["water"]).map { WaterEvent(sessionId = 0, at = time(it["at"])) }
             val notes = events(o["notes"]).map { n ->

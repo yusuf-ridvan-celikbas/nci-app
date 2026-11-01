@@ -52,6 +52,7 @@ data class Settings(
     val reminderIntervalMin: Int = DEFAULT_REMINDER_INTERVAL_MIN,
     val reminderSilent: Boolean = false,
     val beerSize: BeerSize = BeerSize.DEFAULT,
+    val defaultDrink: com.cansin.app.data.DrinkKind = com.cansin.app.data.DrinkKind.BEER,
     val profile: BodyProfile? = null,
     val profilePromptDismissed: Boolean = false,
     val waterEnabled: Boolean = true,

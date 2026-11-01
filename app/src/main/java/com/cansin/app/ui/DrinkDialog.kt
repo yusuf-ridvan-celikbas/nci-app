@@ -1,0 +1,109 @@
+package com.cansin.app.ui
+
+import androidx.annotation.StringRes
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.selection.selectableGroup
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
+import com.cansin.app.R
+import com.cansin.app.data.BeerEvent
+import com.cansin.app.data.DrinkKind
+import com.cansin.app.domain.BeerRules
+import com.cansin.app.domain.BeerSize
+import com.cansin.app.domain.DrinkChoice
+import com.cansin.app.domain.Drinks
+
+@StringRes
+fun drinkName(kind: DrinkKind): Int = when (kind) {
+    DrinkKind.BEER -> R.string.drink_beer
+    DrinkKind.WINE -> R.string.drink_wine
+    DrinkKind.RAKI -> R.string.drink_raki
+    DrinkKind.SHOT -> R.string.drink_shot
+    DrinkKind.COCKTAIL -> R.string.drink_cocktail
+    DrinkKind.CUSTOM -> R.string.drink_custom
+}
+
+/** "Wine · 15 cl · 12.0%"; beer keeps the short size-only label. */
+@Composable
+fun drinkLabel(event: BeerEvent): String {
+    val size = beerSizeLabel(BeerSize(event.sizeMl, event.abv))
+    return if (event.kind == DrinkKind.BEER) size else stringResource(drinkName(event.kind)) + " · " + size
+}
+
+/** "Beer: 2 · Wine: 1", only when not all beer. */
+@Composable
+fun drinkBreakdown(kinds: List<DrinkKind>): String? {
+    if (!Drinks.showBreakdown(kinds)) return null
+    return Drinks.breakdown(kinds).map { (kind, n) -> stringResource(R.string.drink_count, stringResource(drinkName(kind)), n) }
+        .joinToString(" · ")
+}
+
+/** Long-press +1: pick a kind (fills its usual size) and adjust size/alcohol if needed. */
+@Composable
+fun DrinkDialog(initial: DrinkChoice, beer: BeerSize, onConfirm: (DrinkChoice) -> Unit, onDismiss: () -> Unit) {
+    val separator = rememberDecimalSeparator()
+    var kind by rememberSaveable { mutableStateOf(initial.kind) }
+    var clText by rememberSaveable { mutableStateOf(BeerRules.formatCl(initial.size.sizeMl, separator)) }
+    var abvText by rememberSaveable { mutableStateOf(BeerRules.formatAbv(initial.size.abv, separator)) }
+    val sizeMl = BeerRules.parseCl(clText)
+    val abv = BeerRules.parseAbv(abvText)
+
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text(stringResource(R.string.pick_size_title)) },
+        text = {
+            Column(Modifier.verticalScroll(rememberScrollState())) {
+                Column(Modifier.selectableGroup()) {
+                    DrinkKind.entries.forEach { k ->
+                        val name = stringResource(drinkName(k))
+                        val text = if (k == DrinkKind.CUSTOM) name else name + " · " + beerSizeLabel(Drinks.preset(k, beer))
+                        RadioRow(text, k == kind) {
+                            kind = k
+                            if (k != DrinkKind.CUSTOM) {
+                                val p = Drinks.preset(k, beer)
+                                clText = BeerRules.formatCl(p.sizeMl, separator)
+                                abvText = BeerRules.formatAbv(p.abv, separator)
+                            }
+                        }
+                    }
+                }
+                NumberField(clText, { clText = it }, R.string.size_custom_cl, R.string.invalid_size, sizeMl == null)
+                NumberField(abvText, { abvText = it }, R.string.abv_label, R.string.invalid_abv, abv == null)
+            }
+        },
+        confirmButton = {
+            TextButton(
+                enabled = sizeMl != null && abv != null,
+                onClick = { if (sizeMl != null && abv != null) onConfirm(DrinkChoice(kind, BeerSize(sizeMl, abv))) },
+            ) { Text(stringResource(R.string.action_add)) }
+        },
+        dismissButton = { TextButton(onClick = onDismiss) { Text(stringResource(R.string.action_cancel)) } },
+    )
+}
+
+/** Settings: which kind the big +1 adds. */
+@Composable
+fun DefaultDrinkDialog(current: DrinkKind, beer: BeerSize, onPick: (DrinkKind) -> Unit, onDismiss: () -> Unit) {
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text(stringResource(R.string.setting_default_drink)) },
+        text = {
+            Column(Modifier.selectableGroup()) {
+                Drinks.DEFAULT_KINDS.forEach { k ->
+                    RadioRow(stringResource(drinkName(k)) + " · " + beerSizeLabel(Drinks.preset(k, beer)), k == current) { onPick(k) }
+                }
+            }
+        },
+        confirmButton = { TextButton(onClick = onDismiss) { Text(stringResource(R.string.action_cancel)) } },
+    )
+}

@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="counter_prompt">Barmenden sipariş verdin mi? Hemen dokun.</string>
-    <string name="counter_label">Bu oturumdaki biralar</string>
-    <string name="add_beer">Bir bira ekle</string>
-    <string name="remove_beer">Bir bira çıkar</string>
+    <string name="counter_label">Bu oturumdaki içkiler</string>
+    <string name="add_beer">Bir içki ekle</string>
+    <string name="remove_beer">Son içkiyi çıkar</string>
     <string name="end_session">Oturumu bitir</string>
     <string name="no_session">Aktif oturum yok</string>
-    <string name="beer_added">Bira eklendi</string>
+    <string name="beer_added">İçki eklendi</string>
     <string name="undo">Geri al</string>
     <string name="age_title">18 yaşında veya daha büyük müsün?</string>
     <string name="age_body">Bu uygulama, yasal içki içme yaşındaki yetişkinler için kişisel bir içecek ve hesap takipçisidir.</string>
@@ -34,7 +34,7 @@
     <string name="color_purple">Mor</string>
     <string name="color_dynamic">Dinamik (duvar kağıdından)</string>
     <string name="widget_name">Sayaç</string>
-    <string name="widget_description">Hızlı düğmelerle bira, hesap ve su</string>
+    <string name="widget_description">Hızlı düğmelerle içki, hesap ve su</string>
     <string name="section_reminders">Hatırlatmalar</string>
     <string name="setting_reminders">İçeceğimin bitip bitmediğini sor</string>
     <string name="setting_reminder_interval">%1$d dk sonra sor</string>
@@ -45,7 +45,7 @@
     <string name="reminder_rationale_body">Hatırlatmalar, içeceğinin bitip bitmediğini soran yerel bildirimlerdir. Hiçbir veri telefonundan çıkmaz.</string>
     <string name="action_continue">Devam</string>
     <string name="action_cancel">İptal</string>
-    <string name="reminder_text">Biran bitti mi?</string>
+    <string name="reminder_text">İçkin bitti mi?</string>
     <string name="reminder_public">Hatırlatma</string>
     <string name="action_another">Evet, bir tane daha (+1)</string>
     <string name="action_snooze">Hâlâ içiyorum</string>
@@ -69,18 +69,18 @@
     <string name="pick_time">Saat seç</string>
     <string name="action_save">Kaydet</string>
     <string name="action_delete">Sil</string>
-    <string name="section_beer">Bira</string>
+    <string name="section_beer">İçkiler</string>
     <string name="setting_default_beer">Varsayılan bira</string>
     <string name="beer_size_value">%1$s cl · %%%2$s</string>
     <string name="size_cl">%1$s cl</string>
     <string name="size_custom">Özel</string>
     <string name="size_custom_cl">Boyut (cl)</string>
     <string name="abv_label" formatted="false">Alkol oranı (%)</string>
-    <string name="invalid_size">10–200 cl arası, en fazla 1 ondalık gir.</string>
-    <string name="invalid_abv">0–20 arası, en fazla 1 ondalık gir.</string>
-    <string name="pick_size_title">Bu bira</string>
-    <string name="pick_size">Boyut seç</string>
-    <string name="pick_size_hint">Farklı bir boyut seçmek için +1’e basılı tut.</string>
+    <string name="invalid_size">2–200 cl arası, en fazla 1 ondalık gir.</string>
+    <string name="invalid_abv">0–80 arası, en fazla 1 ondalık gir.</string>
+    <string name="pick_size_title">Bu içki</string>
+    <string name="pick_size">İçki seç</string>
+    <string name="pick_size_hint">Başka bir içki ya da boyut seçmek için +1’e basılı tut.</string>
     <string name="action_add">Ekle</string>
     <string name="promille_title">Promil tahmini</string>
     <string name="promille_disclaimer">Yalnızca tahmindir. Alkolmetre değildir. Asla alkollü araç kullanmayın.</string>
@@ -122,7 +122,7 @@
     <string name="action_transport">Taksi/ulaşım</string>
     <string name="transport_query">taksi</string>
     <string name="action_call_112">112’yi ara</string>
-    <string name="edit_beer">Birayı düzenle</string>
+    <string name="edit_beer">İçkiyi düzenle</string>
     <string name="beer_started">Başlangıç: %1$s</string>
     <string name="beer_finished">Bitiş: %1$s</string>
     <string name="beer_finished_unset">Bitiş: ayarlanmadı</string>
@@ -139,8 +139,8 @@
     <string name="versus_me_note">Promil tahmini ve hatırlatmalar yalnızca senin tarafını kullanır.</string>
     <string name="versus_save_friend">Arkadaş olarak kaydet</string>
     <string name="versus_name_me">%1$s (sen)</string>
-    <string name="versus_add">%1$s için bira ekle</string>
-    <string name="versus_remove">%1$s için son birayı sil</string>
+    <string name="versus_add">%1$s için içki ekle</string>
+    <string name="versus_remove">%1$s için son içkiyi sil</string>
     <string name="versus_score">%1$d–%2$d</string>
     <string name="versus_score_description">Kırmızı %1$d, Mavi %2$d</string>
     <string name="versus_open">Kapışmayı aç</string>
@@ -150,8 +150,8 @@
     <string name="section_water">Su</string>
     <string name="setting_water">Su hatırlatması</string>
     <plurals name="water_every">
-        <item quantity="one">Her biradan sonra hatırlat</item>
-        <item quantity="other">Her %1$d birada bir hatırlat</item>
+        <item quantity="one">Her içkiden sonra hatırlat</item>
+        <item quantity="other">Her %1$d içkide bir hatırlat</item>
     </plurals>
     <string name="water_nudge">Bir bardak su içme zamanı.</string>
     <string name="water_count">Su: %1$d</string>
@@ -163,8 +163,8 @@
     <string name="history_empty">Henüz bitmiş oturum yok.</string>
     <string name="history_versus_row">%1$s · Kapışma</string>
     <plurals name="beers_count">
-        <item quantity="one">%1$d bira</item>
-        <item quantity="other">%1$d bira</item>
+        <item quantity="one">%1$d içki</item>
+        <item quantity="other">%1$d içki</item>
     </plurals>
     <plurals name="notes_count">
         <item quantity="one">%1$d not</item>
@@ -175,26 +175,26 @@
         <item quantity="one">%1$d oturum</item>
         <item quantity="other">%1$d oturum</item>
     </plurals>
-    <string name="stats_avg_beers">Oturum başına bira: %1$s</string>
-    <string name="stats_pace">Ortalama tempo: bira başına %1$s dk</string>
-    <string name="stats_water_ratio">Bira başına su: %1$s</string>
-    <string name="stats_chart_beers">Oturum başına bira (son 20)</string>
+    <string name="stats_avg_beers">Oturum başına içki: %1$s</string>
+    <string name="stats_pace">Ortalama tempo: içki başına %1$s dk</string>
+    <string name="stats_water_ratio">İçki başına su: %1$s</string>
+    <string name="stats_chart_beers">Oturum başına içki (son 20)</string>
     <string name="stats_chart_peak">Oturum başına tahmini en yüksek ‰</string>
     <string name="stats_chart_description">Eskiden yeniye değerler: %1$s</string>
-    <string name="stats_peak_note">En yüksek değerler mevcut vücut profilini kullanır. Yalnızca kendi biraların sayılır.</string>
+    <string name="stats_peak_note">En yüksek değerler mevcut vücut profilini kullanır. Yalnızca kendi içkilerin sayılır.</string>
     <string name="session_detail_title">Oturum</string>
-    <string name="detail_beers">Bira: %1$d</string>
+    <string name="detail_beers">İçki: %1$d</string>
     <string name="delete_session_title">Bu oturum silinsin mi?</string>
-    <string name="delete_session_body">Biraları, suyu ve notları bu telefondan silinir. Geri alınamaz.</string>
+    <string name="delete_session_body">İçkileri, suyu ve notları bu telefondan silinir. Geri alınamaz.</string>
     <string name="section_data">Veriler</string>
     <string name="export_data">Verileri dışa aktar</string>
-    <string name="export_body">Oturumların, biraların, suyun, notların ve arkadaşlarınla bir JSON dosyası oluşturur ve paylaşım menüsünü açar. Yalnızca güvendiğin uygulama ve kişilerle paylaş.</string>
+    <string name="export_body">Oturumların, içkilerin, suyun, notların ve arkadaşlarınla bir JSON dosyası oluşturur ve paylaşım menüsünü açar. Yalnızca güvendiğin uygulama ve kişilerle paylaş.</string>
     <string name="export_include_profile">Vücut profilini ekle (hassas)</string>
     <string name="action_share">Paylaş</string>
     <string name="delete_all_data">Tüm verileri sil</string>
     <string name="delete_all_title">Tüm veriler silinsin mi?</string>
-    <string name="delete_all_body">Tüm oturumlar, biralar, su, notlar, arkadaşlar, vücut profilin ve hatırlatma ayarları bu telefondan silinir. Uygulama adı, dil ve renkler korunur. Geri alınamaz.</string>
-    <string name="widget_page_beer">Biralar</string>
+    <string name="delete_all_body">Tüm oturumlar, içkiler, su, notlar, arkadaşlar, vücut profilin ve hatırlatma ayarları bu telefondan silinir. Uygulama adı, dil ve renkler korunur. Geri alınamaz.</string>
+    <string name="widget_page_beer">İçkiler</string>
     <string name="widget_page_tab">Hesap</string>
     <string name="widget_page_water">Su</string>
     <string name="widget_prev">Önceki sayfa</string>
@@ -207,7 +207,7 @@
     <string name="timer_running">İçiliyor</string>
     <string name="timer_idle">Zamanlayıcı</string>
     <string name="setting_timer">İçme zamanlayıcısı</string>
-    <string name="setting_timer_note">Birayı gerçekten içmeye başladığında başlat; durdurmak bitiş saatini tahmin için kaydeder. Tüm zamanlayıcıları gizlemek için kapat.</string>
+    <string name="setting_timer_note">İçkini gerçekten içmeye başladığında başlat; durdurmak bitiş saatini tahmin için kaydeder. Tüm zamanlayıcıları gizlemek için kapat.</string>
     <string name="history_friends">Arkadaşlar</string>
     <string name="friends_empty">Henüz arkadaş sonucu yok. Bir arkadaşından oturum sonucunu paylaşmasını iste, sonra buraya yapıştır.</string>
     <string name="friends_import">Sonuç içe aktar</string>
@@ -218,7 +218,7 @@
     <string name="friends_note">Sonuçlar bu telefonda kalır. Uygulama hiçbir yere bir şey göndermez; paylaşımı sen yaparsın.</string>
     <string name="share_result">Sonucu paylaş</string>
     <string name="share_name">Adın</string>
-    <string name="share_body">Yalnızca adın, gün, bira sayın, süre ve su paylaşılır. Kime gideceğini sen seçersin.</string>
+    <string name="share_body">Yalnızca adın, gün, içki sayın, süre ve su paylaşılır. Kime gideceğini sen seçersin.</string>
     <string name="share_message">Oturum sonucum. İçe aktarmak için bu mesajı uygulamada Geçmiş → Arkadaşlar bölümüne yapıştır:\n%1$s</string>
     <string name="setting_currency">Hesap para birimi</string>
     <string name="currency_none">Simge yok</string>
@@ -226,13 +226,13 @@
     <string name="currency_eur">Euro (€)</string>
     <string name="currency_usd">ABD doları ($)</string>
     <string name="currency_gbp">İngiliz sterlini (£)</string>
-    <string name="shortcut_beer">+1 bira</string>
-    <string name="shortcut_beer_long">Bira ekle</string>
+    <string name="shortcut_beer">+1 içki</string>
+    <string name="shortcut_beer_long">İçki ekle</string>
     <string name="shortcut_water">+1 su</string>
     <string name="shortcut_water_long">Bir bardak su ekle</string>
     <string name="shortcut_tab">Hesap</string>
     <string name="shortcut_tab_long">Hesabı aç</string>
-    <string name="tile_label">+1 bira</string>
+    <string name="tile_label">+1 içki</string>
     <string name="tile_open_app">Uygulamayı aç</string>
     <string name="care_late">Geç oldu. Eve dönme vakti mi?</string>
     <string name="care_slow_down">Bu gece yavaş git. Bir bardak su iyi gelir.</string>
@@ -240,7 +240,7 @@
     <string name="care_stops_query">otobüs durağı</string>
     <string name="section_care">Kendine iyi bak</string>
     <string name="setting_care">Nazik hatırlatmalar</string>
-    <string name="setting_care_note">Geç olunca veya birkaç biradan sonra nazik bir kart. Hiçbir şey telefonundan çıkmaz.</string>
+    <string name="setting_care_note">Geç olunca veya birkaç içkiden sonra nazik bir kart. Hiçbir şey telefonundan çıkmaz.</string>
     <string name="setting_late_hour">Geç saat başlangıcı</string>
     <string name="setting_home">Ev ("Eve yol" için)</string>
     <string name="setting_home_not_set">Ayarlanmadı – yakındaki duraklar gösterilir</string>
@@ -248,16 +248,16 @@
     <string name="setting_home_note">Harita uygulamanı toplu taşıma ile açar. Sadece bu telefonda saklanır.</string>
     <string name="action_remove">Kaldır</string>
     <plurals name="care_beer_limit">
-        <item quantity="one">Bu gece kendine %d bira sınırı koydun ve ulaştın. Su mu, eve dönüş mü?</item>
-        <item quantity="other">Bu gece kendine %d bira sınırı koydun ve ulaştın. Su mu, eve dönüş mü?</item>
+        <item quantity="one">Bu gece kendine %d içki sınırı koydun ve ulaştın. Su mu, eve dönüş mü?</item>
+        <item quantity="other">Bu gece kendine %d içki sınırı koydun ve ulaştın. Su mu, eve dönüş mü?</item>
     </plurals>
     <string name="care_budget">Belirlediğin bütçeye ulaştın (%s).</string>
     <string name="setting_limits">Gecelik sınırlarım</string>
     <string name="setting_limits_off">Kapalı</string>
-    <string name="setting_beer_limit">Bira</string>
+    <string name="setting_beer_limit">İçki</string>
     <string name="setting_budget">Bütçe</string>
     <string name="setting_limits_note">Senin seçimin. Bir sınıra ulaşınca nazik bir kart görürsün; kapatmak için boş bırak.</string>
-    <string name="limits_invalid">Bira 1–20, bütçe pozitif bir tutar olmalı.</string>
+    <string name="limits_invalid">İçki 1–20, bütçe pozitif bir tutar olmalı.</string>
     <string name="section_lock">Uygulama kilidi</string>
     <string name="lock_off">Kapalı. Telefonunu alan herkes uygulamayı açabilir.</string>
     <string name="lock_on">Açık. Uygulama açılırken PIN sorulur.</string>
@@ -312,4 +312,12 @@
     <string name="restore_newer">Bu yedek daha yeni bir uygulama sürümünden. Önce uygulamayı güncelle.</string>
     <string name="restore_too_large">Bu dosya çok büyük.</string>
     <string name="restore_invalid">Yedek bozuk ya da bu uygulamanın okuyamadığı değerler içeriyor. Hiçbir şey değiştirilmedi.</string>
+    <string name="setting_default_drink">+1 için varsayılan içki</string>
+    <string name="drink_beer">Bira</string>
+    <string name="drink_wine">Şarap</string>
+    <string name="drink_raki">Rakı</string>
+    <string name="drink_shot">Shot</string>
+    <string name="drink_cocktail">Kokteyl</string>
+    <string name="drink_custom">Diğer</string>
+    <string name="drink_count">%1$s: %2$d</string>
 </resources>

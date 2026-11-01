@@ -218,7 +218,7 @@ fun PromilleScreen(viewModel: PromilleViewModel, onBack: () -> Unit) {
             }
             items(state.beers, key = { it.id }) { beer ->
                 Column(Modifier.fillMaxWidth().clickable { editing = beer.id }.padding(horizontal = 16.dp, vertical = 12.dp)) {
-                    Text(beerSizeLabel(BeerSize(beer.sizeMl, beer.abv)))
+                    Text(drinkLabel(beer))
                     Text(
                         stringResource(R.string.beer_started, formatTime(beer.at)) +
                             (beer.finishedAt?.let { " · " + stringResource(R.string.beer_finished, formatTime(it)) } ?: ""),

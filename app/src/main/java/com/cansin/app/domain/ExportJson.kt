@@ -1,6 +1,7 @@
 package com.cansin.app.domain
 
 import com.cansin.app.data.BeerEvent
+import com.cansin.app.data.DrinkKind
 import com.cansin.app.data.FriendProfile
 import com.cansin.app.data.FriendResult
 import com.cansin.app.data.Note
@@ -41,7 +42,8 @@ object ExportJson {
                     "blueFriendId" to s.blueFriendId,
                     "meSide" to s.meSide?.name,
                     "beers" to beers[s.id].orEmpty().map {
-                        linkedMapOf("side" to it.side.name, "sizeMl" to it.sizeMl, "abv" to it.abv, "at" to it.at, "finishedAt" to it.finishedAt)
+                        linkedMapOf<String, Any?>("side" to it.side.name, "sizeMl" to it.sizeMl, "abv" to it.abv, "at" to it.at, "finishedAt" to it.finishedAt)
+                            .apply { if (it.kind != DrinkKind.BEER) put("kind", it.kind.name) }
                     },
                     "water" to water[s.id].orEmpty().map { linkedMapOf("at" to it.at) },
                     "notes" to notes[s.id].orEmpty().map {

@@ -1,6 +1,7 @@
 package com.cansin.app.domain
 
 import com.cansin.app.data.BeerEvent
+import com.cansin.app.data.DrinkKind
 import com.cansin.app.data.FriendProfile
 import com.cansin.app.data.FriendResult
 import com.cansin.app.data.Note
@@ -23,7 +24,7 @@ class RestoreParserTest {
         ),
         beers = listOf(
             BeerEvent(sessionId = 1, at = 11, sizeMl = 330, abv = 4.5, finishedAt = 15),
-            BeerEvent(sessionId = 2, side = Side.BLUE, at = 31),
+            BeerEvent(sessionId = 2, side = Side.BLUE, at = 31, sizeMl = 40, abv = 40.0, kind = DrinkKind.SHOT),
         ),
         water = listOf(WaterEvent(sessionId = 1, at = 12)),
         notes = listOf(
@@ -61,6 +62,8 @@ class RestoreParserTest {
         assertEquals(Currency.TRY, r.currency)
         assertEquals(profile, r.profile)
         assertEquals(2, r.beerCount)
+        assertEquals(DrinkKind.SHOT, r.sessions[1].beers.single().kind)
+        assertEquals(DrinkKind.BEER, solo.beers.single().kind)
     }
 
     @Test
@@ -92,6 +95,7 @@ class RestoreParserTest {
         assertEquals(RestoreError.INVALID, fail(json.replace("\"blueFriendId\":4", "\"blueFriendId\":9")))
         assertEquals(RestoreError.INVALID, fail(json.replace("\"amountMinor\":1250", "\"amountMinor\":-1")))
         assertEquals(RestoreError.INVALID, fail(json.replace("\"mode\":\"SOLO\"", "\"mode\":\"PARTY\"")))
+        assertEquals(RestoreError.INVALID, fail(json.replace("\"kind\":\"SHOT\"", "\"kind\":\"WATER\"")))
         assertEquals(RestoreError.INVALID, fail(json.replace("\"age\":30", "\"age\":12")))
         assertEquals(RestoreError.INVALID, fail(json.replace("\"endedAt\":20", "\"endedAt\":null")))
         assertEquals(RestoreError.INVALID, fail(json.replace("\"text\":\"nuts\"", "\"text\":\"   \"")))

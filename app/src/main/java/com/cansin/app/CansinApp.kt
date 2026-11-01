@@ -2,6 +2,7 @@ package com.cansin.app
 
 import com.cansin.app.system.AppLock
 import android.app.Application
+import com.cansin.app.domain.Drinks
 import com.cansin.app.data.AppDatabase
 import com.cansin.app.data.BeerEvent
 import com.cansin.app.data.FriendRepository
@@ -49,7 +50,7 @@ class CansinApp : Application() {
                     drinkTimer.clearIf(sessionId)
                 }
             },
-            defaultSize = { settingsStore.settings.first().beerSize },
+            defaultDrink = { settingsStore.settings.first().let { Drinks.default(it.defaultDrink, it.beerSize) } },
         )
     }
 }

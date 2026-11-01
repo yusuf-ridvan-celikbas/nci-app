@@ -1,5 +1,6 @@
 package com.cansin.app.data
 
+import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.ForeignKey
 import androidx.room.Index
@@ -8,6 +9,9 @@ import androidx.room.PrimaryKey
 enum class SessionMode { SOLO, VERSUS }
 
 enum class Side { SOLO, RED, BLUE }
+
+/** P22: what was drunk. Table and class keep the "beer" name to avoid a risky rename. */
+enum class DrinkKind { BEER, WINE, RAKI, SHOT, COCKTAIL, CUSTOM }
 
 @Entity(tableName = "session")
 data class Session(
@@ -35,6 +39,7 @@ data class BeerEvent(
     val abv: Double = DEFAULT_ABV,
     val at: Long,
     val finishedAt: Long? = null,
+    @ColumnInfo(defaultValue = "BEER") val kind: DrinkKind = DrinkKind.BEER,
 ) {
     companion object {
         const val DEFAULT_SIZE_ML = 500

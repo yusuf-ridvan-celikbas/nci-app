@@ -5,12 +5,12 @@
     <string name="plus_one" translatable="false">+1</string>
     <string name="minus_one" translatable="false">−1</string>
     <string name="counter_prompt">Ordered from the bartender? Tap now.</string>
-    <string name="counter_label">Beers this session</string>
-    <string name="add_beer">Add one beer</string>
-    <string name="remove_beer">Remove one beer</string>
+    <string name="counter_label">Drinks this session</string>
+    <string name="add_beer">Add one drink</string>
+    <string name="remove_beer">Remove the last drink</string>
     <string name="end_session">End session</string>
     <string name="no_session">No active session</string>
-    <string name="beer_added">Beer added</string>
+    <string name="beer_added">Drink added</string>
     <string name="undo">Undo</string>
     <string name="age_title">Are you 18 or older?</string>
     <string name="age_body">This app is a personal drink and bar-tab tracker for adults of legal drinking age.</string>
@@ -40,7 +40,7 @@
     <string name="color_purple">Purple</string>
     <string name="color_dynamic">Dynamic (from wallpaper)</string>
     <string name="widget_name">Counter</string>
-    <string name="widget_description">Beers, tab and water with quick buttons</string>
+    <string name="widget_description">Drinks, tab and water with quick buttons</string>
     <string name="section_reminders">Reminders</string>
     <string name="setting_reminders">Ask if my drink is finished</string>
     <string name="setting_reminder_interval">Ask after %1$d min</string>
@@ -51,7 +51,7 @@
     <string name="reminder_rationale_body">Reminders are local notifications that ask whether your drink is finished. Nothing leaves your phone.</string>
     <string name="action_continue">Continue</string>
     <string name="action_cancel">Cancel</string>
-    <string name="reminder_text">Is your beer finished?</string>
+    <string name="reminder_text">Is your drink finished?</string>
     <string name="reminder_public">Reminder</string>
     <string name="action_another">Yes, got another (+1)</string>
     <string name="action_snooze">Still drinking</string>
@@ -75,18 +75,18 @@
     <string name="pick_time">Pick time</string>
     <string name="action_save">Save</string>
     <string name="action_delete">Delete</string>
-    <string name="section_beer">Beer</string>
+    <string name="section_beer">Drinks</string>
     <string name="setting_default_beer">Default beer</string>
     <string name="beer_size_value">%1$s cl · %2$s%%</string>
     <string name="size_cl">%1$s cl</string>
     <string name="size_custom">Custom</string>
     <string name="size_custom_cl">Size (cl)</string>
     <string name="abv_label" formatted="false">Alcohol (% ABV)</string>
-    <string name="invalid_size">Enter 10–200 cl, up to 1 decimal.</string>
-    <string name="invalid_abv">Enter 0–20, up to 1 decimal.</string>
-    <string name="pick_size_title">This beer</string>
-    <string name="pick_size">Choose size</string>
-    <string name="pick_size_hint">Long-press +1 to choose a different size.</string>
+    <string name="invalid_size">Enter 2–200 cl, up to 1 decimal.</string>
+    <string name="invalid_abv">Enter 0–80, up to 1 decimal.</string>
+    <string name="pick_size_title">This drink</string>
+    <string name="pick_size">Choose drink</string>
+    <string name="pick_size_hint">Long-press +1 to choose another drink or size.</string>
     <string name="action_add">Add</string>
     <string name="promille_title">Blood alcohol estimate</string>
     <string name="promille_disclaimer">Estimate only. Not a breathalyzer. Never drink and drive.</string>
@@ -128,7 +128,7 @@
     <string name="action_transport">Taxi / transport</string>
     <string name="transport_query">taxi</string>
     <string name="action_call_112">Call 112</string>
-    <string name="edit_beer">Edit beer</string>
+    <string name="edit_beer">Edit drink</string>
     <string name="beer_started">Started: %1$s</string>
     <string name="beer_finished">Finished: %1$s</string>
     <string name="beer_finished_unset">Finished: not set</string>
@@ -145,8 +145,8 @@
     <string name="versus_me_note">The blood alcohol estimate and reminders use only your side.</string>
     <string name="versus_save_friend">Save as friend</string>
     <string name="versus_name_me">%1$s (you)</string>
-    <string name="versus_add">Add beer for %1$s</string>
-    <string name="versus_remove">Remove last beer for %1$s</string>
+    <string name="versus_add">Add a drink for %1$s</string>
+    <string name="versus_remove">Remove last drink for %1$s</string>
     <string name="versus_score">%1$d–%2$d</string>
     <string name="versus_score_description">Red %1$d, Blue %2$d</string>
     <string name="versus_open">Open Versus</string>
@@ -156,8 +156,8 @@
     <string name="section_water">Water</string>
     <string name="setting_water">Water reminder</string>
     <plurals name="water_every">
-        <item quantity="one">Remind me after every beer</item>
-        <item quantity="other">Remind me every %1$d beers</item>
+        <item quantity="one">Remind me after every drink</item>
+        <item quantity="other">Remind me every %1$d drinks</item>
     </plurals>
     <string name="water_nudge">Time for a glass of water.</string>
     <string name="water_count">Water: %1$d</string>
@@ -169,8 +169,8 @@
     <string name="history_empty">No finished sessions yet.</string>
     <string name="history_versus_row">%1$s · Versus</string>
     <plurals name="beers_count">
-        <item quantity="one">%1$d beer</item>
-        <item quantity="other">%1$d beers</item>
+        <item quantity="one">%1$d drink</item>
+        <item quantity="other">%1$d drinks</item>
     </plurals>
     <plurals name="notes_count">
         <item quantity="one">%1$d note</item>
@@ -181,26 +181,26 @@
         <item quantity="one">%1$d session</item>
         <item quantity="other">%1$d sessions</item>
     </plurals>
-    <string name="stats_avg_beers">Beers per session: %1$s</string>
-    <string name="stats_pace">Average pace: %1$s min per beer</string>
-    <string name="stats_water_ratio">Water per beer: %1$s</string>
-    <string name="stats_chart_beers">Beers per session (latest 20)</string>
+    <string name="stats_avg_beers">Drinks per session: %1$s</string>
+    <string name="stats_pace">Average pace: %1$s min per drink</string>
+    <string name="stats_water_ratio">Water per drink: %1$s</string>
+    <string name="stats_chart_beers">Drinks per session (latest 20)</string>
     <string name="stats_chart_peak">Estimated peak ‰ per session</string>
     <string name="stats_chart_description">Values from oldest to newest: %1$s</string>
-    <string name="stats_peak_note">Peaks use your current body profile. Only your own beers are counted.</string>
+    <string name="stats_peak_note">Peaks use your current body profile. Only your own drinks are counted.</string>
     <string name="session_detail_title">Session</string>
-    <string name="detail_beers">Beers: %1$d</string>
+    <string name="detail_beers">Drinks: %1$d</string>
     <string name="delete_session_title">Delete this session?</string>
-    <string name="delete_session_body">Its beers, water and notes are removed from this phone. This can’t be undone.</string>
+    <string name="delete_session_body">Its drinks, water and notes are removed from this phone. This can’t be undone.</string>
     <string name="section_data">Data</string>
     <string name="export_data">Export data</string>
-    <string name="export_body">Creates a JSON file with your sessions, beers, water, notes and friends, and opens the share sheet. Only share it with apps and people you trust.</string>
+    <string name="export_body">Creates a JSON file with your sessions, drinks, water, notes and friends, and opens the share sheet. Only share it with apps and people you trust.</string>
     <string name="export_include_profile">Include body profile (sensitive)</string>
     <string name="action_share">Share</string>
     <string name="delete_all_data">Delete all data</string>
     <string name="delete_all_title">Delete all data?</string>
-    <string name="delete_all_body">All sessions, beers, water, notes, friends, your body profile and reminder settings are removed from this phone. App name, language and colours are kept. This can’t be undone.</string>
-    <string name="widget_page_beer">Beers</string>
+    <string name="delete_all_body">All sessions, drinks, water, notes, friends, your body profile and reminder settings are removed from this phone. App name, language and colours are kept. This can’t be undone.</string>
+    <string name="widget_page_beer">Drinks</string>
     <string name="widget_page_tab">Tab</string>
     <string name="widget_page_water">Water</string>
     <string name="widget_prev">Previous page</string>
@@ -213,7 +213,7 @@
     <string name="timer_running">Drinking</string>
     <string name="timer_idle">Start timer</string>
     <string name="setting_timer">Drinking timer</string>
-    <string name="setting_timer_note">Start the timer when you actually begin a beer; stopping it saves the finish time for the estimate. Turn off to hide all timers.</string>
+    <string name="setting_timer_note">Start the timer when you actually begin a drink; stopping it saves the finish time for the estimate. Turn off to hide all timers.</string>
     <string name="history_friends">Friends</string>
     <string name="friends_empty">No friend results yet. Ask a friend to share a session result, then paste it here.</string>
     <string name="friends_import">Import result</string>
@@ -224,7 +224,7 @@
     <string name="friends_note">Results stay on this phone. The app never sends anything anywhere; you share by yourself.</string>
     <string name="share_result">Share result</string>
     <string name="share_name">Your name</string>
-    <string name="share_body">Shares only your name, the day, your beer count, duration and water. You choose who gets it.</string>
+    <string name="share_body">Shares only your name, the day, your drink count, duration and water. You choose who gets it.</string>
     <string name="share_message">My session result. To import it, paste this message into the app under History → Friends:\n%1$s</string>
     <string name="setting_currency">Currency for the tab</string>
     <string name="currency_none">No symbol</string>
@@ -232,13 +232,13 @@
     <string name="currency_eur">Euro (€)</string>
     <string name="currency_usd">US dollar ($)</string>
     <string name="currency_gbp">British pound (£)</string>
-    <string name="shortcut_beer">+1 beer</string>
-    <string name="shortcut_beer_long">Add a beer</string>
+    <string name="shortcut_beer">+1 drink</string>
+    <string name="shortcut_beer_long">Add a drink</string>
     <string name="shortcut_water">+1 water</string>
     <string name="shortcut_water_long">Add a glass of water</string>
     <string name="shortcut_tab">Tab</string>
     <string name="shortcut_tab_long">Open the tab</string>
-    <string name="tile_label">+1 beer</string>
+    <string name="tile_label">+1 drink</string>
     <string name="tile_open_app">Open the app</string>
     <string name="care_late">It\'s getting late. Time to head home?</string>
     <string name="care_slow_down">Take it slow tonight. A glass of water helps.</string>
@@ -246,7 +246,7 @@
     <string name="care_stops_query">bus stop</string>
     <string name="section_care">Looking after you</string>
     <string name="setting_care">Kind reminders</string>
-    <string name="setting_care_note">A gentle card when it gets late or after several beers. Nothing leaves your phone.</string>
+    <string name="setting_care_note">A gentle card when it gets late or after several drinks. Nothing leaves your phone.</string>
     <string name="setting_late_hour">Late from</string>
     <string name="setting_home">Home (for "Way home")</string>
     <string name="setting_home_not_set">Not set – shows nearby stops</string>
@@ -254,16 +254,16 @@
     <string name="setting_home_note">Opens your maps app with public transport. Stored only on this phone.</string>
     <string name="action_remove">Remove</string>
     <plurals name="care_beer_limit">
-        <item quantity="one">You set a limit of %d beer tonight and you\'ve reached it. Water or heading home?</item>
-        <item quantity="other">You set a limit of %d beers tonight and you\'ve reached it. Water or heading home?</item>
+        <item quantity="one">You set a limit of %d drink tonight and you\'ve reached it. Water or heading home?</item>
+        <item quantity="other">You set a limit of %d drinks tonight and you\'ve reached it. Water or heading home?</item>
     </plurals>
     <string name="care_budget">You\'ve reached the budget you set (%s).</string>
     <string name="setting_limits">My limits per night</string>
     <string name="setting_limits_off">Off</string>
-    <string name="setting_beer_limit">Beers</string>
+    <string name="setting_beer_limit">Drinks</string>
     <string name="setting_budget">Budget</string>
     <string name="setting_limits_note">Your own choice. You get a gentle card when you reach a limit; leave empty to turn it off.</string>
-    <string name="limits_invalid">Beers 1–20, budget a positive amount.</string>
+    <string name="limits_invalid">Drinks 1–20, budget a positive amount.</string>
     <string name="section_lock">App lock</string>
     <string name="lock_off">Off. Anyone with your phone can open the app.</string>
     <string name="lock_on">On. A PIN is asked when you open the app.</string>
@@ -320,4 +320,12 @@
     <string name="restore_newer">This backup is from a newer app version. Update the app first.</string>
     <string name="restore_too_large">This file is too large.</string>
     <string name="restore_invalid">The backup is damaged or has values this app can\'t read. Nothing was changed.</string>
+    <string name="setting_default_drink">Default drink for +1</string>
+    <string name="drink_beer">Beer</string>
+    <string name="drink_wine">Wine</string>
+    <string name="drink_raki">Rakı</string>
+    <string name="drink_shot">Shot</string>
+    <string name="drink_cocktail">Cocktail</string>
+    <string name="drink_custom">Other</string>
+    <string name="drink_count">%1$s: %2$d</string>
 </resources>

@@ -101,7 +101,7 @@ fun SessionDetailScreen(viewModel: HistoryViewModel, onBack: () -> Unit) {
                 Row(Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp)) {
                     Text(formatTime(beer.at), Modifier.width(64.dp), style = MaterialTheme.typography.labelLarge)
                     Text(
-                        beerSizeLabel(BeerSize(beer.sizeMl, beer.abv)) + if (versus) " · " + sideName(session, beer.side) else "",
+                        drinkLabel(beer) + if (versus) " · " + sideName(session, beer.side) else "",
                     )
                 }
             }

@@ -7,7 +7,8 @@ import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
 import com.cansin.app.data.BeerEvent
 import com.cansin.app.data.SessionRepository
-import com.cansin.app.domain.BeerSize
+import com.cansin.app.data.DrinkKind
+import com.cansin.app.domain.DrinkChoice
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.Flow
@@ -20,14 +21,14 @@ import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 
-data class CounterState(val count: Int = 0, val sessionActive: Boolean = false)
+data class CounterState(val count: Int = 0, val sessionActive: Boolean = false, val kinds: List<DrinkKind> = emptyList())
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class CounterViewModel(private val repository: SessionRepository) : ViewModel() {
     val state: StateFlow<CounterState> = repository.openSession
         .flatMapLatest { session ->
             if (session == null) flowOf(CounterState())
-            else repository.beerCount(session.id).map { CounterState(it, sessionActive = true) }
+            else repository.beers(session.id).map { list -> CounterState(list.size, sessionActive = true, kinds = list.map { it.kind }) }
         }
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), CounterState())
 
@@ -36,7 +37,7 @@ class CounterViewModel(private val repository: SessionRepository) : ViewModel() 
 
     fun refresh() = viewModelScope.launch { repository.closeIfStale() }
 
-    fun add(size: BeerSize? = null) = viewModelScope.launch { repository.addBeer(size = size)?.let { added.send(it) } }
+    fun add(drink: DrinkChoice? = null) = viewModelScope.launch { repository.addBeer(drink = drink)?.let { added.send(it) } }
 
     fun undo(event: BeerEvent) = viewModelScope.launch { repository.undo(event) }
 

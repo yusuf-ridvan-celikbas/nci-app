@@ -11,10 +11,10 @@ data class BeerSize(val sizeMl: Int, val abv: Double) {
 
 object BeerRules {
     val PRESETS_ML = listOf(330, 500)
-    const val MIN_ML = 100
+    const val MIN_ML = 20
     const val MAX_ML = 2_000
     const val MIN_ABV = 0.0
-    const val MAX_ABV = 20.0
+    const val MAX_ABV = 80.0
     private val ONE_DECIMAL = Regex("""^(\d{1,3})(?:[.,](\d))?$""")
 
     fun clamp(size: BeerSize) = BeerSize(size.sizeMl.coerceIn(MIN_ML, MAX_ML), size.abv.coerceIn(MIN_ABV, MAX_ABV))

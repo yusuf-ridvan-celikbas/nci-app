@@ -78,6 +78,7 @@ class SettingsActions(
     val lock: AppLock,
     val onPinHidesWidget: (Boolean) -> Unit,
     val onPinChanged: () -> Unit,
+    val onDefaultDrink: (com.cansin.app.data.DrinkKind) -> Unit,
     val onExport: (Boolean) -> Unit,
     val onReadBackup: suspend (android.net.Uri) -> com.cansin.app.domain.RestoreResult,
     val onRestore: suspend (com.cansin.app.domain.RestoreData) -> Unit,
@@ -124,7 +125,7 @@ fun SettingsScreen(
             val accents = Accent.entries.filter { it != Accent.DYNAMIC || dynamicAvailable }
             ChoiceGroup(R.string.setting_color, accents, settings.accent, { it.label }, actions.onAccent)
             HorizontalDivider(Modifier.padding(vertical = 16.dp))
-            BeerSection(settings.beerSize, actions.onBeerSize)
+            BeerSection(settings.beerSize, actions.onBeerSize, settings.defaultDrink, actions.onDefaultDrink)
             HorizontalDivider(Modifier.padding(vertical = 16.dp))
             WaterSection(settings, actions)
             HorizontalDivider(Modifier.padding(vertical = 16.dp))
@@ -154,9 +155,24 @@ fun SettingsScreen(
 }
 
 @Composable
-private fun BeerSection(size: BeerSize, onChange: (BeerSize) -> Unit) {
+private fun BeerSection(
+    size: BeerSize,
+    onChange: (BeerSize) -> Unit,
+    drink: com.cansin.app.data.DrinkKind,
+    onDrink: (com.cansin.app.data.DrinkKind) -> Unit,
+) {
     var editing by rememberSaveable { mutableStateOf(false) }
+    var pickingDrink by rememberSaveable { mutableStateOf(false) }
     SectionHeader(R.string.section_beer)
+    Column(
+        Modifier.fillMaxWidth().heightIn(min = 48.dp).clickable(role = Role.Button) { pickingDrink = true }.padding(vertical = 8.dp),
+    ) {
+        Text(stringResource(R.string.setting_default_drink), style = MaterialTheme.typography.titleSmall)
+        Text(stringResource(drinkName(drink)), color = MaterialTheme.colorScheme.onSurfaceVariant)
+    }
+    if (pickingDrink) {
+        DefaultDrinkDialog(drink, size, { onDrink(it); pickingDrink = false }, { pickingDrink = false })
+    }
     Column(
         Modifier.fillMaxWidth().heightIn(min = 48.dp).clickable(role = Role.Button) { editing = true }.padding(vertical = 8.dp),
     ) {
