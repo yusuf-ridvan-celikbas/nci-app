@@ -1,6 +1,6 @@
 # Progress
 
-Current phase: **P14–P19 done (feature/p18-pin; next P20 stats extras). Earlier: P12 iOS port on branch feature/p12-ios (64203b3); core logic tested on Linux Swift, app/widget NOT compiled yet (needs a Mac + Xcode). Next: build on a Mac, fix compile issues, device test. P13 = offline result cards (Option A) on branch feature/p13-cards: Android done, iOS core codec done, iOS UI for it not yet.**
+Current phase: **P14–P23 done on Android (branch feature/p20-plus, local only, NOT pushed). Phone review paused by user (2026-11-01): user reviews P20–P23 later in order, then we merge. iOS: CansinCore has P14–P23 rules (uncompiled); app/widget never compiled; see ios/PORT_PLAN.md (needs a Mac).**
 
 ## Phases
 - [x] Setup (project, wrapper, git, CLAUDE.md)
@@ -19,8 +19,8 @@ Current phase: **P14–P19 done (feature/p18-pin; next P20 stats extras). Earlie
 - [x] P13 Friends, offline (Option A result cards; Android done, iOS core only) (design first)
 - Plan P14–P23 (2026-11-01, user-approved; file ~/.claude/plans/bright-swimming-diffie.md), branch feature/p14-plus:
   - [x] P14 Currency  - [x] P15 Quick tile + shortcuts  - [x] P16 Care messages  - [x] P17 Self-set limits
-  - [x] P18 PIN lock  - [x] P19 Settle up (branch feature/p18-pin, on top of p14-plus)  - [ ] P20 Stats extras  - [ ] checkpoint: phone test + merge
-  - [ ] P21 Restore backup  - [ ] P22 Other drinks (DB v4)  - [ ] P23 Group mode 2–6 (DB v5, no winner/race)
+  - [x] P18 PIN lock  - [x] P19 Settle up (branch feature/p18-pin, on top of p14-plus)  - [x] P20 Stats extras  - [ ] checkpoint: phone test + merge (paused by user)
+  - [x] P21 Restore backup  - [x] P22 Other drinks (DB v4)  - [x] P23 Group mode 2–6 (DB v5, no winner/race) (branch feature/p20-plus on top of p18-pin)
 
 ## Code map
 - `data/` Entities.kt (all 5 Room entities, enums stored as TEXT), Daos.kt (SessionDao, BeerDao), AppDatabase.kt (v1, schema in app/schemas), SessionRepository.kt (all writes behind one Mutex)
@@ -103,7 +103,24 @@ Current phase: **P14–P19 done (feature/p18-pin; next P20 stats extras). Earlie
 - Release APK 1.67 MB (+23 KB). Permissions unchanged, no INTERNET. Lint 0 errors. Tests 131/131. Not tested on device.
 - Remote added: origin https://github.com/yusuf-ridvan-celikbas/nci-app.git (nothing pushed yet).
 
-## Phone review (2026-11-01, step by step, debug builds over existing data)
+## P20–P23 report (2026-11-01, built while the user studies; not on the phone, not pushed)
+- Commits on feature/p20-plus: e249fbd P20, 9864fd9 P21, 9562429 P22, 4afffe8 P23, f44e4ff P23 budget fix, 906657d iOS prep.
+- P20: `domain/CalendarRules.kt` + `ui/MonthCalendar.kt` (History → Stats): month grid that marks days with a session (presence only, no counts), ‹ › from the first session's month to now, tap a day → its sessions → detail. Tab total this month, average tab per session (only sessions with an amount), bar chart of tab total for the last 6 months. Session list rows show the tab total. `SessionSummary.spentMinor` = SUM(note.amountMinor) in the history query (no schema change).
+- P21: `domain/MiniJson.kt` (own strict reader: depth ≤8, duplicate keys rejected, no trailing data; org.json is stubbed in JVM tests) + `domain/RestoreParser.kt` (format "cansin-export" v1, newer → "update app"; ≤8 MB, ≤10k sessions, ≤200k events; every field range-checked like the UI; at most one open session; one bad item rejects the whole file). `DataManager.readBackup` (SAF OpenDocument, no storage permission, strict UTF-8, BOM ok) → "Replace all data?" (shows session count) → `restore` in ONE Room transaction (delete sessions/friends/friend results, insert with new ids, friend links remapped). Keeps settings + PIN; applies currency/profile if in the file; cancels reminders, clears timer, refreshes widgets.
+- P22: `DrinkKind` column on beer_event (AutoMigration 3→4, default 'BEER'). `domain/Drinks.kt`: presets wine 15 cl 12 %, rakı 5 cl 45 %, shot 4 cl 40 %, cocktail 20 cl 10 %, beer = own default size, other = custom. Size/alcohol limits widened for all drinks to 2–200 cl and 0–80 %. Long-press +1 → `ui/DrinkDialog.kt` (kind fills size, editable). Settings → Drinks → "Default drink for +1" (not "other"). Counter shows "Beer: 2 · Wine: 1" only when mixed. Lists show the kind. Export writes "kind" only when not beer. Wording: "beer" → "drink" where it counts any drink (EN+TR).
+- P23: "Together" mode = new `SessionMode.GROUP` (Versus unchanged). DB v5 (AutoMigration 4→5): table `group_seat(sessionId, side, name)` + `water_event.side` (NULL = me). Seats = RED, BLUE, GREEN, PURPLE, AMBER, YELLOW (fixed light accent tones, AA-tested). Counter's people button → chooser Versus / Together. `ui/GroupSetupDialog.kt`: 2–6 seats (default 4), names, "which seat are you". `ui/GroupScreen.kt`: one card per seat in seat order with drinks −1/+1 and water +1. No winner, no ranking, no highlight; note "counts are only a record for the tab". Seats can be renamed/added mid-session, never removed. Tab: notes per seat + shared; settle splits shared evenly (leftover cents to the first seats). Promille, reminders, care, limits and result cards use only my seat. Widget and tile only open the app in a group. History row "· Together", detail shows drinks + water per seat. Export/restore include seats + water seat.
+- Release APK 1.74 MB, AAB 4.4 MB. Permissions unchanged (POST_NOTIFICATIONS, RECEIVE_BOOT_COMPLETED); no INTERNET (merged release manifest checked). No new dependencies. Lint 0 errors (2 version notices). Tests 171/171. Not on a device: the 3→4 and 4→5 migrations, the restore picker and all new UI still need a phone test.
+- Security: restore reads only a user-picked file through SAF (no permission) with strict size, depth and range limits. The file can't add a PIN, can't change other settings, and can't break the DB (one transaction). MiniJson isn't a general parser and only reads our own format.
+- Decided while user away – confirm:
+  1. Rakı preset = 5 cl at 45 % (a "tek"; some bars pour 3.5 cl). Wine 15 cl 12 %, shot 4 cl 40 %, cocktail 20 cl 10 %.
+  2. Calendar only marks session days (no count per day), so there is no "busiest day" look.
+  3. Group allows 2–6 seats (plan said 2, 3, 4 or 6; 5 works too). Default 4.
+  4. Group seats can't be linked to saved friends yet (names only).
+  5. Restore keeps your settings and PIN and replaces only the data (sessions, notes, water, friends, friend results).
+  6. Counts in widget/stats/result card now mean all drinks, not only beer.
+- Known limits: the Stats "water per drink" in a group counts everyone's water; in a group, the counter's water bar duplicates my seat's water button.
+
+## Phone review (2026-11-01, step by step, debug builds over existing data — paused by user)
 - Installed in order on the phone: P13 (DB 2→3 ran, app started, no crash) → P14 → P15 → P16 → P17 → P18 (currently on phone).
 - User approved: P14, P15, P16, P17. P13 + P18 installed but not yet confirmed. Next: user checks P18, then install P19 (bc7ae55), then merge approved features into master and push.
 - adb taps are blocked by the auto-mode classifier; screenshots work. Options offered: user taps + I screenshot, a permission rule, or scrcpy (not installed).
