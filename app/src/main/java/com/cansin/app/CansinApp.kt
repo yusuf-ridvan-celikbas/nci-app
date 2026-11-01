@@ -32,6 +32,7 @@ class CansinApp : Application() {
     }
     val appLock: AppLock by lazy { AppLock(settingsStore) }
     val drinkTimer: DrinkTimer by lazy { DrinkTimer(settingsStore, { sessionRepository }) }
+    val gameRepository: com.cansin.app.data.GameRepository by lazy { com.cansin.app.data.GameRepository(database.customQuestionDao()) }
     val groupTimers: com.cansin.app.timer.GroupTimers by lazy { com.cansin.app.timer.GroupTimers(settingsStore, { sessionRepository }) }
     val reminders: Reminders by lazy { Reminders(this, settingsStore, { sessionRepository }) }
 

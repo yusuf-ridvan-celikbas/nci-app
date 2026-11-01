@@ -4,6 +4,7 @@ import com.cansin.app.data.BeerEvent
 import com.cansin.app.data.DrinkKind
 import com.cansin.app.data.FriendResult
 import com.cansin.app.data.GroupSeat
+import com.cansin.app.data.CustomQuestion
 import com.cansin.app.data.Note
 import com.cansin.app.data.Session
 import com.cansin.app.data.SessionMode
@@ -29,6 +30,7 @@ data class RestoreData(
     val friendResults: List<FriendResult>,
     val currency: Currency?,
     val profile: BodyProfile?,
+    val customQuestions: List<CustomQuestion> = emptyList(),
 ) {
     val beerCount get() = sessions.sumOf { it.beers.size }
 }
@@ -80,7 +82,14 @@ object RestoreParser {
                 .distinctBy { listOf(it.name, it.day, it.beers, it.durationMin, it.water) }
             val currency = root["currency"]?.let { c -> Currency.entries.firstOrNull { it.name == c && it != Currency.NONE } ?: throw Bad() }
             val profile = root["bodyProfile"]?.let { profile(obj(it)) }
-            return RestoreData(sessions, friends, results, currency, profile)
+            val questions = list(root["customQuestions"], CustomQuestion.MAX_COUNT, optional = true).map { question(obj(it)) }
+            return RestoreData(sessions, friends, results, currency, profile, questions)
+        }
+
+        fun question(o: Map<*, *>): CustomQuestion {
+            val raw = str(o["text"])
+            if (raw.length > CustomQuestion.MAX_TEXT) throw Bad()
+            return CustomQuestion(kind = enum(o["kind"]), text = GameRules.cleanQuestion(raw) ?: throw Bad(), createdAt = time(o["createdAt"]))
         }
 
         fun friend(o: Map<*, *>) = RestoreFriend(long(o["id"]), VersusRules.cleanName(str(o["name"])) ?: throw Bad())

@@ -31,6 +31,8 @@ The App/Shared/Widget code has never been compiled (P12). New enum cases (`Sessi
 | P22 other drinks | `Drinks`, wider limits (2–200 cl, 0–80 %) | Long-press picker, default-drink setting, kind in lists/export | — |
 | P23 together | `GroupRules`, `isMineWater`, `mySpend` | Mode chooser, group setup sheet, seat grid (fixed seat colours = the 6 accent light tones), per-seat water, tab per seat, detail/export/restore seats; widget/controls only open the app in a group | — |
 | P24 screen lock | — | iOS has no public API to start Guided Access from an app. In Versus/Together, show a lock button that opens an info card: "Settings → Accessibility → Guided Access, then triple-click the side button" | — (`UIAccessibility.isGuidedAccessEnabled` only reads the state) |
+| P25 bottom navigation | — | `TabView`: Tonight (counter/versus/together) · Tab · Game · History · Settings | — |
+| P26 Truth or Dare | — (Android `GameRules`, `ShuffleBag`) | Port the rules, a spinning glass (`rotationEffect` + `withAnimation(.easeOut)`), packs from `game_questions.xml` (extend gen_strings for string-arrays), SwiftData `CustomQuestionRecord`, linked players from Versus/Together | `UIImpactFeedbackGenerator` |
 
 ## Store/privacy checks (same as Android)
 - No network or tracking SDKs. Maps/share sheets are system apps.

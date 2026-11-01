@@ -5,6 +5,7 @@ import com.cansin.app.data.DrinkKind
 import com.cansin.app.data.FriendProfile
 import com.cansin.app.data.FriendResult
 import com.cansin.app.data.GroupSeat
+import com.cansin.app.data.CustomQuestion
 import com.cansin.app.data.Note
 import com.cansin.app.data.Session
 import com.cansin.app.data.WaterEvent
@@ -18,6 +19,7 @@ data class ExportData(
     val profile: BodyProfile?,
     val friendResults: List<FriendResult> = emptyList(),
     val seats: List<GroupSeat> = emptyList(),
+    val customQuestions: List<CustomQuestion> = emptyList(),
     val currency: Currency = Currency.NONE,
 )
 
@@ -70,6 +72,9 @@ object ExportJson {
             },
         )
         if (data.currency != Currency.NONE) root["currency"] = data.currency.name
+        if (data.customQuestions.isNotEmpty()) {
+            root["customQuestions"] = data.customQuestions.map { linkedMapOf("kind" to it.kind.name, "text" to it.text, "createdAt" to it.createdAt) }
+        }
         val profile = data.profile
         if (includeProfile && profile != null) {
             root["bodyProfile"] = linkedMapOf(

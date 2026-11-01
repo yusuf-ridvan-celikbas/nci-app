@@ -1,6 +1,6 @@
 # Progress
 
-Current phase: **P14–P24 done on Android (branch feature/p20-plus, local only, NOT pushed). Phone review paused by user (2026-11-01): user reviews P20–P23 later in order, then we merge. iOS: CansinCore has P14–P23 rules (uncompiled); app/widget never compiled; see ios/PORT_PLAN.md (needs a Mac).**
+Current phase: **P14–P26 done on Android (branch feature/p20-plus, local only, NOT pushed). Phone review paused by user (2026-11-01): user reviews P20–P23 later in order, then we merge. iOS: CansinCore has P14–P23 rules (uncompiled); app/widget never compiled; see ios/PORT_PLAN.md (needs a Mac).**
 
 ## Phases
 - [x] Setup (project, wrapper, git, CLAUDE.md)
@@ -20,7 +20,7 @@ Current phase: **P14–P24 done on Android (branch feature/p20-plus, local only,
 - Plan P14–P23 (2026-11-01, user-approved; file ~/.claude/plans/bright-swimming-diffie.md), branch feature/p14-plus:
   - [x] P14 Currency  - [x] P15 Quick tile + shortcuts  - [x] P16 Care messages  - [x] P17 Self-set limits
   - [x] P18 PIN lock  - [x] P19 Settle up (branch feature/p18-pin, on top of p14-plus)  - [x] P20 Stats extras  - [ ] checkpoint: phone test + merge (paused by user)
-  - [x] P21 Restore backup  - [x] P22 Other drinks (DB v4)  - [x] P23 Group mode 2–6 (DB v5, no winner/race)  - [x] P24 Screen pinning in Versus/Together (branch feature/p20-plus on top of p18-pin)
+  - [x] P21 Restore backup  - [x] P22 Other drinks (DB v4)  - [x] P23 Group mode 2–6 (DB v5, no winner/race)  - [x] P24 Screen pinning in Versus/Together  - [x] P25 Bottom navigation  - [x] P26 Truth or Dare game (branch feature/p20-plus on top of p18-pin)
 
 ## Code map
 - `data/` Entities.kt (all 5 Room entities, enums stored as TEXT), Daos.kt (SessionDao, BeerDao), AppDatabase.kt (v1, schema in app/schemas), SessionRepository.kt (all writes behind one Mutex)
@@ -102,6 +102,13 @@ Current phase: **P14–P24 done on Android (branch feature/p20-plus, local only,
 - P16/P17: `domain/CareRules.kt` + `ui/CareViewModel.kt`, `ui/CareCard.kt` (one card in the promille slot of counter + versus), `ui/CareSection.kt` (Settings → Looking after you). Priority: own beer limit > own budget > late (default 01:00, choices 22–03, until 06:00; "Not now" = 1 h) > slow down (≥5 of my beers; no numbers, also covers EN health caution). Limits work even with kind reminders off. Budget compares my spend (solo: whole tab; versus: my side + shared). "Way home": saved home text → https maps transit directions; none → geo search "bus stop". Taxi = existing geo search. Prefs: care_enabled, care_late_hour, home_place (≤100, no control chars), beer_limit (1–20), budget_minor.
 - Release APK 1.67 MB (+23 KB). Permissions unchanged, no INTERNET. Lint 0 errors. Tests 131/131. Not tested on device.
 - Remote added: origin https://github.com/yusuf-ridvan-celikbas/nci-app.git (nothing pushed yet).
+
+## P25–P26 report (2026-11-01)
+- P25: bottom `NavigationBar` (`ui/AppNavBar.kt`): Tonight (counter, or the open Versus/Together) · Tab · Game · History · Settings. History/Settings icons removed from the top bars, back arrows removed on root tabs; system back → Tonight. Promille/detail open on top without the bar. The outer Scaffold consumes insets so inner bottom bars don't double-pad.
+- P23 redesign (63a6fbf, user-approved on phone): full-width person rows, last drink/water "… ago", at the table, per-person drink timer (my seat = normal DrinkTimer; others in DataStore `group_timers`, strict codec `domain/SeatTimes.kt`, cleared on session end), long-press drink picker.
+- P26: Truth or Dare with a spinning wine glass (`ui/SpinGlass.kt`, Animatable 2.8 s ease-out, haptic on stop, no VIBRATE permission). `domain/GameRules.kt` (players 2–8, avoid-repeat pick, spin target/pointed-at math, ShuffleBag with no repeats until exhausted, linked players from Versus/Together). Packs Friends / Best friends / Couples (romantic, not explicit), 24 truths + 16 dares each, EN+TR in `res/values*/game_questions.xml`. `GameContentTest` enforces equal EN/TR counts and no alcohol words (Unicode-aware regex, with a sanity test). Skip is always free; there's no link to drink counts and answers are never stored. Own questions: DB v6 (AutoMigration 5→6) `custom_question` (≤200 chars, ≤300 items), in export/restore and delete-all.
+- Release APK 1.80 MB. Permissions unchanged, no INTERNET, no new libraries. Lint 0 errors. Tests 188/188.
+- Decided – confirm: TR labels "Kankalar" (best friends) and "Sevgililer" (couples); the glass button says "Kadehi çevir".
 
 ## P24 report (2026-11-01) — screen pinning for Versus/Together (user request)
 - Lock icon in the Versus and Together top bars → Android screen pinning (`system/ScreenPin.kt`, `startLockTask`, user confirms the system prompt; no permission, no manifest change). The first time, an info dialog explains how to leave (pref `pin_info_seen`). Tap again to unpin; the state is re-read on resume/focus (a gesture unpin also updates the icon). It auto-unpins when no Versus/Together session is open (`domain/PinScreenRules.kt`).

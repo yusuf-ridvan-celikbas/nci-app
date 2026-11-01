@@ -1,0 +1,138 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- P26 Truth or Dare. Never about alcohol (checked by GameContentTest). Couples: romantic, not explicit. -->
+<resources>
+    <string-array name="game_friends_truth">
+        <item>What is the most embarrassing thing that happened to you at school?</item>
+        <item>What is a talent nobody here knows you have?</item>
+        <item>What was your worst haircut?</item>
+        <item>Who was your first celebrity crush?</item>
+        <item>What is the strangest food you have ever liked?</item>
+        <item>What is a habit you are secretly proud of?</item>
+        <item>What is the funniest lie you told as a kid?</item>
+        <item>What would you do with a free day and no phone?</item>
+        <item>Which song do you sing when you are alone?</item>
+        <item>What is the silliest thing you are afraid of?</item>
+        <item>What was your dream job as a child?</item>
+        <item>What is the best gift you have ever received?</item>
+        <item>If you could swap lives with someone here for a day, who would it be?</item>
+        <item>Which bad movie do you secretly love?</item>
+        <item>What is your most used emoji and why?</item>
+        <item>What is something you have never told your parents?</item>
+        <item>What is the weirdest dream you remember?</item>
+        <item>Which app could you never delete?</item>
+        <item>What is the most spontaneous thing you have done?</item>
+        <item>Which TV show is your guilty pleasure?</item>
+        <item>Who here would survive longest on a desert island?</item>
+        <item>What is the best advice you ever got?</item>
+        <item>What small thing makes your day better?</item>
+        <item>What did you think of the person on your left when you first met?</item>
+    </string-array>
+    <string-array name="game_friends_dare">
+        <item>Do an impression of someone at the table until they guess who it is.</item>
+        <item>Talk in a robot voice until your next turn.</item>
+        <item>Sing the chorus of the last song you listened to.</item>
+        <item>Tell your best joke. If nobody laughs, tell another one.</item>
+        <item>Give everyone here a nickname.</item>
+        <item>Describe your day so far like a sports commentator.</item>
+        <item>Act out a movie scene without words until someone guesses it.</item>
+        <item>Say the alphabet backwards as fast as you can.</item>
+        <item>Give a one-minute speech about why socks are important.</item>
+        <item>Show your best dance move for ten seconds.</item>
+        <item>Speak only in questions until your next turn.</item>
+        <item>Compliment the person on your right in three different ways.</item>
+        <item>Make up a short rap about the person who asked.</item>
+        <item>Do your best evil villain laugh.</item>
+        <item>Pretend to be a tour guide and present this room.</item>
+        <item>Keep a straight face for 30 seconds while everyone tries to make you laugh.</item>
+    </string-array>
+
+    <string-array name="game_best_truth">
+        <item>What is your favourite memory of us?</item>
+        <item>When did you feel closest to me?</item>
+        <item>What is one thing I do that annoys you a little?</item>
+        <item>What did you think of me the first time we met?</item>
+        <item>What is the secret you have kept the longest?</item>
+        <item>What do you wish you had told me earlier?</item>
+        <item>When did you last cry, and why?</item>
+        <item>What is your biggest worry about the future?</item>
+        <item>What is the best decision you have ever made?</item>
+        <item>Which of my habits would you steal?</item>
+        <item>What from years ago are you still proud of?</item>
+        <item>What would you never forgive a friend for?</item>
+        <item>What was the hardest thing you went through this year?</item>
+        <item>Who do you call first with good news?</item>
+        <item>What is one thing you want to change about yourself?</item>
+        <item>What is the kindest thing someone has done for you?</item>
+        <item>What is a dream you have not told anyone?</item>
+        <item>Which moment of your life would you live again?</item>
+        <item>What do you think I will be doing in ten years?</item>
+        <item>Which compliment have you remembered for years?</item>
+        <item>When did you last feel really brave?</item>
+        <item>What is something you have learned from me?</item>
+        <item>What would your perfect weekend look like?</item>
+        <item>What is one rule you live by?</item>
+    </string-array>
+    <string-array name="game_best_dare">
+        <item>Tell the story of how we met like a film trailer.</item>
+        <item>Do an impression of me.</item>
+        <item>Say three things you love about the person who asked.</item>
+        <item>Recreate a funny photo of us using only your face.</item>
+        <item>Sing a made-up song about our friendship.</item>
+        <item>Describe me in exactly five words.</item>
+        <item>Share an old inside joke and explain it to the others.</item>
+        <item>Give a short thank-you speech for the “best friend of the year” award.</item>
+        <item>Act out the last time we laughed really hard.</item>
+        <item>Name your favourite moment with each person here.</item>
+        <item>Plan our next adventure together in one minute.</item>
+        <item>Talk about our week like a news reporter.</item>
+        <item>Draw a quick portrait of the person on your left, on paper or in the air.</item>
+        <item>Tell everyone one thing they don’t know about you.</item>
+        <item>Let the group pick a word you must use in every sentence until your next turn.</item>
+        <item>Write a three-line poem about the person who asked and read it aloud.</item>
+    </string-array>
+
+    <string-array name="game_couples_truth">
+        <item>What was your first impression of me?</item>
+        <item>When did you know you liked me?</item>
+        <item>What is your favourite memory of us?</item>
+        <item>What small thing do I do that makes you happy?</item>
+        <item>Which song reminds you of us?</item>
+        <item>What is your idea of a perfect date?</item>
+        <item>What is one thing you would like us to try together?</item>
+        <item>Where would you take me on a dream trip?</item>
+        <item>What do you find most attractive about me?</item>
+        <item>What is the sweetest thing I have ever done for you?</item>
+        <item>Which nickname would you secretly like me to call you?</item>
+        <item>What was the best day we have had together?</item>
+        <item>What would you like to learn about me?</item>
+        <item>When do you feel most loved?</item>
+        <item>What do you admire about how I handle problems?</item>
+        <item>Which photo of us is your favourite, and why?</item>
+        <item>What would you write in a love letter to me?</item>
+        <item>Which habit of mine do you find cute?</item>
+        <item>What is our funniest moment together?</item>
+        <item>What are you most looking forward to with me?</item>
+        <item>What was the first thing you noticed about me?</item>
+        <item>Which film couple are we most like?</item>
+        <item>What is your favourite way to spend a lazy day with me?</item>
+        <item>What promise would you like to make to me?</item>
+    </string-array>
+    <string-array name="game_couples_dare">
+        <item>Look your partner in the eyes and give a sincere compliment.</item>
+        <item>Hold hands until your next turn.</item>
+        <item>Describe our perfect date in one minute.</item>
+        <item>Write a two-line love poem and read it aloud.</item>
+        <item>Do an impression of how your partner laughs.</item>
+        <item>Tell the story of our first date as a fairy tale.</item>
+        <item>Give your partner a 30-second shoulder massage.</item>
+        <item>Say three reasons you are grateful for your partner.</item>
+        <item>Slow dance together for 20 seconds, even without music.</item>
+        <item>Plan our next weekend out loud.</item>
+        <item>Hum a song that reminds you of your partner until they guess it.</item>
+        <item>Give your partner a sweet new nickname.</item>
+        <item>Act out the moment we first met.</item>
+        <item>Whisper something kind to your partner.</item>
+        <item>Draw a heart on your partner’s hand with your finger.</item>
+        <item>Promise your partner one small thing for tomorrow.</item>
+    </string-array>
+</resources>

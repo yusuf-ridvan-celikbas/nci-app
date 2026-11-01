@@ -123,6 +123,12 @@ interface RestoreDao {
 
     @Insert
     suspend fun insertSeats(seats: List<GroupSeat>)
+
+    @Query("DELETE FROM custom_question")
+    suspend fun clearCustomQuestions()
+
+    @Insert
+    suspend fun insertCustomQuestions(questions: List<CustomQuestion>)
 }
 
 @Dao

@@ -1,0 +1,138 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- P26 Doğruluk mu cesaret mi. Asla alkolle ilgili değil (GameContentTest kontrol eder). Çiftler: romantik, açık saçık değil. -->
+<resources>
+    <string-array name="game_friends_truth">
+        <item>Okulda başına gelen en utanç verici şey neydi?</item>
+        <item>Burada kimsenin bilmediği bir yeteneğin ne?</item>
+        <item>En kötü saç kesimin hangisiydi?</item>
+        <item>İlk ünlü aşkın kimdi?</item>
+        <item>Sevdiğin en tuhaf yemek ne?</item>
+        <item>Gizlice gurur duyduğun bir alışkanlığın ne?</item>
+        <item>Çocukken söylediğin en komik yalan neydi?</item>
+        <item>Telefonsuz boş bir günün olsa ne yapardın?</item>
+        <item>Yalnızken hangi şarkıyı söylersin?</item>
+        <item>Korktuğun en saçma şey ne?</item>
+        <item>Çocukken hayalindeki meslek neydi?</item>
+        <item>Aldığın en güzel hediye neydi?</item>
+        <item>Bir günlüğüne buradakilerden biriyle hayatını değiştirebilsen bu kim olurdu?</item>
+        <item>Gizlice sevdiğin kötü film hangisi?</item>
+        <item>En çok kullandığın emoji hangisi ve neden?</item>
+        <item>Ailene hiç söylemediğin bir şey ne?</item>
+        <item>Hatırladığın en tuhaf rüya neydi?</item>
+        <item>Asla silemeyeceğin uygulama hangisi?</item>
+        <item>Yaptığın en spontane şey neydi?</item>
+        <item>Gizlice izlediğin dizi hangisi?</item>
+        <item>Issız bir adada buradakilerden en uzun kim dayanır?</item>
+        <item>Aldığın en iyi tavsiye neydi?</item>
+        <item>Gününü güzelleştiren küçük bir şey ne?</item>
+        <item>Solundaki kişiyle ilk tanıştığında onun hakkında ne düşündün?</item>
+    </string-array>
+    <string-array name="game_friends_dare">
+        <item>Masadaki birinin taklidini yap, kim olduğunu bilene kadar devam et.</item>
+        <item>Bir sonraki sırana kadar robot sesiyle konuş.</item>
+        <item>En son dinlediğin şarkının nakaratını söyle.</item>
+        <item>En iyi fıkranı anlat. Kimse gülmezse bir tane daha anlat.</item>
+        <item>Buradaki herkese bir lakap tak.</item>
+        <item>Bugününü bir spor spikeri gibi anlat.</item>
+        <item>Bir film sahnesini konuşmadan canlandır, biri bilene kadar.</item>
+        <item>Alfabeyi olabildiğince hızlı tersten say.</item>
+        <item>Çorapların neden önemli olduğu hakkında bir dakikalık konuşma yap.</item>
+        <item>En iyi dans hareketini on saniye göster.</item>
+        <item>Bir sonraki sırana kadar sadece soru cümleleriyle konuş.</item>
+        <item>Sağındaki kişiye üç farklı iltifat et.</item>
+        <item>Soruyu soran kişi hakkında kısa bir rap uydur.</item>
+        <item>En iyi kötü adam kahkahanı at.</item>
+        <item>Rehbermiş gibi bu odayı tanıt.</item>
+        <item>Herkes seni güldürmeye çalışırken 30 saniye ciddi kal.</item>
+    </string-array>
+
+    <string-array name="game_best_truth">
+        <item>Bizimle ilgili en sevdiğin anı ne?</item>
+        <item>Kendini bana en yakın ne zaman hissettin?</item>
+        <item>Yaptığım ve seni hafifçe sinir eden bir şey ne?</item>
+        <item>Tanıştığımızda benim hakkımda ilk ne düşündün?</item>
+        <item>En uzun süre sakladığın sır ne?</item>
+        <item>Bana daha önce söylemiş olmayı dilediğin şey ne?</item>
+        <item>En son ne zaman ağladın ve neden?</item>
+        <item>Gelecekle ilgili en büyük endişen ne?</item>
+        <item>Verdiğin en iyi karar neydi?</item>
+        <item>Alışkanlıklarımdan hangisini çalmak isterdin?</item>
+        <item>Yıllar öncesinden hâlâ gurur duyduğun şey ne?</item>
+        <item>Bir arkadaşını asla affetmeyeceğin şey ne olurdu?</item>
+        <item>Bu yıl yaşadığın en zor şey neydi?</item>
+        <item>İyi bir haberi ilk kime söylersin?</item>
+        <item>Kendinde değiştirmek istediğin bir şey ne?</item>
+        <item>Birinin senin için yaptığı en nazik şey neydi?</item>
+        <item>Kimseye anlatmadığın bir hayalin ne?</item>
+        <item>Hayatının hangi anını yeniden yaşamak isterdin?</item>
+        <item>Sence on yıl sonra ne yapıyor olacağım?</item>
+        <item>Yıllardır aklında kalan iltifat hangisi?</item>
+        <item>Kendini en son ne zaman gerçekten cesur hissettin?</item>
+        <item>Benden öğrendiğin bir şey ne?</item>
+        <item>Mükemmel bir hafta sonu senin için nasıl olurdu?</item>
+        <item>Hayatında uyduğun bir kural ne?</item>
+    </string-array>
+    <string-array name="game_best_dare">
+        <item>Nasıl tanıştığımızı bir film fragmanı gibi anlat.</item>
+        <item>Benim taklidimi yap.</item>
+        <item>Soruyu soran kişide sevdiğin üç şeyi söyle.</item>
+        <item>Birlikte çekildiğimiz komik bir fotoğrafı sadece yüz ifadenle canlandır.</item>
+        <item>Arkadaşlığımız hakkında uydurma bir şarkı söyle.</item>
+        <item>Beni tam beş kelimeyle anlat.</item>
+        <item>Eski bir iç şakamızı paylaş ve diğerlerine açıkla.</item>
+        <item>“Yılın en iyi arkadaşı” ödülü için kısa bir teşekkür konuşması yap.</item>
+        <item>En son kahkahalara boğulduğumuz anı canlandır.</item>
+        <item>Buradaki her kişiyle en sevdiğin anını söyle.</item>
+        <item>Bir dakikada bir sonraki maceramızı planla.</item>
+        <item>Haftamızı bir haber spikeri gibi anlat.</item>
+        <item>Solundaki kişinin hızlı bir portresini çiz, kâğıda ya da havaya.</item>
+        <item>Herkese senin hakkında bilmedikleri bir şey söyle.</item>
+        <item>Grup bir kelime seçsin; bir sonraki sırana kadar her cümlede o kelimeyi kullan.</item>
+        <item>Soruyu soran kişi hakkında üç satırlık bir şiir yaz ve sesli oku.</item>
+    </string-array>
+
+    <string-array name="game_couples_truth">
+        <item>Benim hakkımdaki ilk izlenimin neydi?</item>
+        <item>Benden hoşlandığını ne zaman anladın?</item>
+        <item>Bizimle ilgili en sevdiğin anı ne?</item>
+        <item>Yaptığım ve seni mutlu eden küçük bir şey ne?</item>
+        <item>Hangi şarkı sana bizi hatırlatıyor?</item>
+        <item>Senin için mükemmel bir buluşma nasıl olurdu?</item>
+        <item>Birlikte denemek istediğin bir şey ne?</item>
+        <item>Hayalindeki bir yolculukta beni nereye götürürdün?</item>
+        <item>Bende en çekici bulduğun şey ne?</item>
+        <item>Senin için yaptığım en tatlı şey neydi?</item>
+        <item>Sana gizlice hangi lakapla seslenmemi isterdin?</item>
+        <item>Birlikte geçirdiğimiz en güzel gün hangisiydi?</item>
+        <item>Benim hakkımda neyi öğrenmek isterdin?</item>
+        <item>Kendini en çok ne zaman sevilmiş hissediyorsun?</item>
+        <item>Sorunlarla başa çıkma şeklimde neyi takdir ediyorsun?</item>
+        <item>En sevdiğin fotoğrafımız hangisi ve neden?</item>
+        <item>Bana bir aşk mektubu yazsan içine ne yazardın?</item>
+        <item>Sevimli bulduğun bir alışkanlığım ne?</item>
+        <item>Birlikte yaşadığımız en komik an neydi?</item>
+        <item>Benimle en çok neyi dört gözle bekliyorsun?</item>
+        <item>Bende fark ettiğin ilk şey neydi?</item>
+        <item>En çok hangi film çiftine benziyoruz?</item>
+        <item>Benimle tembel bir günü geçirmenin en sevdiğin yolu ne?</item>
+        <item>Bana vermek istediğin bir söz ne?</item>
+    </string-array>
+    <string-array name="game_couples_dare">
+        <item>Partnerinin gözlerine bakarak ona içten bir iltifat et.</item>
+        <item>Bir sonraki sırana kadar el ele tutuşun.</item>
+        <item>Mükemmel buluşmamızı bir dakikada anlat.</item>
+        <item>İki satırlık bir aşk şiiri yaz ve sesli oku.</item>
+        <item>Partnerinin nasıl güldüğünü taklit et.</item>
+        <item>İlk buluşmamızı bir masal gibi anlat.</item>
+        <item>Partnerine 30 saniye omuz masajı yap.</item>
+        <item>Partnerine minnettar olduğun üç sebebi söyle.</item>
+        <item>Müzik olmasa bile 20 saniye birlikte yavaş dans edin.</item>
+        <item>Bir sonraki hafta sonumuzu sesli planla.</item>
+        <item>Partnerini hatırlatan bir şarkıyı, o bilene kadar mırıldan.</item>
+        <item>Partnerine tatlı, yeni bir lakap tak.</item>
+        <item>İlk tanıştığımız anı canlandır.</item>
+        <item>Partnerinin kulağına nazik bir şey fısılda.</item>
+        <item>Parmağınla partnerinin eline bir kalp çiz.</item>
+        <item>Partnerine yarın için küçük bir söz ver.</item>
+    </string-array>
+</resources>

@@ -60,6 +60,8 @@ import com.cansin.app.ui.VersusScreen
 import com.cansin.app.ui.VersusSetupDialog
 import com.cansin.app.ui.VersusViewModel
 import com.cansin.app.ui.GroupViewModel
+import com.cansin.app.ui.GameViewModel
+import com.cansin.app.ui.GameScreen
 import com.cansin.app.system.ScreenPin
 import com.cansin.app.domain.PinScreenRules
 import androidx.compose.material3.AlertDialog
@@ -92,7 +94,7 @@ import kotlinx.coroutines.runBlocking
 private enum class Screen { COUNTER, TAB, SETTINGS, PROMILLE, HISTORY, DETAIL, GAME }
 
 /** Root screens shown with the bottom bar (P25); PROMILLE and DETAIL open on top without it. */
-private val NAV_TABS = listOf(RootTab.TONIGHT, RootTab.TAB, RootTab.HISTORY, RootTab.SETTINGS)
+private val NAV_TABS = listOf(RootTab.TONIGHT, RootTab.TAB, RootTab.GAME, RootTab.HISTORY, RootTab.SETTINGS)
 
 private fun Screen.tab(): RootTab? = when (this) {
     Screen.COUNTER -> RootTab.TONIGHT
@@ -121,6 +123,7 @@ class MainActivity : ComponentActivity() {
     private val group: GroupViewModel by viewModels {
         GroupViewModel.factory(app.sessionRepository, app.settingsStore, app.drinkTimer, app.groupTimers) { CounterWidget.refreshAll(app) }
     }
+    private val game: GameViewModel by viewModels { GameViewModel.factory(app.gameRepository) }
     private val water: WaterViewModel by viewModels { WaterViewModel.factory(app.sessionRepository, app.settingsStore) }
     private val care: CareViewModel by viewModels { CareViewModel.factory(app.sessionRepository, app.settingsStore) }
     private val history: HistoryViewModel by viewModels { HistoryViewModel.factory(app.historyRepository, app.settingsStore) }
@@ -272,6 +275,11 @@ class MainActivity : ComponentActivity() {
                     notificationAccess = notificationAccess,
                     friends = friends,
                     actions = settingsActions(onBack = { screen = Screen.COUNTER }),
+                )
+                screen == Screen.GAME -> GameScreen(
+                    game,
+                    session = groupState.session ?: versusState.session,
+                    seats = groupState.seats,
                 )
                 screen == Screen.TAB -> NotesScreen(notes, onBack = { screen = Screen.COUNTER })
                 screen == Screen.HISTORY -> HistoryScreen(

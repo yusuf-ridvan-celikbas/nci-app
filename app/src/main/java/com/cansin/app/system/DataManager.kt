@@ -53,6 +53,7 @@ class DataManager(
             friendResults = database.friendResultDao().all(),
             currency = settings.currency,
             seats = database.groupSeatDao().all(),
+            customQuestions = database.customQuestionDao().all(),
         )
         val json = ExportJson.build(data, includeProfile, System.currentTimeMillis())
         exportDir.deleteRecursively()
@@ -93,6 +94,7 @@ class DataManager(
                 dao.clearSessions()
                 dao.clearFriends()
                 dao.clearFriendResults()
+                dao.clearCustomQuestions()
                 val friendIds = data.friends.associate { it.fileId to dao.insert(FriendProfile(name = it.name, color = 0)) }
                 data.sessions.forEach { r ->
                     val s = r.session
@@ -103,6 +105,7 @@ class DataManager(
                     dao.insertSeats(r.seats.map { it.copy(sessionId = id) })
                 }
                 dao.insertFriendResults(data.friendResults)
+                dao.insertCustomQuestions(data.customQuestions)
             }
             exportDir.deleteRecursively()
         }

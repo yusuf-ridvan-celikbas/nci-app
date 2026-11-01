@@ -1,0 +1,99 @@
+package com.cansin.app.ui
+
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.viewModelScope
+import androidx.lifecycle.viewmodel.initializer
+import androidx.lifecycle.viewmodel.viewModelFactory
+import com.cansin.app.data.CustomQuestion
+import com.cansin.app.data.GameRepository
+import com.cansin.app.data.QuestionKind
+import com.cansin.app.data.Side
+import com.cansin.app.domain.GamePack
+import com.cansin.app.domain.GameRules
+import com.cansin.app.domain.ShuffleBag
+import com.cansin.app.domain.VersusRules
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.launch
+import kotlin.random.Random
+
+/** [side] = seat colour when the players come from Versus/Together; null = colour by position. */
+data class GamePlayer(val name: String, val side: Side? = null)
+
+data class GameCard(val kind: QuestionKind, val text: String)
+
+data class GameState(
+    val playing: Boolean = false,
+    val players: List<GamePlayer> = emptyList(),
+    val pack: GamePack = GamePack.FRIENDS,
+    val includeOwn: Boolean = true,
+    val avoidRepeat: Boolean = true,
+    val turn: Int? = null,
+    /** Final glass angle; while [spinning], the UI animates from [fromAngle] to it. */
+    val angle: Float = 0f,
+    val fromAngle: Float = 0f,
+    val spinId: Int = 0,
+    val spinning: Boolean = false,
+    val card: GameCard? = null,
+)
+
+/** Game state lives here (in memory) so switching tabs keeps it. Answers are never stored. */
+class GameViewModel(private val repository: GameRepository, private val random: Random = Random.Default) : ViewModel() {
+    private val ui = MutableStateFlow(GameState())
+    val state: StateFlow<GameState> = ui.asStateFlow()
+
+    val own: StateFlow<List<CustomQuestion>> = repository.own.stateIn(viewModelScope, SharingStarted.Eagerly, emptyList())
+
+    private val bags = mutableMapOf<QuestionKind, ShuffleBag>()
+
+    fun setPack(pack: GamePack) = ui.update { it.copy(pack = pack) }.also { bags.clear() }
+
+    fun setIncludeOwn(on: Boolean) = ui.update { it.copy(includeOwn = on) }.also { bags.clear() }
+
+    fun setAvoidRepeat(on: Boolean) = ui.update { it.copy(avoidRepeat = on) }
+
+    fun start(players: List<GamePlayer>) {
+        val clean = players.mapNotNull { p -> VersusRules.cleanName(p.name)?.let { p.copy(name = it) } }.take(GameRules.MAX_PLAYERS)
+        if (clean.size < GameRules.MIN_PLAYERS) return
+        bags.clear()
+        ui.update { it.copy(playing = true, players = clean, turn = null, card = null, spinning = false) }
+    }
+
+    fun backToSetup() = ui.update { it.copy(playing = false, spinning = false, card = null, turn = null) }
+
+    fun spin() {
+        val s = ui.value
+        if (!s.playing || s.spinning || s.players.size < GameRules.MIN_PLAYERS) return
+        val next = GameRules.pickNext(s.players.size, s.turn, s.avoidRepeat, random)
+        val target = GameRules.spinTarget(s.angle, next, s.players.size)
+        ui.update { it.copy(fromAngle = it.angle, angle = target, turn = next, spinId = it.spinId + 1, spinning = true, card = null) }
+    }
+
+    fun spinDone() = ui.update { it.copy(spinning = false) }
+
+    /** [builtIn] comes from the current language's resources; own questions are added when switched on. */
+    fun draw(kind: QuestionKind, builtIn: List<String>) {
+        val s = ui.value
+        if (s.turn == null || s.spinning) return
+        val items = builtIn + if (s.includeOwn) own.value.filter { it.kind == kind }.map { it.text } else emptyList()
+        val bag = bags[kind]?.takeIf { it.source == items } ?: ShuffleBag(items, random).also { bags[kind] = it }
+        val text = bag.next() ?: return
+        ui.update { it.copy(card = GameCard(kind, text)) }
+    }
+
+    fun addOwn(kind: QuestionKind, text: String, onResult: (Boolean) -> Unit) = viewModelScope.launch {
+        onResult(repository.add(kind, text))
+        bags.remove(kind)
+    }
+
+    fun deleteOwn(id: Long) = viewModelScope.launch { repository.delete(id); bags.clear() }
+
+    companion object {
+        fun factory(repository: GameRepository): ViewModelProvider.Factory = viewModelFactory { initializer { GameViewModel(repository) } }
+    }
+}

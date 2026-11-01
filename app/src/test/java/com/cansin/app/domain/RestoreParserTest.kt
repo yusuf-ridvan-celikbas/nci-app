@@ -5,6 +5,8 @@ import com.cansin.app.data.DrinkKind
 import com.cansin.app.data.FriendProfile
 import com.cansin.app.data.FriendResult
 import com.cansin.app.data.GroupSeat
+import com.cansin.app.data.CustomQuestion
+import com.cansin.app.data.QuestionKind
 import com.cansin.app.data.Note
 import com.cansin.app.data.Session
 import com.cansin.app.data.SessionMode
@@ -131,6 +133,16 @@ class RestoreParserTest {
         assertEquals(RestoreError.INVALID, fail(groupJson.replace("\"meSide\":\"GREEN\"", "\"meSide\":\"PURPLE\"")))
         assertEquals(RestoreError.INVALID, fail(groupJson.replace("\"mode\":\"GROUP\"", "\"mode\":\"VERSUS\"")))
         assertEquals(RestoreError.INVALID, fail(json.replace("{\"at\":12}", "{\"at\":12,\"side\":\"RED\"}")))
+    }
+
+    @Test
+    fun customQuestionsRoundTrip() {
+        val qs = listOf(CustomQuestion(9, QuestionKind.DARE, "Sing", 20), CustomQuestion(10, QuestionKind.TRUTH, "Why?", 30))
+        val j = ExportJson.build(data.copy(customQuestions = qs), includeProfile = false, exportedAt = 0)
+        assertEquals(qs.map { it.copy(id = 0) }, ok(j).customQuestions)
+        assertTrue(ok(json).customQuestions.isEmpty())
+        assertEquals(RestoreError.INVALID, fail(j.replace("\"kind\":\"DARE\"", "\"kind\":\"DRINK\"")))
+        assertEquals(RestoreError.INVALID, fail(j.replace("\"text\":\"Sing\"", "\"text\":\"   \"")))
     }
 
     @Test
