@@ -9,10 +9,10 @@ public struct BeerSize: Equatable, Codable, Sendable {
 
 public enum BeerRules {
     public static let presetsMl = [330, 500]
-    public static let minMl = 100
+    public static let minMl = 20
     public static let maxMl = 2_000
     public static let minAbv = 0.0
-    public static let maxAbv = 20.0
+    public static let maxAbv = 80.0
 
     public static func clamp(_ size: BeerSize) -> BeerSize {
         BeerSize(sizeMl: size.sizeMl.clamped(minMl, maxMl), abv: size.abv.clamped(minAbv, maxAbv))

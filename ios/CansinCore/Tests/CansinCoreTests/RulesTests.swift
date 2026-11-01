@@ -7,19 +7,19 @@ final class BeerRulesTests: XCTestCase {
         XCTAssertEqual(BeerRules.parseCl("33"), 330)
         XCTAssertEqual(BeerRules.parseCl("56,8"), 568)
         XCTAssertEqual(BeerRules.parseCl(" 40.0 "), 400)
-        XCTAssertEqual(BeerRules.parseCl("10"), BeerRules.minMl)
+        XCTAssertEqual(BeerRules.parseCl("2"), BeerRules.minMl)
         XCTAssertEqual(BeerRules.parseCl("200"), BeerRules.maxMl)
     }
 
     func testRejectsInvalidCentilitres() {
-        for raw in ["", "9.9", "200.1", "-33", "33.25", "abc", "1e2", ",5", "٣٣"] { XCTAssertNil(BeerRules.parseCl(raw), raw) }
+        for raw in ["", "1.9", "200.1", "-33", "33.25", "abc", "1e2", ",5", "٣٣"] { XCTAssertNil(BeerRules.parseCl(raw), raw) }
     }
 
     func testParsesAbv() {
         XCTAssertEqual(BeerRules.parseAbv("5"), 5.0)
         XCTAssertEqual(BeerRules.parseAbv("4,7")!, 4.7, accuracy: 1e-9)
         XCTAssertEqual(BeerRules.parseAbv("0"), 0.0)
-        for raw in ["20.1", "-1", "5.55", ""] { XCTAssertNil(BeerRules.parseAbv(raw), raw) }
+        for raw in ["80.1", "-1", "5.55", ""] { XCTAssertNil(BeerRules.parseAbv(raw), raw) }
     }
 
     func testFormats() {

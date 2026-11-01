@@ -2,9 +2,25 @@ import Foundation
 
 public typealias Millis = Int64
 
-public enum SessionMode: String, Codable, CaseIterable, Sendable { case SOLO, VERSUS }
+/// GROUP = P23 "drinking together" (2–6 seats).
+public enum SessionMode: String, Codable, CaseIterable, Sendable { case SOLO, VERSUS, GROUP }
 
-public enum Side: String, Codable, CaseIterable, Sendable { case SOLO, RED, BLUE }
+/// RED/BLUE = versus sides; group seats use `GroupRules.sides`.
+public enum Side: String, Codable, CaseIterable, Sendable { case SOLO, RED, BLUE, GREEN, PURPLE, AMBER, YELLOW }
+
+/// P22: what was drunk. Records keep the "beer" name.
+public enum DrinkKind: String, Codable, CaseIterable, Sendable { case BEER, WINE, RAKI, SHOT, COCKTAIL, CUSTOM }
+
+/// P23: one seat of a group session; name nil = default label.
+public struct GroupSeat: Equatable, Sendable {
+    public var sessionId: Int64
+    public var side: Side
+    public var name: String?
+
+    public init(sessionId: Int64, side: Side, name: String? = nil) {
+        self.sessionId = sessionId; self.side = side; self.name = name
+    }
+}
 
 public struct Session: Equatable, Identifiable, Sendable {
     public var id: Int64
@@ -37,11 +53,12 @@ public struct BeerEvent: Equatable, Identifiable, Sendable {
     public var abv: Double
     public var at: Millis
     public var finishedAt: Millis?
+    public var kind: DrinkKind
 
     public init(id: Int64 = 0, sessionId: Int64, side: Side = .SOLO, sizeMl: Int = BeerEvent.defaultSizeMl,
-                abv: Double = BeerEvent.defaultAbv, at: Millis, finishedAt: Millis? = nil) {
+                abv: Double = BeerEvent.defaultAbv, at: Millis, finishedAt: Millis? = nil, kind: DrinkKind = .BEER) {
         self.id = id; self.sessionId = sessionId; self.side = side; self.sizeMl = sizeMl
-        self.abv = abv; self.at = at; self.finishedAt = finishedAt
+        self.abv = abv; self.at = at; self.finishedAt = finishedAt; self.kind = kind
     }
 }
 
@@ -49,9 +66,11 @@ public struct WaterEvent: Equatable, Identifiable, Sendable {
     public var id: Int64
     public var sessionId: Int64
     public var at: Millis
+    /// Seat in a group session; nil = me (solo/versus).
+    public var side: Side?
 
-    public init(id: Int64 = 0, sessionId: Int64, at: Millis) {
-        self.id = id; self.sessionId = sessionId; self.at = at
+    public init(id: Int64 = 0, sessionId: Int64, at: Millis, side: Side? = nil) {
+        self.id = id; self.sessionId = sessionId; self.at = at; self.side = side
     }
 }
 

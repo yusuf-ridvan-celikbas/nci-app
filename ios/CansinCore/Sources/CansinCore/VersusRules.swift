@@ -37,17 +37,28 @@ public enum VersusRules {
     }
 
     public static func fits(_ side: Side, mode: SessionMode?) -> Bool {
-        side == .SOLO ? mode != .VERSUS : mode == .VERSUS
+        switch mode {
+        case .VERSUS: return side == .RED || side == .BLUE
+        case .GROUP: return GroupRules.isSeatSide(side)
+        default: return side == .SOLO
+        }
     }
 
+    public static func hasSides(_ mode: SessionMode?) -> Bool { mode == .VERSUS || mode == .GROUP }
+
     public static func meSide(_ session: Session?) -> Side? {
-        session?.mode == .VERSUS ? session?.meSide : .SOLO
+        hasSides(session?.mode) ? session?.meSide : .SOLO
+    }
+
+    /// Water carries a seat only in group sessions; elsewhere every glass is mine.
+    public static func isMineWater(_ event: WaterEvent, in session: Session) -> Bool {
+        session.mode == .GROUP ? (session.meSide != nil && event.side == session.meSide) : true
     }
 
     public static func isMine(_ event: BeerEvent, in session: Session) -> Bool { event.side == meSide(session) }
 
     public static func noteSide(_ side: Side?, mode: SessionMode) -> Side? {
-        guard let side, mode == .VERSUS, side != .SOLO else { return nil }
+        guard let side, hasSides(mode), fits(side, mode: mode) else { return nil }
         return side
     }
 
