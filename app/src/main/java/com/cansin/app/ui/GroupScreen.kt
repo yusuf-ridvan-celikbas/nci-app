@@ -73,6 +73,7 @@ private const val SLOW_TICK_MS = 30_000L
 @Composable
 fun GroupScreen(
     viewModel: GroupViewModel,
+    game: GameViewModel,
     onOpenTab: () -> Unit,
     onEditSeats: () -> Unit,
     pinned: Boolean,
@@ -88,6 +89,8 @@ fun GroupScreen(
     UndoEffect(viewModel.beerAdded, snackbar, viewModel::undo)
     UndoEffect(viewModel.waterAdded, snackbar, viewModel::undoWater, R.string.water_added)
     var picking by rememberSaveable { mutableStateOf<Side?>(null) }
+    val gameState by game.state.collectAsState()
+    val gameOn = gameState.shownInSession
 
     // Ticks only while visible: every second when a timer runs, else every 30 s for the "… ago" lines.
     var now by remember { mutableLongStateOf(System.currentTimeMillis()) }
@@ -101,6 +104,7 @@ fun GroupScreen(
     }
 
     CompositionLocalProvider(LocalSeats provides state.seats) {
+        SyncGamePlayers(game, session, gameOn)
         Scaffold(
             topBar = {
                 CenterAlignedTopAppBar(
@@ -111,6 +115,7 @@ fun GroupScreen(
                         }
                     },
                     actions = {
+                        GameToggle(gameOn, game::setShownInSession)
                         IconButton(onClick = onTogglePin) {
                             Icon(
                                 painterResource(if (pinned) R.drawable.ic_lock else R.drawable.ic_lock_open),
@@ -136,7 +141,28 @@ fun GroupScreen(
                 contentPadding = androidx.compose.foundation.layout.PaddingValues(12.dp),
                 verticalArrangement = Arrangement.spacedBy(10.dp),
             ) {
-                items(state.times, key = { it.side.name }) { t ->
+                if (gameOn) {
+                    // Counting stays first: compact rows, then the game.
+                    items(state.times, key = { "c" + it.side.name }) { t ->
+                        val name = sideName(session, t.side)
+                        val waterDescription = stringResource(R.string.group_water_add, name)
+                        CompactSideRow(
+                            name = if (session.meSide == t.side) stringResource(R.string.versus_name_me, name) else name,
+                            colors = sideColor(t.side) ?: (MaterialTheme.colorScheme.primary to MaterialTheme.colorScheme.onPrimary),
+                            count = t.drinks,
+                            addDescription = stringResource(R.string.versus_add, name),
+                            removeDescription = stringResource(R.string.versus_remove, name),
+                            onAdd = { viewModel.add(t.side) },
+                            onRemove = { viewModel.removeLatest(t.side) },
+                        ) {
+                            IconButton(onClick = { viewModel.addWater(t.side) }) {
+                                Icon(painterResource(R.drawable.ic_shortcut_water), waterDescription)
+                            }
+                        }
+                    }
+                    item { GamePanel(game, gameState, showPacks = true) }
+                }
+                if (!gameOn) items(state.times, key = { it.side.name }) { t ->
                     SeatRow(
                         session = session,
                         times = t,

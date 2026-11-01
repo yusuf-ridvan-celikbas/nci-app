@@ -297,6 +297,7 @@ class MainActivity : ComponentActivity() {
                 }
                 groupState.session != null -> GroupScreen(
                     viewModel = group,
+                    game = game,
                     onOpenTab = { screen = Screen.TAB },
                     onEditSeats = { editingGroup = true },
                     pinned = pinned,
@@ -308,6 +309,7 @@ class MainActivity : ComponentActivity() {
                 )
                 versusState.session != null -> VersusScreen(
                     viewModel = versus,
+                    game = game,
                     onOpenTab = { screen = Screen.TAB },
                     onEditSides = { editingSides = true },
                     pinned = pinned,

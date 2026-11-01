@@ -27,6 +27,9 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
@@ -46,6 +49,7 @@ import com.cansin.app.data.Side
 @Composable
 fun VersusScreen(
     viewModel: VersusViewModel,
+    game: GameViewModel,
     onOpenTab: () -> Unit,
     onEditSides: () -> Unit,
     pinned: Boolean,
@@ -57,6 +61,9 @@ fun VersusScreen(
     val session = state.session ?: return
     val snackbar = remember { SnackbarHostState() }
     UndoEffect(viewModel.beerAdded, snackbar, viewModel::undo)
+    val gameState by game.state.collectAsState()
+    val gameOn = gameState.shownInSession
+    SyncGamePlayers(game, session, gameOn)
 
     Scaffold(
         topBar = {
@@ -68,6 +75,7 @@ fun VersusScreen(
                     }
                 },
                 actions = {
+                    GameToggle(gameOn, game::setShownInSession)
                     IconButton(onClick = onTogglePin) {
                         Icon(
                             painterResource(if (pinned) R.drawable.ic_lock else R.drawable.ic_lock_open),
@@ -88,6 +96,35 @@ fun VersusScreen(
             ) { Text(stringResource(R.string.end_session)) }
         },
     ) { padding ->
+        if (gameOn) {
+            // Versus stays the main view: both sides pinned on top, the game scrolls below.
+            Column(Modifier.fillMaxSize().padding(padding)) {
+                Column(Modifier.padding(horizontal = 12.dp, vertical = 8.dp)) {
+                    listOf(Side.RED to state.red, Side.BLUE to state.blue).forEach { (side, count) ->
+                        val name = sideName(session, side)
+                        CompactSideRow(
+                            name = if (session.meSide == side) stringResource(R.string.versus_name_me, name) else name,
+                            colors = sideColor(side) ?: (Color.Gray to Color.White),
+                            count = count,
+                            addDescription = stringResource(R.string.versus_add, name),
+                            removeDescription = stringResource(R.string.versus_remove, name),
+                            onAdd = { viewModel.add(side) },
+                            onRemove = { viewModel.removeLatest(side) },
+                        )
+                    }
+                }
+                HorizontalDivider()
+                Column(
+                    Modifier.weight(1f).verticalScroll(rememberScrollState()).padding(16.dp),
+                    verticalArrangement = Arrangement.spacedBy(8.dp),
+                ) {
+                    GamePanel(game, gameState, showPacks = true)
+                    waterBar(snackbar)
+                    promilleCard()
+                }
+            }
+            return@Scaffold
+        }
         Column(Modifier.fillMaxSize().padding(padding)) {
             SideHalf(session, Side.RED, state.red, onEditSides, viewModel::add, viewModel::removeLatest)
             SideHalf(session, Side.BLUE, state.blue, onEditSides, viewModel::add, viewModel::removeLatest)

@@ -357,7 +357,7 @@
     <string name="nav_game">Oyun</string>
     <string name="nav_history">Geçmiş</string>
     <string name="nav_settings">Ayarlar</string>
-    <string name="game_title">Doğruluk mu Cesaret mi</string>
+    <string name="game_subtitle">Doğruluk mu Cesaret mi</string>
     <string name="game_play_with">Bu geceki kişilerle oyna</string>
     <string name="game_use_players">Bu oyuncuları kullan</string>
     <string name="game_players">Oyuncular</string>
@@ -390,4 +390,6 @@
     <string name="game_own_invalid">En fazla 200 karakter.</string>
     <string name="game_own_full">Listen dolu (300).</string>
     <string name="game_own_empty">Henüz kendi sorun yok.</string>
+    <string name="game_show">Soy tu Tentación’ı göster (Doğruluk mu Cesaret mi)</string>
+    <string name="game_hide">Soy tu Tentación’ı gizle</string>
 </resources>

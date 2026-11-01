@@ -40,6 +40,8 @@ data class GameState(
     val spinId: Int = 0,
     val spinning: Boolean = false,
     val card: GameCard? = null,
+    /** Truth or Dare switched on inside Versus/Together (Versus stays the main view). */
+    val shownInSession: Boolean = false,
 )
 
 /** Game state lives here (in memory) so switching tabs keeps it. Answers are never stored. */
@@ -63,6 +65,15 @@ class GameViewModel(private val repository: GameRepository, private val random: 
         bags.clear()
         ui.update { it.copy(playing = true, players = clean, turn = null, card = null, spinning = false) }
     }
+
+    /** Versus/Together: play with the session's people; restarts only when they change. */
+    fun usePlayers(players: List<GamePlayer>) {
+        val s = ui.value
+        if (s.playing && s.players == players) return
+        start(players)
+    }
+
+    fun setShownInSession(on: Boolean) = ui.update { it.copy(shownInSession = on) }
 
     fun backToSetup() = ui.update { it.copy(playing = false, spinning = false, card = null, turn = null) }
 

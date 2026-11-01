@@ -59,14 +59,14 @@ import com.cansin.app.domain.GameRules
 private val playersSaver = listSaver<SnapshotStateList<String>, String>({ it.toList() }, { mutableStateListOf<String>().apply { addAll(it) } })
 
 @StringRes
-private fun packName(pack: GamePack): Int = when (pack) {
+internal fun packName(pack: GamePack): Int = when (pack) {
     GamePack.FRIENDS -> R.string.game_pack_friends
     GamePack.BEST_FRIENDS -> R.string.game_pack_best
     GamePack.COUPLES -> R.string.game_pack_couples
 }
 
 @ArrayRes
-private fun packArray(pack: GamePack, kind: QuestionKind): Int = when (pack) {
+internal fun packArray(pack: GamePack, kind: QuestionKind): Int = when (pack) {
     GamePack.FRIENDS -> if (kind == QuestionKind.TRUTH) R.array.game_friends_truth else R.array.game_friends_dare
     GamePack.BEST_FRIENDS -> if (kind == QuestionKind.TRUTH) R.array.game_best_truth else R.array.game_best_dare
     GamePack.COUPLES -> if (kind == QuestionKind.TRUTH) R.array.game_couples_truth else R.array.game_couples_dare
@@ -95,7 +95,7 @@ fun GameScreen(viewModel: GameViewModel, session: Session?, seats: List<GroupSea
                 verticalArrangement = Arrangement.spacedBy(12.dp),
                 horizontalAlignment = Alignment.CenterHorizontally,
             ) {
-                if (state.playing) Play(viewModel, state) else Setup(viewModel, state, own.size, session) { managing = true }
+                if (state.playing) GamePanel(viewModel, state, showPacks = false) else Setup(viewModel, state, own.size, session) { managing = true }
             }
         }
     }
@@ -104,6 +104,7 @@ fun GameScreen(viewModel: GameViewModel, session: Session?, seats: List<GroupSea
 
 @Composable
 private fun Setup(viewModel: GameViewModel, state: GameState, ownCount: Int, session: Session?, onManage: () -> Unit) {
+    Text(stringResource(R.string.game_subtitle), Modifier.fillMaxWidth(), style = MaterialTheme.typography.titleSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
     val linked = GameRules.linkedSides(session, LocalSeats.current).map { GamePlayer(sideName(session, it), it) }
     if (linked.size >= GameRules.MIN_PLAYERS) {
         OutlinedCard(Modifier.fillMaxWidth()) {
@@ -161,56 +162,4 @@ private fun Setup(viewModel: GameViewModel, state: GameState, ownCount: Int, ses
         enabled = GameRules.canStart(players),
         modifier = Modifier.fillMaxWidth().heightIn(min = 52.dp),
     ) { Text(stringResource(R.string.game_start)) }
-}
-
-@Composable
-private fun Play(viewModel: GameViewModel, state: GameState) {
-    val truths = stringArrayResource(packArray(state.pack, QuestionKind.TRUTH)).toList()
-    val dares = stringArrayResource(packArray(state.pack, QuestionKind.DARE)).toList()
-    fun items(kind: QuestionKind) = if (kind == QuestionKind.TRUTH) truths else dares
-
-    SpinGlass(state, onSpin = viewModel::spin, onSpinDone = viewModel::spinDone)
-    val turn = state.turn?.let { state.players.getOrNull(it) }
-    Text(
-        when {
-            state.spinning -> stringResource(R.string.game_spinning)
-            turn != null -> stringResource(R.string.game_turn, turn.name)
-            else -> stringResource(R.string.game_tap_to_spin)
-        },
-        style = MaterialTheme.typography.headlineSmall,
-        textAlign = TextAlign.Center,
-    )
-    val card = state.card
-    when {
-        state.spinning -> Unit
-        turn == null -> Button(onClick = viewModel::spin, modifier = Modifier.fillMaxWidth().heightIn(min = 52.dp)) {
-            Text(stringResource(R.string.game_spin))
-        }
-        card == null -> Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-            Button(onClick = { viewModel.draw(QuestionKind.TRUTH, truths) }, modifier = Modifier.weight(1f).heightIn(min = 56.dp)) {
-                Text(stringResource(R.string.game_truth))
-            }
-            FilledTonalButton(onClick = { viewModel.draw(QuestionKind.DARE, dares) }, modifier = Modifier.weight(1f).heightIn(min = 56.dp)) {
-                Text(stringResource(R.string.game_dare))
-            }
-        }
-        else -> {
-            ElevatedCard(Modifier.fillMaxWidth()) {
-                Column(Modifier.padding(20.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                    Text(
-                        stringResource(if (card.kind == QuestionKind.TRUTH) R.string.game_truth else R.string.game_dare),
-                        style = MaterialTheme.typography.labelLarge,
-                        color = MaterialTheme.colorScheme.primary,
-                    )
-                    Text(card.text, style = MaterialTheme.typography.headlineSmall)
-                }
-            }
-            Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                OutlinedButton(onClick = { viewModel.draw(card.kind, items(card.kind)) }, modifier = Modifier.weight(1f)) {
-                    Text(stringResource(R.string.game_skip))
-                }
-                Button(onClick = viewModel::spin, modifier = Modifier.weight(1f)) { Text(stringResource(R.string.game_next)) }
-            }
-        }
-    }
 }
