@@ -142,6 +142,12 @@ Current phase: **P14–P26 done on Android (branch feature/p20-plus, local only,
   6. Counts in widget/stats/result card now mean all drinks, not only beer.
 - Known limits: the Stats "water per drink" in a group counts everyone's water; in a group, the counter's water bar duplicates my seat's water button.
 
+## Phone review status (end of 2026-11-01)
+- Approved on the phone: P13, P14, P15, P16, P17, P18, P19, P20, P21, P22, P23 (incl. the redesign 63a6fbf).
+- Installed, waiting for review: P24 screen lock, P25 bottom bar, P26 Soy tu Tentación (+ inside Versus/Together, who asks whom, AI questions switch, CSV import), app name SalgamBalgam.
+- After the OKs: merge feature/p20-plus into master in order, then ask the user before pushing.
+- Phone: wireless adb (the IP/port changes each time, so ask the user). Debug builds installed over existing data.
+
 ## Phone review (2026-11-01, step by step, debug builds over existing data — paused by user)
 - Installed in order on the phone: P13 (DB 2→3 ran, app started, no crash) → P14 → P15 → P16 → P17 → P18 (currently on phone).
 - User approved: P14, P15, P16, P17. P13 + P18 installed but not yet confirmed. Next: user checks P18, then install P19 (bc7ae55), then merge approved features into master and push.
