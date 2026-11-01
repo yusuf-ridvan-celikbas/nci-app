@@ -74,11 +74,6 @@ private fun NotesContent(viewModel: NotesViewModel, state: NotesState, onBack: (
         topBar = {
             TopAppBar(
                 title = { Text(stringResource(R.string.tab_title)) },
-                navigationIcon = {
-                    IconButton(onClick = onBack) {
-                        Icon(painterResource(R.drawable.ic_arrow_back), stringResource(R.string.back))
-                    }
-                },
                 actions = {
                     TextButton(onClick = { settling = true }, enabled = state.totals.total > 0) { Text(stringResource(R.string.settle_title)) }
                 },

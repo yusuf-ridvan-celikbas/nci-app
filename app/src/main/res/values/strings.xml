@@ -360,4 +360,9 @@
     <string name="group_add_water">+ Water</string>
     <string name="group_timer_stop">Stop</string>
     <string name="time_minutes">%1$d min</string>
+    <string name="nav_tonight">Tonight</string>
+    <string name="nav_tab">Tab</string>
+    <string name="nav_game">Game</string>
+    <string name="nav_history">History</string>
+    <string name="nav_settings">Settings</string>
 </resources>

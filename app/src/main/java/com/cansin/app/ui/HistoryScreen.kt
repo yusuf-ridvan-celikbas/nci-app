@@ -62,11 +62,6 @@ fun HistoryScreen(viewModel: HistoryViewModel, onBack: () -> Unit, onOpen: (Long
         topBar = {
             TopAppBar(
                 title = { Text(stringResource(R.string.history_title)) },
-                navigationIcon = {
-                    IconButton(onClick = onBack) {
-                        Icon(painterResource(R.drawable.ic_arrow_back), stringResource(R.string.back))
-                    }
-                },
             )
         },
     ) { padding ->

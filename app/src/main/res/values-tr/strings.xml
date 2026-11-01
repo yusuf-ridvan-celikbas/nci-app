@@ -352,4 +352,9 @@
     <string name="group_add_water">+ Su</string>
     <string name="group_timer_stop">Durdur</string>
     <string name="time_minutes">%1$d dk</string>
+    <string name="nav_tonight">Bu gece</string>
+    <string name="nav_tab">Hesap</string>
+    <string name="nav_game">Oyun</string>
+    <string name="nav_history">Geçmiş</string>
+    <string name="nav_settings">Ayarlar</string>
 </resources>

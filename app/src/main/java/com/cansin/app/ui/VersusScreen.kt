@@ -46,10 +46,8 @@ import com.cansin.app.data.Side
 @Composable
 fun VersusScreen(
     viewModel: VersusViewModel,
-    onOpenSettings: () -> Unit,
     onOpenTab: () -> Unit,
     onEditSides: () -> Unit,
-    onOpenHistory: () -> Unit,
     pinned: Boolean,
     onTogglePin: () -> Unit,
     promilleCard: @Composable () -> Unit,
@@ -76,14 +74,8 @@ fun VersusScreen(
                             stringResource(if (pinned) R.string.unpin_screen else R.string.pin_screen),
                         )
                     }
-                    IconButton(onClick = onOpenHistory) {
-                        Icon(painterResource(R.drawable.ic_history), stringResource(R.string.history_title))
-                    }
                     IconButton(onClick = onEditSides) {
                         Icon(painterResource(R.drawable.ic_versus), stringResource(R.string.versus_edit))
-                    }
-                    IconButton(onClick = onOpenSettings) {
-                        Icon(painterResource(R.drawable.ic_settings), stringResource(R.string.settings))
                     }
                 },
             )

@@ -73,10 +73,8 @@ private const val SLOW_TICK_MS = 30_000L
 @Composable
 fun GroupScreen(
     viewModel: GroupViewModel,
-    onOpenSettings: () -> Unit,
     onOpenTab: () -> Unit,
     onEditSeats: () -> Unit,
-    onOpenHistory: () -> Unit,
     pinned: Boolean,
     onTogglePin: () -> Unit,
     resumed: Boolean,
@@ -119,14 +117,8 @@ fun GroupScreen(
                                 stringResource(if (pinned) R.string.unpin_screen else R.string.pin_screen),
                             )
                         }
-                        IconButton(onClick = onOpenHistory) {
-                            Icon(painterResource(R.drawable.ic_history), stringResource(R.string.history_title))
-                        }
                         IconButton(onClick = onEditSeats) {
                             Icon(painterResource(R.drawable.ic_versus), stringResource(R.string.group_edit))
-                        }
-                        IconButton(onClick = onOpenSettings) {
-                            Icon(painterResource(R.drawable.ic_settings), stringResource(R.string.settings))
                         }
                     },
                 )

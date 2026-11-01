@@ -11,6 +11,15 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.SystemBarStyle
 import androidx.activity.compose.BackHandler
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.consumeWindowInsets
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.Scaffold
+import androidx.compose.ui.Modifier
+import com.cansin.app.ui.AppNavBar
+import com.cansin.app.ui.RootTab
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
@@ -80,7 +89,27 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 
-private enum class Screen { COUNTER, TAB, SETTINGS, PROMILLE, HISTORY, DETAIL }
+private enum class Screen { COUNTER, TAB, SETTINGS, PROMILLE, HISTORY, DETAIL, GAME }
+
+/** Root screens shown with the bottom bar (P25); PROMILLE and DETAIL open on top without it. */
+private val NAV_TABS = listOf(RootTab.TONIGHT, RootTab.TAB, RootTab.HISTORY, RootTab.SETTINGS)
+
+private fun Screen.tab(): RootTab? = when (this) {
+    Screen.COUNTER -> RootTab.TONIGHT
+    Screen.TAB -> RootTab.TAB
+    Screen.GAME -> RootTab.GAME
+    Screen.HISTORY -> RootTab.HISTORY
+    Screen.SETTINGS -> RootTab.SETTINGS
+    Screen.PROMILLE, Screen.DETAIL -> null
+}
+
+private fun RootTab.screen(): Screen = when (this) {
+    RootTab.TONIGHT -> Screen.COUNTER
+    RootTab.TAB -> Screen.TAB
+    RootTab.GAME -> Screen.GAME
+    RootTab.HISTORY -> Screen.HISTORY
+    RootTab.SETTINGS -> Screen.SETTINGS
+}
 
 class MainActivity : ComponentActivity() {
     private val app get() = application as CansinApp
@@ -218,6 +247,13 @@ class MainActivity : ComponentActivity() {
         BackHandler(screen != Screen.COUNTER) { screen = if (screen == Screen.DETAIL) Screen.HISTORY else Screen.COUNTER }
 
         CansinTheme(dark, settings.accent) { CompositionLocalProvider(LocalCurrency provides settings.currency) {
+            val tab = screen.tab()
+            val showBar = settings.ageConfirmed && !showLock && tab != null
+            Scaffold(
+                bottomBar = { if (showBar && tab != null) AppNavBar(tab, NAV_TABS) { screen = it.screen() } },
+                contentWindowInsets = WindowInsets(0),
+            ) { inner ->
+            Box(Modifier.fillMaxSize().padding(inner).consumeWindowInsets(inner)) {
             when {
                 showLock -> LockScreen(
                     title = stringResource(settings.appName.label),
@@ -231,7 +267,7 @@ class MainActivity : ComponentActivity() {
                 )
                 screen == Screen.SETTINGS -> SettingsScreen(
                     settings = settings,
-                    language = AppLocale.current(this, settings.language),
+                    language = AppLocale.current(this@MainActivity, settings.language),
                     dynamicAvailable = dynamicColorAvailable,
                     notificationAccess = notificationAccess,
                     friends = friends,
@@ -253,10 +289,8 @@ class MainActivity : ComponentActivity() {
                 }
                 groupState.session != null -> GroupScreen(
                     viewModel = group,
-                    onOpenSettings = { screen = Screen.SETTINGS },
                     onOpenTab = { screen = Screen.TAB },
                     onEditSeats = { editingGroup = true },
-                    onOpenHistory = { screen = Screen.HISTORY },
                     pinned = pinned,
                     onTogglePin = { togglePin(settings.pinInfoSeen) },
                     resumed = resumed,
@@ -266,10 +300,8 @@ class MainActivity : ComponentActivity() {
                 )
                 versusState.session != null -> VersusScreen(
                     viewModel = versus,
-                    onOpenSettings = { screen = Screen.SETTINGS },
                     onOpenTab = { screen = Screen.TAB },
                     onEditSides = { editingSides = true },
-                    onOpenHistory = { screen = Screen.HISTORY },
                     pinned = pinned,
                     onTogglePin = { togglePin(settings.pinInfoSeen) },
                     promilleCard = { CareSlot(); PromilleSlot(onOpen = { screen = Screen.PROMILLE }) },
@@ -280,13 +312,13 @@ class MainActivity : ComponentActivity() {
                     title = stringResource(settings.appName.label),
                     defaultDrink = com.cansin.app.domain.Drinks.default(settings.defaultDrink, settings.beerSize),
                     beerSize = settings.beerSize,
-                    onOpenSettings = { screen = Screen.SETTINGS },
                     onOpenTab = { screen = Screen.TAB },
                     onStartVersus = { choosingMode = true },
-                    onOpenHistory = { screen = Screen.HISTORY },
                     promilleCard = { CareSlot(); PromilleSlot(onOpen = { screen = Screen.PROMILLE }) },
                     waterBar = { WaterSlot(it) },
                 )
+            }
+            }
             }
             val shared = versusState.session != null || groupState.session != null
             LaunchedEffect(shared, pinned, versusState.loaded, groupState.loaded) {
