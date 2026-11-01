@@ -50,8 +50,9 @@ class DataManager(
         val data = ExportData(
             dao.sessions(), dao.beers(), dao.water(), dao.notes(), dao.friends(),
             settings.profile,
-            database.friendResultDao().all(),
-            settings.currency,
+            friendResults = database.friendResultDao().all(),
+            currency = settings.currency,
+            seats = database.groupSeatDao().all(),
         )
         val json = ExportJson.build(data, includeProfile, System.currentTimeMillis())
         exportDir.deleteRecursively()
@@ -99,6 +100,7 @@ class DataManager(
                     dao.insertBeers(r.beers.map { it.copy(sessionId = id) })
                     dao.insertWater(r.water.map { it.copy(sessionId = id) })
                     dao.insertNotes(r.notes.map { it.copy(sessionId = id) })
+                    dao.insertSeats(r.seats.map { it.copy(sessionId = id) })
                 }
                 dao.insertFriendResults(data.friendResults)
             }

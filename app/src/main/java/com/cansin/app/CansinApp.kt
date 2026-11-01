@@ -25,7 +25,7 @@ class CansinApp : Application() {
     val settingsStore: SettingsStore by lazy { SettingsStore(this) }
     val friendRepository: FriendRepository by lazy { FriendRepository(database.friendDao()) }
     val historyRepository: HistoryRepository by lazy {
-        HistoryRepository(database.sessionDao(), database.beerDao(), database.noteDao(), database.waterDao(), database.friendResultDao())
+        HistoryRepository(database.sessionDao(), database.beerDao(), database.noteDao(), database.waterDao(), database.friendResultDao(), database.groupSeatDao())
     }
     val dataManager: DataManager by lazy {
         DataManager(this, database, settingsStore, { reminders.cancel() }, { CounterWidget.refreshAll(this) })
@@ -51,6 +51,7 @@ class CansinApp : Application() {
                 }
             },
             defaultDrink = { settingsStore.settings.first().let { Drinks.default(it.defaultDrink, it.beerSize) } },
+            seats = database.groupSeatDao(),
         )
     }
 }

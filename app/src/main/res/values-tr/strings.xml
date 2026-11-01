@@ -320,4 +320,21 @@
     <string name="drink_cocktail">Kokteyl</string>
     <string name="drink_custom">Diğer</string>
     <string name="drink_count">%1$s: %2$d</string>
+    <string name="mode_title">Kim içiyor?</string>
+    <string name="mode_versus">Kapışma (2 taraf)</string>
+    <string name="mode_group">Birlikte (2–6 kişi)</string>
+    <string name="group_title">Birlikte</string>
+    <string name="group_start">Birlikte başlat</string>
+    <string name="group_edit">Kişileri düzenle</string>
+    <string name="group_intro">Tek bir ortak hesap tut, her kişi için içki ve suyu say. Herkes aynı şekilde gösterilir – kazanan yok.</string>
+    <string name="group_ends_session">Bunu başlatmak mevcut oturumu bitirir.</string>
+    <string name="group_seats">Masadaki kişiler</string>
+    <string name="group_seat_default">Kişi %1$d</string>
+    <string name="group_note">Sayılar yalnızca hesap için bir kayıttır. Su herkes için gösterilir – yavaş gidin.</string>
+    <string name="group_water">Su: %1$d · +1</string>
+    <string name="group_water_add">%1$s için bir bardak su ekle</string>
+    <string name="group_open">Birlikte\'yi aç</string>
+    <string name="group_detail_row">%1$s: %2$s · %3$s</string>
+    <string name="history_group_row">%1$s · Birlikte</string>
+    <string name="settle_split_shared_group">Ortak kalemleri eşit böl</string>
 </resources>

@@ -50,6 +50,10 @@ import com.cansin.app.ui.SettingsScreen
 import com.cansin.app.ui.VersusScreen
 import com.cansin.app.ui.VersusSetupDialog
 import com.cansin.app.ui.VersusViewModel
+import com.cansin.app.ui.GroupViewModel
+import com.cansin.app.ui.GroupScreen
+import com.cansin.app.ui.GroupSetupDialog
+import com.cansin.app.ui.ModeChooserDialog
 import com.cansin.app.ui.UndoEffect
 import com.cansin.app.ui.WaterBar
 import com.cansin.app.ui.TimerBar
@@ -80,6 +84,7 @@ class MainActivity : ComponentActivity() {
     private val notes: NotesViewModel by viewModels { NotesViewModel.factory(app.sessionRepository) }
     private val promille: PromilleViewModel by viewModels { PromilleViewModel.factory(app.sessionRepository, app.settingsStore) }
     private val versus: VersusViewModel by viewModels { VersusViewModel.factory(app.sessionRepository, app.friendRepository) }
+    private val group: GroupViewModel by viewModels { GroupViewModel.factory(app.sessionRepository) }
     private val water: WaterViewModel by viewModels { WaterViewModel.factory(app.sessionRepository, app.settingsStore) }
     private val care: CareViewModel by viewModels { CareViewModel.factory(app.sessionRepository, app.settingsStore) }
     private val history: HistoryViewModel by viewModels { HistoryViewModel.factory(app.historyRepository, app.settingsStore) }
@@ -159,7 +164,10 @@ class MainActivity : ComponentActivity() {
         }
         var screen by rememberSaveable { mutableStateOf(Screen.COUNTER) }
         var editingSides by rememberSaveable { mutableStateOf(false) }
+        var choosingMode by rememberSaveable { mutableStateOf(false) }
+        var editingGroup by rememberSaveable { mutableStateOf(false) }
         val versusState by versus.state.collectAsState()
+        val groupState by group.state.collectAsState()
         val friends by versus.friends.collectAsState()
         var detailId by rememberSaveable { mutableStateOf<Long?>(null) }
         LaunchedEffect(detailId) { history.select(detailId) }
@@ -220,6 +228,15 @@ class MainActivity : ComponentActivity() {
                     PromilleTicker(promille, resumed)
                     PromilleScreen(promille, onBack = { screen = Screen.COUNTER })
                 }
+                groupState.session != null -> GroupScreen(
+                    viewModel = group,
+                    onOpenSettings = { screen = Screen.SETTINGS },
+                    onOpenTab = { screen = Screen.TAB },
+                    onEditSeats = { editingGroup = true },
+                    onOpenHistory = { screen = Screen.HISTORY },
+                    promilleCard = { CareSlot(); PromilleSlot(onOpen = { screen = Screen.PROMILLE }) },
+                    waterBar = { WaterSlot(it) },
+                )
                 versusState.session != null -> VersusScreen(
                     viewModel = versus,
                     onOpenSettings = { screen = Screen.SETTINGS },
@@ -236,10 +253,31 @@ class MainActivity : ComponentActivity() {
                     beerSize = settings.beerSize,
                     onOpenSettings = { screen = Screen.SETTINGS },
                     onOpenTab = { screen = Screen.TAB },
-                    onStartVersus = { editingSides = true },
+                    onStartVersus = { choosingMode = true },
                     onOpenHistory = { screen = Screen.HISTORY },
                     promilleCard = { CareSlot(); PromilleSlot(onOpen = { screen = Screen.PROMILLE }) },
                     waterBar = { WaterSlot(it) },
+                )
+            }
+            if (choosingMode && settings.ageConfirmed) {
+                ModeChooserDialog(
+                    onVersus = { choosingMode = false; editingSides = true },
+                    onGroup = { choosingMode = false; editingGroup = true },
+                    onDismiss = { choosingMode = false },
+                )
+            }
+            if (editingGroup && settings.ageConfirmed) {
+                val session = groupState.session
+                GroupSetupDialog(
+                    seats = groupState.seats,
+                    me = session?.meSide,
+                    editing = session != null,
+                    endsCurrentSession = session == null && counter.state.collectAsState().value.sessionActive,
+                    onSave = { setup ->
+                        group.save(setup, start = session == null)
+                        editingGroup = false
+                    },
+                    onDismiss = { editingGroup = false },
                 )
             }
             if (editingSides && settings.ageConfirmed) {

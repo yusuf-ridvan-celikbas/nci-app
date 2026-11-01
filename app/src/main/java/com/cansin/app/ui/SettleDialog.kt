@@ -28,6 +28,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.cansin.app.R
 import com.cansin.app.data.Side
+import com.cansin.app.domain.GroupRules
 import com.cansin.app.domain.SettleRules
 
 @Composable
@@ -40,7 +41,12 @@ fun SettleDialog(state: NotesState, onDismiss: () -> Unit) {
     val unnamed = stringResource(R.string.settle_unnamed)
     val lines = mutableListOf<String>()
 
-    if (state.versus) {
+    if (state.group) {
+        GroupRules.split(state.seats, state.notes, splitShared).forEach {
+            lines += stringResource(R.string.tab_side_total, sideName(state.session, it.side), format(it.pays))
+        }
+        if (!splitShared) lines += stringResource(R.string.tab_side_total, sideName(state.session, null), format(GroupRules.tab(state.seats, state.notes).second))
+    } else if (state.versus) {
         val totals = state.totals
         val (red, blue) = if (splitShared) SettleRules.splitShared(totals) else totals.red to totals.blue
         lines += stringResource(R.string.tab_side_total, sideName(state.session, Side.RED), format(red))
@@ -62,8 +68,8 @@ fun SettleDialog(state: NotesState, onDismiss: () -> Unit) {
                 if (lines.isEmpty()) Text(stringResource(R.string.settle_empty), color = MaterialTheme.colorScheme.onSurfaceVariant)
                 lines.forEach { Text(it) }
                 Text(totalLine, style = MaterialTheme.typography.titleMedium, modifier = Modifier.padding(top = 8.dp))
-                if (state.versus) {
-                    SwitchRow(R.string.settle_split_shared, splitShared) { splitShared = it }
+                if (state.sided) {
+                    SwitchRow(if (state.group) R.string.settle_split_shared_group else R.string.settle_split_shared, splitShared) { splitShared = it }
                 } else {
                     HorizontalDivider(Modifier.padding(vertical = 12.dp))
                     Text(stringResource(R.string.settle_split_evenly), style = MaterialTheme.typography.titleSmall)
@@ -83,7 +89,7 @@ fun SettleDialog(state: NotesState, onDismiss: () -> Unit) {
             TextButton(
                 enabled = total > 0,
                 onClick = {
-                    val text = (listOf(title) + lines + totalLine + listOfNotNull(eachLine.takeIf { !state.versus }))
+                    val text = (listOf(title) + lines + totalLine + listOfNotNull(eachLine.takeIf { !state.sided }))
                         .joinToString("\n")
                     val send = Intent(Intent.ACTION_SEND).setType("text/plain").putExtra(Intent.EXTRA_TEXT, text)
                     try {

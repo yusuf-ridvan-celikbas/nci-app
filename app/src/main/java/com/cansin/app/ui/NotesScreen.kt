@@ -31,6 +31,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.platform.LocalConfiguration
 import com.cansin.app.domain.Currency
+import com.cansin.app.domain.GroupRules
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -58,6 +60,12 @@ import java.util.Date
 @Composable
 fun NotesScreen(viewModel: NotesViewModel, onBack: () -> Unit) {
     val state by viewModel.state.collectAsState()
+    CompositionLocalProvider(LocalSeats provides state.seats) { NotesContent(viewModel, state, onBack) }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun NotesContent(viewModel: NotesViewModel, state: NotesState, onBack: () -> Unit) {
     var editing by remember { mutableStateOf<Note?>(null) }
     var settling by remember { mutableStateOf(false) }
     val format = rememberAmountFormat()
@@ -99,6 +107,12 @@ fun NotesScreen(viewModel: NotesViewModel, onBack: () -> Unit) {
                         Text(stringResource(R.string.tab_side_total, sideName(state.session, side), format(amount)))
                     }
                 }
+                if (state.group) {
+                    val (own, shared) = GroupRules.tab(state.seats, state.notes)
+                    (GroupRules.ordered(state.seats).map { it.side to (own[it.side] ?: 0L) } + (null to shared)).forEach { (side, amount) ->
+                        Text(stringResource(R.string.tab_side_total, sideName(state.session, side), format(amount)))
+                    }
+                }
                 Text(stringResource(R.string.tab_total, format(state.totals.total)), style = MaterialTheme.typography.titleMedium)
             }
         }
@@ -109,7 +123,7 @@ fun NotesScreen(viewModel: NotesViewModel, onBack: () -> Unit) {
     editing?.let { note ->
         NoteEditDialog(
             note = note,
-            session = state.session.takeIf { state.versus },
+            session = state.session.takeIf { state.sided },
             formatAmount = rememberPlainAmountFormat(),
             onSave = { viewModel.update(it); editing = null },
             onDelete = { viewModel.delete(note); editing = null },
@@ -161,7 +175,7 @@ private fun NoteRow(note: Note, state: NotesState, format: (Long) -> String, onC
             note.person?.let {
                 Text(it, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
             }
-            if (state.versus) {
+            if (state.sided) {
                 val colors = sideColor(note.side)
                 Text(
                     sideName(state.session, note.side),
@@ -192,7 +206,7 @@ private fun QuickAdd(state: NotesState, onAdd: (String, Long?, Side?) -> Unit) {
     }
 
     Column(Modifier.fillMaxWidth().navigationBarsPadding().imePadding().padding(8.dp)) {
-        if (state.versus) SideChips(state.session, side, { side = it })
+        if (state.sided) SideChips(state.session, side, { side = it })
         Row(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.spacedBy(8.dp),

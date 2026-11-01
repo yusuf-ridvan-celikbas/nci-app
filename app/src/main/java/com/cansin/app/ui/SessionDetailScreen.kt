@@ -20,6 +20,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -27,18 +28,27 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.cansin.app.R
 import com.cansin.app.data.SessionMode
 import com.cansin.app.data.Side
 import com.cansin.app.domain.BeerSize
+import com.cansin.app.domain.GroupRules
 import com.cansin.app.domain.StatsRules
+import com.cansin.app.domain.VersusRules
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SessionDetailScreen(viewModel: HistoryViewModel, onBack: () -> Unit) {
     val detail by viewModel.detail.collectAsState()
+    CompositionLocalProvider(LocalSeats provides detail?.seats.orEmpty()) { DetailContent(viewModel, detail, onBack) }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun DetailContent(viewModel: HistoryViewModel, detail: SessionDetail?, onBack: () -> Unit) {
     var confirmDelete by rememberSaveable { mutableStateOf(false) }
     var sharing by rememberSaveable { mutableStateOf(false) }
     val shareName by viewModel.shareName.collectAsState()
@@ -68,7 +78,7 @@ fun SessionDetailScreen(viewModel: HistoryViewModel, onBack: () -> Unit) {
     ) { padding ->
         val d = detail ?: return@Scaffold
         val session = d.session
-        val versus = session.mode == SessionMode.VERSUS
+        val versus = VersusRules.hasSides(session.mode)
         LazyColumn(Modifier.fillMaxSize().padding(padding)) {
             item {
                 Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
@@ -79,16 +89,28 @@ fun SessionDetailScreen(viewModel: HistoryViewModel, onBack: () -> Unit) {
                             StatsRules.durationMs(session)?.let { formatDuration(it) },
                         ).joinToString(" · "),
                     )
-                    if (versus) {
+                    if (session.mode == SessionMode.VERSUS) {
                         listOf(Side.RED, Side.BLUE).forEach { side ->
                             val name = sideName(session, side)
                             val count = d.beers.count { it.side == side }
                             Text(stringResource(R.string.tab_side_total, if (session.meSide == side) stringResource(R.string.versus_name_me, name) else name, count.toString()))
                         }
+                    } else if (session.mode == SessionMode.GROUP) {
+                        GroupRules.tally(d.seats, d.beers, d.water).forEach { t ->
+                            val name = sideName(session, t.side)
+                            Text(
+                                stringResource(
+                                    R.string.group_detail_row,
+                                    if (session.meSide == t.side) stringResource(R.string.versus_name_me, name) else name,
+                                    pluralStringResource(R.plurals.beers_count, t.drinks, t.drinks),
+                                    stringResource(R.string.water_count, t.water),
+                                ),
+                            )
+                        }
                     } else {
                         Text(stringResource(R.string.detail_beers, d.beers.size))
                     }
-                    Text(stringResource(R.string.water_count, d.water.size))
+                    if (session.mode != SessionMode.GROUP) Text(stringResource(R.string.water_count, d.water.size))
                     d.stats?.paceMin?.let { Text(stringResource(R.string.stats_pace, formatDecimal(it))) }
                     d.stats?.peak?.let {
                         Text(stringResource(R.string.promille_peak, formatPromille(it)))

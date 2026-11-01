@@ -6,9 +6,11 @@ import androidx.room.ForeignKey
 import androidx.room.Index
 import androidx.room.PrimaryKey
 
-enum class SessionMode { SOLO, VERSUS }
+/** GROUP = P23 "drinking together" (2–6 seats in group_seat). */
+enum class SessionMode { SOLO, VERSUS, GROUP }
 
-enum class Side { SOLO, RED, BLUE }
+/** RED/BLUE = versus sides; group seats use [com.cansin.app.domain.GroupRules.SIDES]. */
+enum class Side { SOLO, RED, BLUE, GREEN, PURPLE, AMBER, YELLOW }
 
 /** P22: what was drunk. Table and class keep the "beer" name to avoid a risky rename. */
 enum class DrinkKind { BEER, WINE, RAKI, SHOT, COCKTAIL, CUSTOM }
@@ -56,6 +58,8 @@ data class WaterEvent(
     @PrimaryKey(autoGenerate = true) val id: Long = 0,
     val sessionId: Long,
     val at: Long,
+    /** Seat in a group session; null = me (solo/versus, and all rows before DB v5). */
+    @ColumnInfo(defaultValue = "NULL") val side: Side? = null,
 )
 
 @Entity(

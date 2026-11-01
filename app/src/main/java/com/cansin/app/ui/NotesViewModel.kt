@@ -10,7 +10,9 @@ import com.cansin.app.data.Session
 import com.cansin.app.data.SessionMode
 import com.cansin.app.data.SessionRepository
 import com.cansin.app.data.Side
+import com.cansin.app.data.GroupSeat
 import com.cansin.app.domain.TabTotals
+import kotlinx.coroutines.flow.combine
 import com.cansin.app.domain.VersusRules
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.SharingStarted
@@ -21,8 +23,11 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 
-data class NotesState(val notes: List<Note> = emptyList(), val session: Session? = null) {
+data class NotesState(val notes: List<Note> = emptyList(), val session: Session? = null, val seats: List<GroupSeat> = emptyList()) {
     val versus: Boolean get() = session?.mode == SessionMode.VERSUS
+    val group: Boolean get() = session?.mode == SessionMode.GROUP
+    /** Notes can be put on a side/seat. */
+    val sided: Boolean get() = VersusRules.hasSides(session?.mode)
     val totals: TabTotals get() = VersusRules.totals(notes)
 }
 
@@ -30,7 +35,12 @@ data class NotesState(val notes: List<Note> = emptyList(), val session: Session?
 class NotesViewModel(private val repository: SessionRepository) : ViewModel() {
     val state: StateFlow<NotesState> = repository.openSession
         .flatMapLatest { session ->
-            if (session == null) flowOf(NotesState()) else repository.notes(session.id).map { NotesState(it, session) }
+            when {
+                session == null -> flowOf(NotesState())
+                session.mode == SessionMode.GROUP ->
+                    combine(repository.notes(session.id), repository.seats(session.id)) { notes, seats -> NotesState(notes, session, seats) }
+                else -> repository.notes(session.id).map { NotesState(it, session) }
+            }
         }
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), NotesState())
 

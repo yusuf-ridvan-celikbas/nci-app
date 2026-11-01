@@ -31,7 +31,7 @@ class BeerTileService : TileService() {
         app.appScope.launch {
             val settings = app.settingsStore.settings.first()
             val snapshot = app.sessionRepository.snapshot()
-            if (QuickAction.tileAddsDirectly(settings.ageConfirmed, snapshot.versus) && !settings.hideCounts) {
+            if (QuickAction.tileAddsDirectly(settings.ageConfirmed, snapshot.versus || snapshot.group) && !settings.hideCounts) {
                 app.sessionRepository.addBeer()
                 CounterWidget.refreshAll(app)
                 render()
@@ -46,7 +46,7 @@ class BeerTileService : TileService() {
         val settings = app.settingsStore.settings.first()
         val snapshot = app.sessionRepository.snapshot()
         val context = AppLocale.localized(app, settings.language)
-        val direct = QuickAction.tileAddsDirectly(settings.ageConfirmed, snapshot.versus) && !settings.hideCounts
+        val direct = QuickAction.tileAddsDirectly(settings.ageConfirmed, snapshot.versus || snapshot.group) && !settings.hideCounts
         tile.label = context.getString(R.string.tile_label)
         tile.state = if (snapshot.sessionId != null) Tile.STATE_ACTIVE else Tile.STATE_INACTIVE
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {

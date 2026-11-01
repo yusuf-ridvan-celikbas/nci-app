@@ -328,4 +328,21 @@
     <string name="drink_cocktail">Cocktail</string>
     <string name="drink_custom">Other</string>
     <string name="drink_count">%1$s: %2$d</string>
+    <string name="mode_title">Who\'s drinking?</string>
+    <string name="mode_versus">Versus (2 sides)</string>
+    <string name="mode_group">Together (2–6 people)</string>
+    <string name="group_title">Together</string>
+    <string name="group_start">Start together</string>
+    <string name="group_edit">Edit seats</string>
+    <string name="group_intro">Keep one shared tab and count drinks and water for each person. Everyone is shown the same way – there is no winner.</string>
+    <string name="group_ends_session">Starting this ends the current session.</string>
+    <string name="group_seats">People at the table</string>
+    <string name="group_seat_default">Seat %1$d</string>
+    <string name="group_note">Counts are only a record for the tab. Water is shown for everyone – pace yourselves.</string>
+    <string name="group_water">Water: %1$d · +1</string>
+    <string name="group_water_add">Add a glass of water for %1$s</string>
+    <string name="group_open">Open Together</string>
+    <string name="group_detail_row">%1$s: %2$s · %3$s</string>
+    <string name="history_group_row">%1$s · Together</string>
+    <string name="settle_split_shared_group">Split shared items evenly</string>
 </resources>

@@ -7,6 +7,7 @@ import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
 import com.cansin.app.data.BeerEvent
 import com.cansin.app.data.FriendResult
+import com.cansin.app.data.GroupSeat
 import com.cansin.app.data.ImportResult
 import com.cansin.app.data.HistoryRepository
 import com.cansin.app.data.Note
@@ -19,6 +20,7 @@ import com.cansin.app.domain.ResultCard
 import com.cansin.app.domain.ResultCards
 import com.cansin.app.domain.SessionStats
 import com.cansin.app.domain.StatsRules
+import com.cansin.app.domain.VersusRules
 import com.cansin.app.prefs.SettingsStore
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -44,6 +46,7 @@ data class SessionDetail(
     val notes: List<Note>,
     val water: List<WaterEvent>,
     val stats: SessionStats?,
+    val seats: List<GroupSeat> = emptyList(),
 )
 
 @OptIn(ExperimentalCoroutinesApi::class)
@@ -94,7 +97,7 @@ class HistoryViewModel(private val history: HistoryRepository, private val setti
         val stats = detail.stats ?: return null
         val duration = StatsRules.durationMs(detail.session) ?: return null
         val day = Instant.ofEpochMilli(detail.session.startedAt).atZone(ZoneId.systemDefault()).toLocalDate()
-        return ResultCards.card(name, day, stats.beers, duration, detail.water.size)
+        return ResultCards.card(name, day, stats.beers, duration, detail.water.count { VersusRules.isMineWater(it, detail.session) })
     }
 
     fun saveShareName(name: String) = viewModelScope.launch { settingsStore.setShareName(name) }
@@ -107,7 +110,7 @@ class HistoryViewModel(private val history: HistoryRepository, private val setti
         profile,
     ) { session, beers, notes, water, p ->
         session?.let { SessionDetail(it, beers, notes, water, StatsRules.session(it, beers, p)) }
-    }
+    }.combine(history.seats(id)) { d, seats -> d?.copy(seats = seats) }
 
     companion object {
         fun factory(history: HistoryRepository, settingsStore: SettingsStore): ViewModelProvider.Factory =

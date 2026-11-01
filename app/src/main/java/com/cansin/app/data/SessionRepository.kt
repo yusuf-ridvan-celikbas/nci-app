@@ -3,6 +3,8 @@ package com.cansin.app.data
 import com.cansin.app.domain.BeerRules
 import com.cansin.app.domain.BeerSize
 import com.cansin.app.domain.DrinkChoice
+import com.cansin.app.domain.GroupRules
+import com.cansin.app.domain.GroupSetup
 import com.cansin.app.domain.NoteRules
 import com.cansin.app.domain.SessionRules
 import com.cansin.app.domain.VersusRules
@@ -23,12 +25,22 @@ data class CounterSnapshot(
     val water: Int = 0,
     val hasMe: Boolean = false,
     val myLatestBeer: BeerEvent? = null,
+    val group: Boolean = false,
 )
 
 interface SessionListener {
     suspend fun onChanged() {}
     suspend fun onBeerAdded(event: BeerEvent, mine: Boolean) {}
     suspend fun onSessionClosed(sessionId: Long) {}
+}
+
+/** For callers (tests, old wiring) without group support: no seats, so group adds are refused. */
+object NoSeats : GroupSeatDao {
+    override suspend fun seats(sessionId: Long) = emptyList<GroupSeat>()
+    override fun observe(sessionId: Long): Flow<List<GroupSeat>> = kotlinx.coroutines.flow.flowOf(emptyList())
+    override suspend fun all() = emptyList<GroupSeat>()
+    override suspend fun insert(seats: List<GroupSeat>) {}
+    override suspend fun clear(sessionId: Long) {}
 }
 
 class SessionRepository(
@@ -40,6 +52,7 @@ class SessionRepository(
     private val inactivityMs: Long = SessionRules.DEFAULT_INACTIVITY_MS,
     private val listener: SessionListener = object : SessionListener {},
     private val defaultDrink: suspend () -> DrinkChoice = { DrinkChoice.DEFAULT },
+    private val seats: GroupSeatDao = NoSeats,
 ) {
     private sealed interface Event {
         data class BeerAdded(val event: BeerEvent, val mine: Boolean) : Event
@@ -63,9 +76,10 @@ class SessionRepository(
         val session = sessions.open() ?: return CounterSnapshot(0, null)
         if (SessionRules.isStale(lastActivity(session), clock(), inactivityMs)) return CounterSnapshot(0, null)
         val versus = session.mode == SessionMode.VERSUS
+        val group = session.mode == SessionMode.GROUP
         val me = VersusRules.meSide(session)
         return CounterSnapshot(
-            count = beers.count(session.id),
+            count = if (group && me != null) beers.countOnSide(session.id, me) else beers.count(session.id),
             lastBeerAt = beers.latest(session.id)?.at,
             sessionId = session.id,
             versus = versus,
@@ -73,9 +87,10 @@ class SessionRepository(
             blue = if (versus) beers.countOnSide(session.id, Side.BLUE) else 0,
             notes = notes.count(session.id),
             tabMinor = notes.totalMinor(session.id),
-            water = water.count(session.id),
+            water = if (group) me?.let { water.countOnSide(session.id, it) } ?: 0 else water.count(session.id),
             hasMe = me != null,
             myLatestBeer = me?.let { beers.latestOnSide(session.id, it) },
+            group = group,
         )
     }
 
@@ -104,6 +119,7 @@ class SessionRepository(
         val active = activeSession(now)
         val side = pickSide(active) ?: return null
         if (!VersusRules.fits(side, active?.mode)) return null
+        if (active?.mode == SessionMode.GROUP && seats.seats(active.id).none { it.side == side }) return null
         if (finishPrevious && active != null) beers.latestOnSide(active.id, side)?.let { beers.finish(it.id, now) }
         val session = active ?: Session(startedAt = now).let { it.copy(id = sessions.insert(it)) }
         val event = BeerEvent(sessionId = session.id, side = side, sizeMl = size.sizeMl, abv = size.abv, at = now, kind = drink.kind)
@@ -115,6 +131,28 @@ class SessionRepository(
         activeSession(now)?.let { close(it) }
         val session = VersusRules.apply(Session(startedAt = now, mode = SessionMode.VERSUS), setup)
         session.copy(id = sessions.insert(session))
+    }
+
+    fun seats(sessionId: Long): Flow<List<GroupSeat>> = seats.observe(sessionId)
+
+    suspend fun startGroup(setup: GroupSetup): Session = write {
+        val now = clock()
+        activeSession(now)?.let { close(it) }
+        val session = Session(startedAt = now, mode = SessionMode.GROUP, meSide = GroupRules.me(setup))
+        val id = sessions.insert(session)
+        seats.insert(GroupRules.seats(id, setup))
+        session.copy(id = id)
+    }
+
+    /** Rename seats, change "me" or add seats; seats are never removed mid-session (their drinks would be orphaned). */
+    suspend fun updateGroup(setup: GroupSetup) = write {
+        val session = activeSession(clock())?.takeIf { it.mode == SessionMode.GROUP } ?: return@write
+        val current = seats.seats(session.id).size
+        val names = setup.names + List((current - setup.names.size).coerceAtLeast(0)) { null }
+        val fixed = setup.copy(names = names)
+        seats.clear(session.id)
+        seats.insert(GroupRules.seats(session.id, fixed))
+        sessions.update(session.copy(meSide = GroupRules.me(fixed)))
     }
 
     suspend fun updateVersus(setup: VersusSetup) = write {
@@ -182,9 +220,15 @@ class SessionRepository(
         deleteIfEmpty(note.sessionId)
     }
 
-    suspend fun addWater(): WaterEvent? = write {
+    /** In a group, water goes to [side] (or my seat); elsewhere [side] is ignored. */
+    suspend fun addWater(side: Side? = null): WaterEvent? = write {
         val session = activeSession(clock()) ?: return@write null
-        val event = WaterEvent(sessionId = session.id, at = clock())
+        val seat = if (session.mode == SessionMode.GROUP) {
+            (side ?: session.meSide)?.takeIf { s -> seats.seats(session.id).any { it.side == s } } ?: return@write null
+        } else {
+            null
+        }
+        val event = WaterEvent(sessionId = session.id, at = clock(), side = seat)
         event.copy(id = water.insert(event))
     }
 
@@ -226,7 +270,7 @@ class SessionRepository(
     )
 
     private suspend fun deleteIfEmpty(sessionId: Long) {
-        if (!isEmpty(sessionId) || sessions.open()?.takeIf { it.id == sessionId }?.mode == SessionMode.VERSUS) return
+        if (!isEmpty(sessionId) || VersusRules.hasSides(sessions.open()?.takeIf { it.id == sessionId }?.mode)) return
         sessions.delete(sessionId)
         pending += Event.SessionClosed(sessionId)
     }

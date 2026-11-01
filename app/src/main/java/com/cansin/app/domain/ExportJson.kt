@@ -4,6 +4,7 @@ import com.cansin.app.data.BeerEvent
 import com.cansin.app.data.DrinkKind
 import com.cansin.app.data.FriendProfile
 import com.cansin.app.data.FriendResult
+import com.cansin.app.data.GroupSeat
 import com.cansin.app.data.Note
 import com.cansin.app.data.Session
 import com.cansin.app.data.WaterEvent
@@ -16,6 +17,7 @@ data class ExportData(
     val friends: List<FriendProfile>,
     val profile: BodyProfile?,
     val friendResults: List<FriendResult> = emptyList(),
+    val seats: List<GroupSeat> = emptyList(),
     val currency: Currency = Currency.NONE,
 )
 
@@ -26,6 +28,7 @@ object ExportJson {
         val beers = data.beers.groupBy { it.sessionId }
         val water = data.water.groupBy { it.sessionId }
         val notes = data.notes.groupBy { it.sessionId }
+        val seats = data.seats.groupBy { it.sessionId }
         val root = linkedMapOf<String, Any?>(
             "format" to "cansin-export",
             "version" to FORMAT_VERSION,
@@ -41,11 +44,14 @@ object ExportJson {
                     "redFriendId" to s.redFriendId,
                     "blueFriendId" to s.blueFriendId,
                     "meSide" to s.meSide?.name,
+                    "seats" to seats[s.id]?.let { GroupRules.ordered(it).map { seat -> linkedMapOf("side" to seat.side.name, "name" to seat.name) } },
                     "beers" to beers[s.id].orEmpty().map {
                         linkedMapOf<String, Any?>("side" to it.side.name, "sizeMl" to it.sizeMl, "abv" to it.abv, "at" to it.at, "finishedAt" to it.finishedAt)
                             .apply { if (it.kind != DrinkKind.BEER) put("kind", it.kind.name) }
                     },
-                    "water" to water[s.id].orEmpty().map { linkedMapOf("at" to it.at) },
+                    "water" to water[s.id].orEmpty().map { w ->
+                        linkedMapOf<String, Any?>("at" to w.at).apply { w.side?.let { put("side", it.name) } }
+                    },
                     "notes" to notes[s.id].orEmpty().map {
                         linkedMapOf(
                             "text" to it.text,

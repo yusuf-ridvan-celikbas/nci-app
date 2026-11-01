@@ -74,6 +74,10 @@ object WidgetRenderer {
                     views.setTextViewText(R.id.widget_value, context.getString(R.string.versus_score, snapshot.red, snapshot.blue))
                     views.setContentDescription(R.id.widget_value, context.getString(R.string.versus_score_description, snapshot.red, snapshot.blue))
                     button(views, context.getString(R.string.plus_one), context.getString(R.string.versus_open), openApp(context, tab = false))
+                } else if (snapshot.group) {
+                    views.setTextViewText(R.id.widget_value, snapshot.count.toString())
+                    views.setContentDescription(R.id.widget_value, null)
+                    button(views, context.getString(R.string.plus_one), context.getString(R.string.group_open), openApp(context, tab = false))
                 } else {
                     views.setTextViewText(R.id.widget_value, snapshot.count.toString())
                     views.setContentDescription(R.id.widget_value, null)

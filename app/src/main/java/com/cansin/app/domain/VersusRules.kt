@@ -6,6 +6,7 @@ import com.cansin.app.data.Note
 import com.cansin.app.data.Session
 import com.cansin.app.data.SessionMode
 import com.cansin.app.data.Side
+import com.cansin.app.data.WaterEvent
 
 data class VersusSetup(
     val redName: String? = null,
@@ -30,16 +31,25 @@ object VersusRules {
         meSide = setup.meSide?.takeIf { it != Side.SOLO },
     )
 
-    fun fits(side: Side, mode: SessionMode?): Boolean =
-        if (side == Side.SOLO) mode != SessionMode.VERSUS else mode == SessionMode.VERSUS
+    fun fits(side: Side, mode: SessionMode?): Boolean = when (mode) {
+        SessionMode.VERSUS -> side == Side.RED || side == Side.BLUE
+        SessionMode.GROUP -> GroupRules.isSeatSide(side)
+        else -> side == Side.SOLO
+    }
+
+    fun hasSides(mode: SessionMode?): Boolean = mode == SessionMode.VERSUS || mode == SessionMode.GROUP
 
     fun meSide(session: Session?): Side? =
-        if (session?.mode == SessionMode.VERSUS) session.meSide else Side.SOLO
+        if (hasSides(session?.mode)) session?.meSide else Side.SOLO
+
+    /** Water rows carry a seat only in group sessions; elsewhere every glass is mine. */
+    fun isMineWater(event: WaterEvent, session: Session): Boolean =
+        if (session.mode == SessionMode.GROUP) session.meSide != null && event.side == session.meSide else true
 
     fun isMine(event: BeerEvent, session: Session): Boolean = event.side == meSide(session)
 
     fun noteSide(side: Side?, mode: SessionMode): Side? =
-        side?.takeIf { mode == SessionMode.VERSUS && it != Side.SOLO }
+        side?.takeIf { hasSides(mode) && fits(it, mode) }
 
     fun totals(notes: List<Note>): TabTotals = notes.fold(TabTotals()) { acc, note ->
         val amount = note.amountMinor ?: 0

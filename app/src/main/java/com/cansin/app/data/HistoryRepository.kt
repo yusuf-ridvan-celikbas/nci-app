@@ -11,6 +11,7 @@ class HistoryRepository(
     private val notes: NoteDao,
     private val water: WaterDao,
     private val friendResults: FriendResultDao,
+    private val groupSeats: GroupSeatDao = NoSeats,
     private val clock: () -> Long = System::currentTimeMillis,
 ) {
     val summaries: Flow<List<SessionSummary>> = sessions.observeHistory()
@@ -21,6 +22,7 @@ class HistoryRepository(
     fun beers(id: Long): Flow<List<BeerEvent>> = beers.observe(id)
     fun notes(id: Long): Flow<List<Note>> = notes.observe(id)
     fun water(id: Long): Flow<List<WaterEvent>> = water.observe(id)
+    fun seats(id: Long): Flow<List<GroupSeat>> = groupSeats.observe(id)
 
     suspend fun delete(id: Long): Boolean = sessions.deleteEnded(id) > 0
 

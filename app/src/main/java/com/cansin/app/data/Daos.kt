@@ -66,6 +66,9 @@ interface WaterDao {
     @Query("SELECT MAX(at) FROM water_event WHERE sessionId = :sessionId")
     suspend fun lastAt(sessionId: Long): Long?
 
+    @Query("SELECT COUNT(*) FROM water_event WHERE sessionId = :sessionId AND side IS :side")
+    suspend fun countOnSide(sessionId: Long, side: Side?): Int
+
     @Query("SELECT * FROM water_event WHERE sessionId = :sessionId ORDER BY at, id")
     fun observe(sessionId: Long): Flow<List<WaterEvent>>
 }
@@ -117,6 +120,9 @@ interface RestoreDao {
 
     @Insert
     suspend fun insertFriendResults(results: List<FriendResult>)
+
+    @Insert
+    suspend fun insertSeats(seats: List<GroupSeat>)
 }
 
 @Dao

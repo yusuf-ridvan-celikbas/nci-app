@@ -105,7 +105,11 @@ private fun SessionList(summaries: List<SessionSummary>, onOpen: (Long) -> Unit)
             Column(Modifier.fillMaxWidth().clickable { onOpen(session.id) }.padding(horizontal = 16.dp, vertical = 12.dp)) {
                 val date = formatDate(session.startedAt) + " " + formatTime(session.startedAt)
                 Text(
-                    if (session.mode == SessionMode.VERSUS) stringResource(R.string.history_versus_row, date) else date,
+                    when (session.mode) {
+                        SessionMode.VERSUS -> stringResource(R.string.history_versus_row, date)
+                        SessionMode.GROUP -> stringResource(R.string.history_group_row, date)
+                        SessionMode.SOLO -> date
+                    },
                     style = MaterialTheme.typography.bodyLarge,
                 )
                 Text(

@@ -3,6 +3,7 @@ package com.cansin.app.domain
 import com.cansin.app.data.BeerEvent
 import com.cansin.app.data.DrinkKind
 import com.cansin.app.data.FriendResult
+import com.cansin.app.data.GroupSeat
 import com.cansin.app.data.Note
 import com.cansin.app.data.Session
 import com.cansin.app.data.SessionMode
@@ -11,7 +12,13 @@ import com.cansin.app.data.WaterEvent
 import java.time.LocalDate
 
 /** One session with its events; ids are 0 and get assigned on insert. */
-data class RestoreSession(val session: Session, val beers: List<BeerEvent>, val water: List<WaterEvent>, val notes: List<Note>)
+data class RestoreSession(
+    val session: Session,
+    val beers: List<BeerEvent>,
+    val water: List<WaterEvent>,
+    val notes: List<Note>,
+    val seats: List<GroupSeat> = emptyList(),
+)
 
 /** Friend from the file; [fileId] links sessions to it before new ids exist. */
 data class RestoreFriend(val fileId: Long, val name: String)
@@ -85,7 +92,11 @@ object RestoreParser {
             val versus = mode == SessionMode.VERSUS
             fun friendRef(v: Any?): Long? = v?.let { long(it) }?.also { if (!versus || it !in friendIds) throw Bad() }
             fun name(v: Any?): String? = v?.let { VersusRules.cleanName(str(it)) ?: throw Bad() }?.also { if (!versus) throw Bad() }
-            val me = o["meSide"]?.let { enum<Side>(it) }?.also { if (!versus || it == Side.SOLO) throw Bad() }
+            val group = mode == SessionMode.GROUP
+            val seats = if (group) groupSeats(o["seats"]) else emptyList<GroupSeat>().also { if (o["seats"] != null) throw Bad() }
+            val seatSides = seats.map { it.side }.toSet()
+            fun onSeat(side: Side) = !group || side in seatSides
+            val me = o["meSide"]?.let { enum<Side>(it) }?.also { if (!VersusRules.hasSides(mode) || !VersusRules.fits(it, mode) || !onSeat(it)) throw Bad() }
             val session = Session(
                 startedAt = start, endedAt = end, mode = mode,
                 redName = name(o["redName"]), blueName = name(o["blueName"]),
@@ -93,19 +104,23 @@ object RestoreParser {
                 meSide = me,
             )
             val beers = events(o["beers"]).map { b ->
-                val side = enum<Side>(b["side"]).also { if (!VersusRules.fits(it, mode)) throw Bad() }
+                val side = enum<Side>(b["side"]).also { if (!VersusRules.fits(it, mode) || !onSeat(it)) throw Bad() }
                 val size = int(b["sizeMl"]).also { if (it !in BeerRules.MIN_ML..BeerRules.MAX_ML) throw Bad() }
                 val abv = double(b["abv"]).also { if (it !in BeerRules.MIN_ABV..BeerRules.MAX_ABV) throw Bad() }
                 val kind = b["kind"]?.let { enum<DrinkKind>(it) } ?: DrinkKind.BEER
                 BeerEvent(sessionId = 0, side = side, sizeMl = size, abv = abv, at = time(b["at"]), finishedAt = b["finishedAt"]?.let { time(it) }, kind = kind)
             }
-            val water = events(o["water"]).map { WaterEvent(sessionId = 0, at = time(it["at"])) }
+            val water = events(o["water"]).map { w ->
+                val side = w["side"]?.let { enum<Side>(it) }
+                if (group != (side != null) || (side != null && side !in seatSides)) throw Bad()
+                WaterEvent(sessionId = 0, at = time(w["at"]), side = side)
+            }
             val notes = events(o["notes"]).map { n ->
                 val raw = str(n["text"])
                 if (raw.length > Note.MAX_TEXT) throw Bad()
                 val person = n["person"]?.let { p -> str(p).also { if (it.length > Note.MAX_PERSON) throw Bad() } }
                 val amount = n["amountMinor"]?.let { long(it) }?.also { if (!NoteRules.isValidAmount(it)) throw Bad() }
-                val side = n["side"]?.let { enum<Side>(it) }?.also { if (VersusRules.noteSide(it, mode) != it) throw Bad() }
+                val side = n["side"]?.let { enum<Side>(it) }?.also { if (VersusRules.noteSide(it, mode) != it || !onSeat(it)) throw Bad() }
                 Note(
                     sessionId = 0,
                     text = NoteRules.cleanText(raw) ?: throw Bad(),
@@ -116,7 +131,16 @@ object RestoreParser {
                     side = side,
                 )
             }
-            return RestoreSession(session, beers, water, notes)
+            return RestoreSession(session, beers, water, notes, seats)
+        }
+
+        /** Exactly the first N seat sides, each once; names cleaned (null = default label). */
+        fun groupSeats(v: Any?): List<GroupSeat> {
+            val items = list(v, GroupRules.MAX_SEATS, optional = false).map { obj(it) }
+            if (items.size < GroupRules.MIN_SEATS) throw Bad()
+            val seats = items.map { s -> GroupSeat(0, enum(s["side"]), s["name"]?.let { VersusRules.cleanName(str(it)) ?: throw Bad() }) }
+            if (seats.map { it.side }.toSet() != GroupRules.sides(seats.size).toSet()) throw Bad()
+            return GroupRules.ordered(seats)
         }
 
         fun friendResult(o: Map<*, *>): FriendResult {

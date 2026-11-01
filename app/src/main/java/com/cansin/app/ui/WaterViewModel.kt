@@ -35,7 +35,8 @@ class WaterViewModel(private val repository: SessionRepository, settingsStore: S
         } else {
             combine(repository.beers(session.id), repository.water(session.id)) { beers, water ->
                 val mine = beers.filter { VersusRules.isMine(it, session) }.map { it.at }
-                WaterState(true, water.size, WaterRules.beersSinceWater(mine, water.maxOfOrNull { it.at }))
+                val myWater = water.filter { VersusRules.isMineWater(it, session) }
+                WaterState(true, myWater.size, WaterRules.beersSinceWater(mine, myWater.maxOfOrNull { it.at }))
             }
         }
     }

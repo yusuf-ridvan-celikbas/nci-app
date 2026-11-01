@@ -91,7 +91,21 @@ class FakeWaterDao : WaterDao {
     }
     override suspend fun count(sessionId: Long) = rows.value.count { it.sessionId == sessionId }
     override suspend fun lastAt(sessionId: Long) = rows.value.filter { it.sessionId == sessionId }.maxOfOrNull { it.at }
+    override suspend fun countOnSide(sessionId: Long, side: Side?) = rows.value.count { it.sessionId == sessionId && it.side == side }
     override fun observe(sessionId: Long): Flow<List<WaterEvent>> = rows.map { list -> list.filter { it.sessionId == sessionId } }
+}
+
+class FakeGroupSeatDao : GroupSeatDao {
+    val rows = MutableStateFlow(listOf<GroupSeat>())
+    override suspend fun seats(sessionId: Long) = rows.value.filter { it.sessionId == sessionId }
+    override fun observe(sessionId: Long): Flow<List<GroupSeat>> = rows.map { l -> l.filter { it.sessionId == sessionId } }
+    override suspend fun all() = rows.value
+    override suspend fun insert(seats: List<GroupSeat>) {
+        rows.value += seats
+    }
+    override suspend fun clear(sessionId: Long) {
+        rows.value = rows.value.filterNot { it.sessionId == sessionId }
+    }
 }
 
 suspend fun SessionRepository.add(finishPrevious: Boolean = false, size: BeerSize? = null): BeerEvent =

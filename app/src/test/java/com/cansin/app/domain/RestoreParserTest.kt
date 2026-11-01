@@ -4,6 +4,7 @@ import com.cansin.app.data.BeerEvent
 import com.cansin.app.data.DrinkKind
 import com.cansin.app.data.FriendProfile
 import com.cansin.app.data.FriendResult
+import com.cansin.app.data.GroupSeat
 import com.cansin.app.data.Note
 import com.cansin.app.data.Session
 import com.cansin.app.data.SessionMode
@@ -99,6 +100,37 @@ class RestoreParserTest {
         assertEquals(RestoreError.INVALID, fail(json.replace("\"age\":30", "\"age\":12")))
         assertEquals(RestoreError.INVALID, fail(json.replace("\"endedAt\":20", "\"endedAt\":null")))
         assertEquals(RestoreError.INVALID, fail(json.replace("\"text\":\"nuts\"", "\"text\":\"   \"")))
+    }
+
+    private val groupData = ExportData(
+        sessions = listOf(Session(id = 5, startedAt = 10, endedAt = 50, mode = SessionMode.GROUP, meSide = Side.GREEN)),
+        beers = listOf(BeerEvent(sessionId = 5, side = Side.GREEN, at = 11), BeerEvent(sessionId = 5, side = Side.RED, at = 12)),
+        water = listOf(WaterEvent(sessionId = 5, at = 13, side = Side.BLUE)),
+        notes = listOf(Note(sessionId = 5, text = "chips", amountMinor = 300, createdAt = 14, side = Side.RED)),
+        friends = emptyList(),
+        profile = null,
+        seats = listOf(GroupSeat(5, Side.GREEN, "Can"), GroupSeat(5, Side.RED, "Ali"), GroupSeat(5, Side.BLUE, null)),
+    )
+    private val groupJson = ExportJson.build(groupData, includeProfile = false, exportedAt = 0)
+
+    @Test
+    fun groupRoundTrips() {
+        val r = ok(groupJson).sessions.single()
+        assertEquals(SessionMode.GROUP, r.session.mode)
+        assertEquals(Side.GREEN, r.session.meSide)
+        assertEquals(listOf(GroupSeat(0, Side.RED, "Ali"), GroupSeat(0, Side.BLUE, null), GroupSeat(0, Side.GREEN, "Can")), r.seats)
+        assertEquals(Side.BLUE, r.water.single().side)
+        assertEquals(Side.RED, r.notes.single().side)
+        assertNull(ok(json).sessions[0].water.single().side)
+    }
+
+    @Test
+    fun rejectsBadGroups() {
+        assertEquals(RestoreError.INVALID, fail(groupJson.replace("\"side\":\"GREEN\",\"name\":\"Can\"", "\"side\":\"YELLOW\",\"name\":\"Can\"")))
+        assertEquals(RestoreError.INVALID, fail(groupJson.replace("{\"at\":13,\"side\":\"BLUE\"}", "{\"at\":13}")))
+        assertEquals(RestoreError.INVALID, fail(groupJson.replace("\"meSide\":\"GREEN\"", "\"meSide\":\"PURPLE\"")))
+        assertEquals(RestoreError.INVALID, fail(groupJson.replace("\"mode\":\"GROUP\"", "\"mode\":\"VERSUS\"")))
+        assertEquals(RestoreError.INVALID, fail(json.replace("{\"at\":12}", "{\"at\":12,\"side\":\"RED\"}")))
     }
 
     @Test
