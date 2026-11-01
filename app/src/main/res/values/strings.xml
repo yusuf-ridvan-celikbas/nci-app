@@ -384,10 +384,10 @@
     <string name="game_change_players">Players</string>
     <string name="game_spin">Spin the glass</string>
     <string name="game_spin_description">Spin the glass</string>
-    <string name="game_tap_to_spin">Tap the glass to spin</string>
+    <string name="game_tap_to_spin">Tap the glass: the rim picks who answers, the foot picks who asks</string>
     <string name="game_spinning">Spinning…</string>
     <string name="game_turn">%1$s, your turn!</string>
-    <string name="game_chosen">%1$s, chosen</string>
+    <string name="game_chosen">%1$s answers</string>
     <string name="game_truth">Truth</string>
     <string name="game_dare">Dare</string>
     <string name="game_skip">Skip</string>
@@ -399,4 +399,9 @@
     <string name="game_own_empty">No own questions yet.</string>
     <string name="game_show">Show Soy tu Tentación (Truth or Dare)</string>
     <string name="game_hide">Hide Soy tu Tentación</string>
+    <string name="game_asks">%1$s asks %2$s</string>
+    <string name="game_asker_tag">asks</string>
+    <string name="game_answerer_tag">answers</string>
+    <string name="game_asker_desc">%1$s asks</string>
+    <string name="game_card_pair">%1$s → %2$s · %3$s</string>
 </resources>

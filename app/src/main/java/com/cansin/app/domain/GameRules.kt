@@ -40,11 +40,27 @@ object GameRules {
 
     fun angleFor(index: Int, count: Int): Float = 360f * index / count
 
-    /** A target past [current] by [turns] full turns that ends pointing at [index]. */
-    fun spinTarget(current: Float, index: Int, count: Int, turns: Int = DEFAULT_TURNS): Float {
+    /** A target past [current] by [turns] full turns whose rim ends pointing at [index] (optionally [tilt]ed). */
+    fun spinTarget(current: Float, index: Int, count: Int, turns: Int = DEFAULT_TURNS, tilt: Float = 0f): Float {
         val base = Math.floorDiv(current.toInt(), 360) * 360f
-        return base + turns * 360f + angleFor(index, count)
+        return base + turns * 360f + angleFor(index, count) + tilt
     }
+
+    /** Two-ended glass: the foot (opposite the rim) points at who asks. Nearest seat(s) to the opposite side, never the answerer. */
+    fun askerCandidates(answerer: Int, count: Int): List<Int> = when {
+        count < 2 -> emptyList()
+        count % 2 == 0 -> listOf((answerer + count / 2) % count)
+        else -> listOf((answerer + (count - 1) / 2) % count, (answerer + (count + 1) / 2) % count)
+    }
+
+    /** For odd counts, tilt the glass a little so the foot visibly leans toward the chosen asker (rim stays on the answerer). */
+    fun askerTilt(answerer: Int, asker: Int, count: Int): Float {
+        if (count % 2 == 0 || count < 3) return 0f
+        val step = TILT_SHARE * 360f / count
+        return if (asker == (answerer + (count - 1) / 2) % count) -step else step
+    }
+
+    private const val TILT_SHARE = 0.2f
 
     /** Which player the glass points at for [angle] (nearest seat). */
     fun pointedAt(angle: Float, count: Int): Int {

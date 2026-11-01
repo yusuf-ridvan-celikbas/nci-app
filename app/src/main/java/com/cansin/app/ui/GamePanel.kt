@@ -119,9 +119,11 @@ fun GamePanel(viewModel: GameViewModel, state: GameState, showPacks: Boolean) {
         if (state.players.size < GameRules.MIN_PLAYERS) return@Column
         SpinGlass(state, onSpin = viewModel::spin, onSpinDone = viewModel::spinDone)
         val turn = state.turn?.let { state.players.getOrNull(it) }
+        val asker = state.asker?.let { state.players.getOrNull(it) }
         Text(
             when {
                 state.spinning -> stringResource(R.string.game_spinning)
+                turn != null && asker != null -> stringResource(R.string.game_asks, asker.name, turn.name)
                 turn != null -> stringResource(R.string.game_turn, turn.name)
                 else -> stringResource(R.string.game_tap_to_spin)
             },
@@ -145,8 +147,9 @@ fun GamePanel(viewModel: GameViewModel, state: GameState, showPacks: Boolean) {
             else -> {
                 ElevatedCard(Modifier.fillMaxWidth()) {
                     Column(Modifier.padding(20.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                        val kind = stringResource(if (card.kind == QuestionKind.TRUTH) R.string.game_truth else R.string.game_dare)
                         Text(
-                            stringResource(if (card.kind == QuestionKind.TRUTH) R.string.game_truth else R.string.game_dare),
+                            if (asker != null) stringResource(R.string.game_card_pair, asker.name, turn.name, kind) else kind,
                             style = MaterialTheme.typography.labelLarge,
                             color = MaterialTheme.colorScheme.primary,
                         )

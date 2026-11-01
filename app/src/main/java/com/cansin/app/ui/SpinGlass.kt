@@ -8,6 +8,7 @@ import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.offset
@@ -76,30 +77,53 @@ fun SpinGlass(state: GameState, onSpin: () -> Unit, onSpinDone: () -> Unit) {
         val radius = (maxWidth / 2) - (CHIP_MAX / 2) + 8.dp
         state.players.forEachIndexed { i, player ->
             val theta = Math.toRadians(GameRules.angleFor(i, count).toDouble())
-            val chosen = !state.spinning && state.turn == i
+            val settled = !state.spinning
+            val answers = settled && state.turn == i
+            val asks = settled && state.asker == i
             val (bg, fg) = playerColors(player, i)
-            val chosenLabel = stringResource(R.string.game_chosen, player.name)
+            val colors = MaterialTheme.colorScheme
+            val label = when {
+                answers -> stringResource(R.string.game_chosen, player.name)
+                asks -> stringResource(R.string.game_asker_desc, player.name)
+                else -> null
+            }
             Surface(
                 shape = RoundedCornerShape(50),
-                color = if (chosen) bg else MaterialTheme.colorScheme.surfaceContainerHigh,
-                contentColor = if (chosen) fg else MaterialTheme.colorScheme.onSurface,
-                border = BorderStroke(if (chosen) 3.dp else 2.dp, bg),
+                color = when {
+                    answers -> bg
+                    asks -> colors.secondaryContainer
+                    else -> colors.surfaceContainerHigh
+                },
+                contentColor = when {
+                    answers -> fg
+                    asks -> colors.onSecondaryContainer
+                    else -> colors.onSurface
+                },
+                border = BorderStroke(if (answers || asks) 3.dp else 2.dp, if (asks) colors.secondary else bg),
                 modifier = Modifier
                     .align(Alignment.Center)
                     .offset(x = radius * sin(theta).toFloat(), y = -radius * cos(theta).toFloat())
                     .widthIn(max = CHIP_MAX)
-                    .then(if (chosen) Modifier.semantics { contentDescription = chosenLabel } else Modifier),
+                    .then(if (label != null) Modifier.semantics(mergeDescendants = true) { contentDescription = label } else Modifier),
             ) {
-                Text(
-                    player.name,
-                    Modifier.padding(horizontal = 12.dp, vertical = 8.dp),
-                    style = if (chosen) MaterialTheme.typography.titleMedium else MaterialTheme.typography.bodyMedium,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis,
-                )
+                Column(Modifier.padding(horizontal = 12.dp, vertical = 6.dp), horizontalAlignment = Alignment.CenterHorizontally) {
+                    Text(
+                        player.name,
+                        style = if (answers || asks) MaterialTheme.typography.titleMedium else MaterialTheme.typography.bodyMedium,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
+                    )
+                    if (answers || asks) {
+                        Text(
+                            stringResource(if (answers) R.string.game_answerer_tag else R.string.game_asker_tag),
+                            style = MaterialTheme.typography.labelSmall,
+                        )
+                    }
+                }
             }
         }
         val pointer = MaterialTheme.colorScheme.primary
+        val foot = MaterialTheme.colorScheme.secondary
         Box(
             Modifier
                 .align(Alignment.Center)
@@ -118,6 +142,8 @@ fun SpinGlass(state: GameState, onSpin: () -> Unit, onSpinDone: () -> Unit) {
                 }
                 drawPath(p, pointer)
             }
+            // Foot of the glass: points at who asks.
+            Canvas(Modifier.align(Alignment.BottomCenter).size(18.dp)) { drawCircle(foot) }
             Icon(
                 painterResource(R.drawable.ic_game),
                 contentDescription = null,

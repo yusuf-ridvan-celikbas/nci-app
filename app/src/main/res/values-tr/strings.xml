@@ -376,10 +376,10 @@
     <string name="game_change_players">Oyuncular</string>
     <string name="game_spin">Kadehi çevir</string>
     <string name="game_spin_description">Kadehi çevir</string>
-    <string name="game_tap_to_spin">Çevirmek için kadehe dokun</string>
+    <string name="game_tap_to_spin">Kadehe dokun: ağzı cevaplayanı, ayağı soranı seçer</string>
     <string name="game_spinning">Dönüyor…</string>
     <string name="game_turn">Sıra sende, %1$s!</string>
-    <string name="game_chosen">%1$s seçildi</string>
+    <string name="game_chosen">%1$s cevaplıyor</string>
     <string name="game_truth">Doğruluk</string>
     <string name="game_dare">Cesaret</string>
     <string name="game_skip">Geç</string>
@@ -391,4 +391,9 @@
     <string name="game_own_empty">Henüz kendi sorun yok.</string>
     <string name="game_show">Soy tu Tentación’ı göster (Doğruluk mu Cesaret mi)</string>
     <string name="game_hide">Soy tu Tentación’ı gizle</string>
+    <string name="game_asks">Soran: %1$s · Cevaplayan: %2$s</string>
+    <string name="game_asker_tag">soruyor</string>
+    <string name="game_answerer_tag">cevaplıyor</string>
+    <string name="game_asker_desc">%1$s soruyor</string>
+    <string name="game_card_pair">%1$s → %2$s · %3$s</string>
 </resources>

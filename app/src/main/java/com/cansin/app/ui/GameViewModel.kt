@@ -33,7 +33,10 @@ data class GameState(
     val pack: GamePack = GamePack.FRIENDS,
     val includeOwn: Boolean = true,
     val avoidRepeat: Boolean = true,
+    /** Who answers (the rim points at them). */
     val turn: Int? = null,
+    /** Who asks (the foot points at them). */
+    val asker: Int? = null,
     /** Final glass angle; while [spinning], the UI animates from [fromAngle] to it. */
     val angle: Float = 0f,
     val fromAngle: Float = 0f,
@@ -63,7 +66,7 @@ class GameViewModel(private val repository: GameRepository, private val random: 
         val clean = players.mapNotNull { p -> VersusRules.cleanName(p.name)?.let { p.copy(name = it) } }.take(GameRules.MAX_PLAYERS)
         if (clean.size < GameRules.MIN_PLAYERS) return
         bags.clear()
-        ui.update { it.copy(playing = true, players = clean, turn = null, card = null, spinning = false) }
+        ui.update { it.copy(playing = true, players = clean, turn = null, asker = null, card = null, spinning = false) }
     }
 
     /** Versus/Together: play with the session's people; restarts only when they change. */
@@ -75,14 +78,18 @@ class GameViewModel(private val repository: GameRepository, private val random: 
 
     fun setShownInSession(on: Boolean) = ui.update { it.copy(shownInSession = on) }
 
-    fun backToSetup() = ui.update { it.copy(playing = false, spinning = false, card = null, turn = null) }
+    fun backToSetup() = ui.update { it.copy(playing = false, spinning = false, card = null, turn = null, asker = null) }
 
     fun spin() {
         val s = ui.value
         if (!s.playing || s.spinning || s.players.size < GameRules.MIN_PLAYERS) return
-        val next = GameRules.pickNext(s.players.size, s.turn, s.avoidRepeat, random)
-        val target = GameRules.spinTarget(s.angle, next, s.players.size)
-        ui.update { it.copy(fromAngle = it.angle, angle = target, turn = next, spinId = it.spinId + 1, spinning = true, card = null) }
+        val count = s.players.size
+        val next = GameRules.pickNext(count, s.turn, s.avoidRepeat, random)
+        val asker = GameRules.askerCandidates(next, count).random(random)
+        val target = GameRules.spinTarget(s.angle, next, count, tilt = GameRules.askerTilt(next, asker, count))
+        ui.update {
+            it.copy(fromAngle = it.angle, angle = target, turn = next, asker = asker, spinId = it.spinId + 1, spinning = true, card = null)
+        }
     }
 
     fun spinDone() = ui.update { it.copy(spinning = false) }
