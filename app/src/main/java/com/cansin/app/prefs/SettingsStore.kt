@@ -51,6 +51,7 @@ private val PROFILE_WEIGHT = intPreferencesKey("profile_weight_kg")
 private val PROFILE_LICENSE = stringPreferencesKey("profile_license")
 private val PROFILE_PROMPT_DISMISSED = booleanPreferencesKey("profile_prompt_dismissed")
 private val PIN_INFO_SEEN = booleanPreferencesKey("pin_info_seen")
+private val GROUP_TIMERS = stringPreferencesKey("group_timers")
 private val WATER_ENABLED = booleanPreferencesKey("water_enabled")
 private val WATER_EVERY = intPreferencesKey("water_every")
 private val TIMER_ENABLED = booleanPreferencesKey("timer_enabled")
@@ -117,6 +118,11 @@ class SettingsStore(private val context: Context) {
         )
         return profile.takeIf { it.isValid }
     }
+
+    /** Encoded seat timers (see SeatTimeRules), only while a Together session is open. */
+    val groupTimers: Flow<String?> = context.dataStore.data.map { it[GROUP_TIMERS] }
+
+    suspend fun setGroupTimers(raw: String?) = edit { it.putOrRemove(GROUP_TIMERS, raw) }
 
     val timerState: Flow<TimerState> = context.dataStore.data.map { p ->
         TimerState(p[TIMER_BEER], p[TIMER_SESSION], p[TIMER_STARTED])

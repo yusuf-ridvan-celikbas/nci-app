@@ -89,7 +89,9 @@ class MainActivity : ComponentActivity() {
     private val notes: NotesViewModel by viewModels { NotesViewModel.factory(app.sessionRepository) }
     private val promille: PromilleViewModel by viewModels { PromilleViewModel.factory(app.sessionRepository, app.settingsStore) }
     private val versus: VersusViewModel by viewModels { VersusViewModel.factory(app.sessionRepository, app.friendRepository) }
-    private val group: GroupViewModel by viewModels { GroupViewModel.factory(app.sessionRepository) }
+    private val group: GroupViewModel by viewModels {
+        GroupViewModel.factory(app.sessionRepository, app.settingsStore, app.drinkTimer, app.groupTimers) { CounterWidget.refreshAll(app) }
+    }
     private val water: WaterViewModel by viewModels { WaterViewModel.factory(app.sessionRepository, app.settingsStore) }
     private val care: CareViewModel by viewModels { CareViewModel.factory(app.sessionRepository, app.settingsStore) }
     private val history: HistoryViewModel by viewModels { HistoryViewModel.factory(app.historyRepository, app.settingsStore) }
@@ -257,8 +259,10 @@ class MainActivity : ComponentActivity() {
                     onOpenHistory = { screen = Screen.HISTORY },
                     pinned = pinned,
                     onTogglePin = { togglePin(settings.pinInfoSeen) },
+                    resumed = resumed,
+                    defaultDrink = com.cansin.app.domain.Drinks.default(settings.defaultDrink, settings.beerSize),
+                    beerSize = settings.beerSize,
                     promilleCard = { CareSlot(); PromilleSlot(onOpen = { screen = Screen.PROMILLE }) },
-                    waterBar = { WaterSlot(it) },
                 )
                 versusState.session != null -> VersusScreen(
                     viewModel = versus,

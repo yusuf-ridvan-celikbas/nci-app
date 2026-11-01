@@ -32,6 +32,7 @@ class CansinApp : Application() {
     }
     val appLock: AppLock by lazy { AppLock(settingsStore) }
     val drinkTimer: DrinkTimer by lazy { DrinkTimer(settingsStore, { sessionRepository }) }
+    val groupTimers: com.cansin.app.timer.GroupTimers by lazy { com.cansin.app.timer.GroupTimers(settingsStore, { sessionRepository }) }
     val reminders: Reminders by lazy { Reminders(this, settingsStore, { sessionRepository }) }
 
     val sessionRepository: SessionRepository by lazy {
@@ -48,6 +49,7 @@ class CansinApp : Application() {
                 override suspend fun onSessionClosed(sessionId: Long) {
                     reminders.onSessionClosed(sessionId)
                     drinkTimer.clearIf(sessionId)
+                    groupTimers.clear()
                 }
             },
             defaultDrink = { settingsStore.settings.first().let { Drinks.default(it.defaultDrink, it.beerSize) } },

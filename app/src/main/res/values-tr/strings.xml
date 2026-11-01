@@ -331,7 +331,6 @@
     <string name="group_seats">Masadaki kişiler</string>
     <string name="group_seat_default">Kişi %1$d</string>
     <string name="group_note">Sayılar yalnızca hesap için bir kayıttır. Su herkes için gösterilir – yavaş gidin.</string>
-    <string name="group_water">Su: %1$d · +1</string>
     <string name="group_water_add">%1$s için bir bardak su ekle</string>
     <string name="group_open">Birlikte\'yi aç</string>
     <string name="group_detail_row">%1$s: %2$s · %3$s</string>
@@ -341,4 +340,16 @@
     <string name="unpin_screen">Sabitlemeyi kaldır</string>
     <string name="pin_info_title">Bu ekran sabitlensin mi?</string>
     <string name="pin_info_body">Telefon elden ele dolaşırken uygulamayı ekranda tutar: Ana ekran, son uygulamalar ve bildirimler engellenir. Android onay ister. Çıkmak için kilide tekrar dokun ya da Geri ve Genel Bakış tuşlarını birlikte basılı tut (hareketlerle: yukarı kaydırıp bekle).</string>
+    <string name="group_last_drink">Son içki %1$s önce</string>
+    <string name="group_last_drink_now">Son içki az önce</string>
+    <string name="group_no_drinks">Henüz içki yok</string>
+    <string name="group_last_water">su %1$s önce</string>
+    <string name="group_last_water_now">su az önce</string>
+    <string name="group_no_water">henüz su yok</string>
+    <string name="group_at_table">Masada %1$s</string>
+    <string name="group_water_count">Su: %1$d</string>
+    <string name="group_add_drink">+1 içki</string>
+    <string name="group_add_water">+ Su</string>
+    <string name="group_timer_stop">Durdur</string>
+    <string name="time_minutes">%1$d dk</string>
 </resources>

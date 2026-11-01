@@ -339,7 +339,6 @@
     <string name="group_seats">People at the table</string>
     <string name="group_seat_default">Seat %1$d</string>
     <string name="group_note">Counts are only a record for the tab. Water is shown for everyone – pace yourselves.</string>
-    <string name="group_water">Water: %1$d · +1</string>
     <string name="group_water_add">Add a glass of water for %1$s</string>
     <string name="group_open">Open Together</string>
     <string name="group_detail_row">%1$s: %2$s · %3$s</string>
@@ -349,4 +348,16 @@
     <string name="unpin_screen">Unpin screen</string>
     <string name="pin_info_title">Pin this screen?</string>
     <string name="pin_info_body">Keeps the app on screen while the phone is passed around: Home, recent apps and notifications are blocked. Android asks you to confirm. To leave, tap the lock again, or hold Back and Overview together (with gestures: swipe up and hold).</string>
+    <string name="group_last_drink">Last drink %1$s ago</string>
+    <string name="group_last_drink_now">Last drink just now</string>
+    <string name="group_no_drinks">No drinks yet</string>
+    <string name="group_last_water">water %1$s ago</string>
+    <string name="group_last_water_now">water just now</string>
+    <string name="group_no_water">no water yet</string>
+    <string name="group_at_table">At the table %1$s</string>
+    <string name="group_water_count">Water: %1$d</string>
+    <string name="group_add_drink">+1 drink</string>
+    <string name="group_add_water">+ Water</string>
+    <string name="group_timer_stop">Stop</string>
+    <string name="time_minutes">%1$d min</string>
 </resources>

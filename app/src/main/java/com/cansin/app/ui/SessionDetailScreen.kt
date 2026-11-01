@@ -35,7 +35,7 @@ import com.cansin.app.R
 import com.cansin.app.data.SessionMode
 import com.cansin.app.data.Side
 import com.cansin.app.domain.BeerSize
-import com.cansin.app.domain.GroupRules
+import com.cansin.app.domain.SeatTimeRules
 import com.cansin.app.domain.StatsRules
 import com.cansin.app.domain.VersusRules
 
@@ -96,15 +96,19 @@ private fun DetailContent(viewModel: HistoryViewModel, detail: SessionDetail?, o
                             Text(stringResource(R.string.tab_side_total, if (session.meSide == side) stringResource(R.string.versus_name_me, name) else name, count.toString()))
                         }
                     } else if (session.mode == SessionMode.GROUP) {
-                        GroupRules.tally(d.seats, d.beers, d.water).forEach { t ->
+                        SeatTimeRules.times(d.seats, d.beers, d.water).forEach { t ->
                             val name = sideName(session, t.side)
+                            val stay = t.firstAt?.let { first ->
+                                val last = maxOf(t.lastDrinkAt ?: first, t.lastWaterAt ?: first)
+                                formatDuration(last - first)
+                            }
                             Text(
                                 stringResource(
                                     R.string.group_detail_row,
                                     if (session.meSide == t.side) stringResource(R.string.versus_name_me, name) else name,
                                     pluralStringResource(R.plurals.beers_count, t.drinks, t.drinks),
                                     stringResource(R.string.water_count, t.water),
-                                ),
+                                ) + (stay?.let { " · " + stringResource(R.string.group_at_table, it) } ?: ""),
                             )
                         }
                     } else {
