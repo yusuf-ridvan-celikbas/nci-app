@@ -55,6 +55,7 @@ data class Settings(
     val defaultDrink: com.cansin.app.data.DrinkKind = com.cansin.app.data.DrinkKind.BEER,
     val profile: BodyProfile? = null,
     val profilePromptDismissed: Boolean = false,
+    val pinInfoSeen: Boolean = false,
     val waterEnabled: Boolean = true,
     val waterEvery: Int = WaterRules.DEFAULT_EVERY,
     val timerEnabled: Boolean = true,

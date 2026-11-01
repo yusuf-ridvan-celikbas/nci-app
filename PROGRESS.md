@@ -1,6 +1,6 @@
 # Progress
 
-Current phase: **P14–P23 done on Android (branch feature/p20-plus, local only, NOT pushed). Phone review paused by user (2026-11-01): user reviews P20–P23 later in order, then we merge. iOS: CansinCore has P14–P23 rules (uncompiled); app/widget never compiled; see ios/PORT_PLAN.md (needs a Mac).**
+Current phase: **P14–P24 done on Android (branch feature/p20-plus, local only, NOT pushed). Phone review paused by user (2026-11-01): user reviews P20–P23 later in order, then we merge. iOS: CansinCore has P14–P23 rules (uncompiled); app/widget never compiled; see ios/PORT_PLAN.md (needs a Mac).**
 
 ## Phases
 - [x] Setup (project, wrapper, git, CLAUDE.md)
@@ -20,7 +20,7 @@ Current phase: **P14–P23 done on Android (branch feature/p20-plus, local only,
 - Plan P14–P23 (2026-11-01, user-approved; file ~/.claude/plans/bright-swimming-diffie.md), branch feature/p14-plus:
   - [x] P14 Currency  - [x] P15 Quick tile + shortcuts  - [x] P16 Care messages  - [x] P17 Self-set limits
   - [x] P18 PIN lock  - [x] P19 Settle up (branch feature/p18-pin, on top of p14-plus)  - [x] P20 Stats extras  - [ ] checkpoint: phone test + merge (paused by user)
-  - [x] P21 Restore backup  - [x] P22 Other drinks (DB v4)  - [x] P23 Group mode 2–6 (DB v5, no winner/race) (branch feature/p20-plus on top of p18-pin)
+  - [x] P21 Restore backup  - [x] P22 Other drinks (DB v4)  - [x] P23 Group mode 2–6 (DB v5, no winner/race)  - [x] P24 Screen pinning in Versus/Together (branch feature/p20-plus on top of p18-pin)
 
 ## Code map
 - `data/` Entities.kt (all 5 Room entities, enums stored as TEXT), Daos.kt (SessionDao, BeerDao), AppDatabase.kt (v1, schema in app/schemas), SessionRepository.kt (all writes behind one Mutex)
@@ -102,6 +102,11 @@ Current phase: **P14–P23 done on Android (branch feature/p20-plus, local only,
 - P16/P17: `domain/CareRules.kt` + `ui/CareViewModel.kt`, `ui/CareCard.kt` (one card in the promille slot of counter + versus), `ui/CareSection.kt` (Settings → Looking after you). Priority: own beer limit > own budget > late (default 01:00, choices 22–03, until 06:00; "Not now" = 1 h) > slow down (≥5 of my beers; no numbers, also covers EN health caution). Limits work even with kind reminders off. Budget compares my spend (solo: whole tab; versus: my side + shared). "Way home": saved home text → https maps transit directions; none → geo search "bus stop". Taxi = existing geo search. Prefs: care_enabled, care_late_hour, home_place (≤100, no control chars), beer_limit (1–20), budget_minor.
 - Release APK 1.67 MB (+23 KB). Permissions unchanged, no INTERNET. Lint 0 errors. Tests 131/131. Not tested on device.
 - Remote added: origin https://github.com/yusuf-ridvan-celikbas/nci-app.git (nothing pushed yet).
+
+## P24 report (2026-11-01) — screen pinning for Versus/Together (user request)
+- Lock icon in the Versus and Together top bars → Android screen pinning (`system/ScreenPin.kt`, `startLockTask`, user confirms the system prompt; no permission, no manifest change). The first time, an info dialog explains how to leave (pref `pin_info_seen`). Tap again to unpin; the state is re-read on resume/focus (a gesture unpin also updates the icon). It auto-unpins when no Versus/Together session is open (`domain/PinScreenRules.kt`).
+- Release APK 1.74 MB. Permissions unchanged, no INTERNET. Lint 0 errors. Tests 172/172. Not tested on a device.
+- iOS: no API; plan = info card pointing to Guided Access (ios/PORT_PLAN.md).
 
 ## P20–P23 report (2026-11-01, built while the user studies; not on the phone, not pushed)
 - Commits on feature/p20-plus: e249fbd P20, 9864fd9 P21, 9562429 P22, 4afffe8 P23, f44e4ff P23 budget fix, 906657d iOS prep.

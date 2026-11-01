@@ -50,6 +50,7 @@ private val PROFILE_HEIGHT = intPreferencesKey("profile_height_cm")
 private val PROFILE_WEIGHT = intPreferencesKey("profile_weight_kg")
 private val PROFILE_LICENSE = stringPreferencesKey("profile_license")
 private val PROFILE_PROMPT_DISMISSED = booleanPreferencesKey("profile_prompt_dismissed")
+private val PIN_INFO_SEEN = booleanPreferencesKey("pin_info_seen")
 private val WATER_ENABLED = booleanPreferencesKey("water_enabled")
 private val WATER_EVERY = intPreferencesKey("water_every")
 private val TIMER_ENABLED = booleanPreferencesKey("timer_enabled")
@@ -90,6 +91,7 @@ class SettingsStore(private val context: Context) {
             defaultDrink = enumOr(p[DEFAULT_DRINK], DrinkKind.BEER).takeIf { it in Drinks.DEFAULT_KINDS } ?: DrinkKind.BEER,
             profile = readProfile(p),
             profilePromptDismissed = p[PROFILE_PROMPT_DISMISSED] == true,
+            pinInfoSeen = p[PIN_INFO_SEEN] == true,
             waterEnabled = p[WATER_ENABLED] ?: true,
             waterEvery = WaterRules.clamp(p[WATER_EVERY] ?: WaterRules.DEFAULT_EVERY),
             timerEnabled = p[TIMER_ENABLED] ?: true,
@@ -223,6 +225,8 @@ class SettingsStore(private val context: Context) {
     suspend fun setShareName(value: String?) = edit { it.putOrRemove(SHARE_NAME, ResultCards.cleanName(value)) }
 
     suspend fun dismissProfilePrompt() = edit { it[PROFILE_PROMPT_DISMISSED] = true }
+
+    suspend fun markPinInfoSeen() = edit { it[PIN_INFO_SEEN] = true }
 
     suspend fun setScheduledReminder(at: Long?, sessionId: Long?) = edit {
         it.putOrRemove(REMINDER_NEXT_AT, at)

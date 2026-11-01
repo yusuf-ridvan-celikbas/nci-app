@@ -345,4 +345,8 @@
     <string name="group_detail_row">%1$s: %2$s · %3$s</string>
     <string name="history_group_row">%1$s · Together</string>
     <string name="settle_split_shared_group">Split shared items evenly</string>
+    <string name="pin_screen">Pin screen</string>
+    <string name="unpin_screen">Unpin screen</string>
+    <string name="pin_info_title">Pin this screen?</string>
+    <string name="pin_info_body">Keeps the app on screen while the phone is passed around: Home, recent apps and notifications are blocked. Android asks you to confirm. To leave, tap the lock again, or hold Back and Overview together (with gestures: swipe up and hold).</string>
 </resources>

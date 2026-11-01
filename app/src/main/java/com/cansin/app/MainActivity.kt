@@ -51,6 +51,11 @@ import com.cansin.app.ui.VersusScreen
 import com.cansin.app.ui.VersusSetupDialog
 import com.cansin.app.ui.VersusViewModel
 import com.cansin.app.ui.GroupViewModel
+import com.cansin.app.system.ScreenPin
+import com.cansin.app.domain.PinScreenRules
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import com.cansin.app.ui.GroupScreen
 import com.cansin.app.ui.GroupSetupDialog
 import com.cansin.app.ui.ModeChooserDialog
@@ -92,6 +97,8 @@ class MainActivity : ComponentActivity() {
     private var openTabRequest by mutableStateOf(false)
     private var quickAction by mutableStateOf<QuickAction?>(null)
     private var locked by mutableStateOf(true)
+    private var pinned by mutableStateOf(false)
+    private var pinInfo by mutableStateOf(false)
     private var notificationAccess by mutableStateOf(NotificationAccess(permissionGranted = false, enabled = false))
 
     override fun attachBaseContext(newBase: Context) {
@@ -144,6 +151,20 @@ class MainActivity : ComponentActivity() {
         val enabled = getSystemService(NotificationManager::class.java).areNotificationsEnabled()
         notificationAccess = NotificationAccess(granted, enabled)
         resumed = true
+        pinned = ScreenPin.isPinned(this)
+    }
+
+    override fun onWindowFocusChanged(hasFocus: Boolean) {
+        super.onWindowFocusChanged(hasFocus)
+        pinned = ScreenPin.isPinned(this)
+    }
+
+    private fun togglePin(infoSeen: Boolean) {
+        when {
+            pinned -> { ScreenPin.unpin(this); pinned = ScreenPin.isPinned(this) }
+            !infoSeen -> pinInfo = true
+            else -> ScreenPin.pin(this)
+        }
     }
 
     override fun onPause() {
@@ -234,6 +255,8 @@ class MainActivity : ComponentActivity() {
                     onOpenTab = { screen = Screen.TAB },
                     onEditSeats = { editingGroup = true },
                     onOpenHistory = { screen = Screen.HISTORY },
+                    pinned = pinned,
+                    onTogglePin = { togglePin(settings.pinInfoSeen) },
                     promilleCard = { CareSlot(); PromilleSlot(onOpen = { screen = Screen.PROMILLE }) },
                     waterBar = { WaterSlot(it) },
                 )
@@ -243,6 +266,8 @@ class MainActivity : ComponentActivity() {
                     onOpenTab = { screen = Screen.TAB },
                     onEditSides = { editingSides = true },
                     onOpenHistory = { screen = Screen.HISTORY },
+                    pinned = pinned,
+                    onTogglePin = { togglePin(settings.pinInfoSeen) },
                     promilleCard = { CareSlot(); PromilleSlot(onOpen = { screen = Screen.PROMILLE }) },
                     waterBar = { WaterSlot(it) },
                 )
@@ -257,6 +282,28 @@ class MainActivity : ComponentActivity() {
                     onOpenHistory = { screen = Screen.HISTORY },
                     promilleCard = { CareSlot(); PromilleSlot(onOpen = { screen = Screen.PROMILLE }) },
                     waterBar = { WaterSlot(it) },
+                )
+            }
+            val shared = versusState.session != null || groupState.session != null
+            LaunchedEffect(shared, pinned, versusState.loaded, groupState.loaded) {
+                if (versusState.loaded && groupState.loaded && PinScreenRules.shouldAutoUnpin(pinned, shared)) {
+                    ScreenPin.unpin(this@MainActivity)
+                    pinned = ScreenPin.isPinned(this@MainActivity)
+                }
+            }
+            if (pinInfo) {
+                AlertDialog(
+                    onDismissRequest = { pinInfo = false },
+                    title = { Text(stringResource(R.string.pin_info_title)) },
+                    text = { Text(stringResource(R.string.pin_info_body)) },
+                    confirmButton = {
+                        TextButton(onClick = {
+                            pinInfo = false
+                            update { markPinInfoSeen() }
+                            ScreenPin.pin(this@MainActivity)
+                        }) { Text(stringResource(R.string.pin_screen)) }
+                    },
+                    dismissButton = { TextButton(onClick = { pinInfo = false }) { Text(stringResource(R.string.action_cancel)) } },
                 )
             }
             if (choosingMode && settings.ageConfirmed) {

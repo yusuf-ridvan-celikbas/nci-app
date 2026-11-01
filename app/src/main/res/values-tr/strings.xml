@@ -337,4 +337,8 @@
     <string name="group_detail_row">%1$s: %2$s · %3$s</string>
     <string name="history_group_row">%1$s · Birlikte</string>
     <string name="settle_split_shared_group">Ortak kalemleri eşit böl</string>
+    <string name="pin_screen">Ekranı sabitle</string>
+    <string name="unpin_screen">Sabitlemeyi kaldır</string>
+    <string name="pin_info_title">Bu ekran sabitlensin mi?</string>
+    <string name="pin_info_body">Telefon elden ele dolaşırken uygulamayı ekranda tutar: Ana ekran, son uygulamalar ve bildirimler engellenir. Android onay ister. Çıkmak için kilide tekrar dokun ya da Geri ve Genel Bakış tuşlarını birlikte basılı tut (hareketlerle: yukarı kaydırıp bekle).</string>
 </resources>

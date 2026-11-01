@@ -57,6 +57,8 @@ fun GroupScreen(
     onOpenTab: () -> Unit,
     onEditSeats: () -> Unit,
     onOpenHistory: () -> Unit,
+    pinned: Boolean,
+    onTogglePin: () -> Unit,
     promilleCard: @Composable () -> Unit,
     waterBar: @Composable (SnackbarHostState) -> Unit,
 ) {
@@ -77,6 +79,12 @@ fun GroupScreen(
                         }
                     },
                     actions = {
+                        IconButton(onClick = onTogglePin) {
+                            Icon(
+                                painterResource(if (pinned) R.drawable.ic_lock else R.drawable.ic_lock_open),
+                                stringResource(if (pinned) R.string.unpin_screen else R.string.pin_screen),
+                            )
+                        }
                         IconButton(onClick = onOpenHistory) {
                             Icon(painterResource(R.drawable.ic_history), stringResource(R.string.history_title))
                         }
