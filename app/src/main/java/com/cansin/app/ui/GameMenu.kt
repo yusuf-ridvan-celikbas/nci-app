@@ -1,6 +1,5 @@
 package com.cansin.app.ui
 
-import android.os.Build
 import androidx.activity.compose.BackHandler
 import androidx.annotation.DrawableRes
 import androidx.annotation.StringRes
@@ -37,7 +36,6 @@ import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.blur
 import androidx.compose.ui.graphics.TransformOrigin
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -47,12 +45,8 @@ import com.cansin.app.R
 private const val ENTER_MS = 260
 private const val STAGGER_MS = 45
 
-/** Blur for the screen behind the Game menu (API 31+; older phones get the dim layer only). */
-fun Modifier.behindGameMenu(open: Boolean): Modifier =
-    if (open && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) blur(14.dp) else this
-
 /**
- * Game tab tap: three floating cards rise from the Game tab over a dimmed (and blurred) screen.
+ * Game tab tap: three floating cards rise from the Game tab over a dimmed screen.
  * Soy tu Tentación, Versus, Together. Tap outside or Back closes it.
  */
 @Composable

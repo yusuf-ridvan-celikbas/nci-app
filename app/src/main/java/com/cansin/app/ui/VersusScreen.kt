@@ -14,7 +14,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.CenterAlignedTopAppBar
+import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -50,7 +50,6 @@ import com.cansin.app.data.Side
 fun VersusScreen(
     viewModel: VersusViewModel,
     game: GameViewModel,
-    onOpenTab: () -> Unit,
     onEditSides: () -> Unit,
     pinned: Boolean,
     onTogglePin: () -> Unit,
@@ -67,13 +66,8 @@ fun VersusScreen(
 
     Scaffold(
         topBar = {
-            CenterAlignedTopAppBar(
+            TopAppBar(
                 title = { Text(stringResource(R.string.versus_title)) },
-                navigationIcon = {
-                    IconButton(onClick = onOpenTab) {
-                        Icon(painterResource(R.drawable.ic_receipt), stringResource(R.string.open_tab))
-                    }
-                },
                 actions = {
                     GameToggle(gameOn, game::setShownInSession)
                     IconButton(onClick = onTogglePin) {

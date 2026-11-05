@@ -21,7 +21,6 @@ import androidx.compose.ui.Modifier
 import com.cansin.app.ui.AppNavBar
 import com.cansin.app.ui.RootTab
 import com.cansin.app.ui.GameMenu
-import com.cansin.app.ui.behindGameMenu
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
@@ -263,7 +262,7 @@ class MainActivity : ComponentActivity() {
                 contentWindowInsets = WindowInsets(0),
             ) { inner ->
             Box(Modifier.fillMaxSize().padding(inner).consumeWindowInsets(inner)) {
-            Box(Modifier.fillMaxSize().behindGameMenu(gameSheet)) {
+            Box(Modifier.fillMaxSize()) {
             when {
                 showLock -> LockScreen(
                     title = stringResource(R.string.name_salgam),
@@ -305,7 +304,6 @@ class MainActivity : ComponentActivity() {
                 groupState.session != null -> GroupScreen(
                     viewModel = group,
                     game = game,
-                    onOpenTab = { screen = Screen.TAB },
                     onEditSeats = { editingGroup = true },
                     pinned = pinned,
                     onTogglePin = { togglePin(settings.pinInfoSeen) },
@@ -319,7 +317,6 @@ class MainActivity : ComponentActivity() {
                 versusState.session != null -> VersusScreen(
                     viewModel = versus,
                     game = game,
-                    onOpenTab = { screen = Screen.TAB },
                     onEditSides = { editingSides = true },
                     pinned = pinned,
                     onTogglePin = { togglePin(settings.pinInfoSeen) },
@@ -331,7 +328,6 @@ class MainActivity : ComponentActivity() {
                     title = stringResource(R.string.name_salgam),
                     defaultDrink = com.cansin.app.domain.Drinks.default(settings.defaultDrink, settings.beerSize),
                     beerSize = settings.beerSize,
-                    onOpenTab = { screen = Screen.TAB },
                     onStartVersus = { choosingMode = true },
                     promilleCard = { CareSlot(); PromilleSlot(onOpen = { screen = Screen.PROMILLE }) },
                     waterBar = { WaterSlot(it) },

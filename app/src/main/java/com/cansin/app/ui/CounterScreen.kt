@@ -13,7 +13,7 @@ import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.material3.CenterAlignedTopAppBar
+import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -25,6 +25,7 @@ import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.SnackbarResult
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -62,7 +63,6 @@ fun CounterScreen(
     title: String,
     defaultDrink: DrinkChoice,
     beerSize: BeerSize,
-    onOpenTab: () -> Unit,
     onStartVersus: () -> Unit,
     promilleCard: @Composable () -> Unit,
     waterBar: @Composable (SnackbarHostState) -> Unit,
@@ -74,16 +74,17 @@ fun CounterScreen(
 
     Scaffold(
         topBar = {
-            CenterAlignedTopAppBar(
+            TopAppBar(
                 title = { Text(title) },
-                navigationIcon = {
-                    IconButton(onClick = onOpenTab) {
-                        Icon(painterResource(R.drawable.ic_receipt), stringResource(R.string.open_tab))
-                    }
-                },
                 actions = {
-                    IconButton(onClick = onStartVersus) {
-                        Icon(painterResource(R.drawable.ic_versus), stringResource(R.string.versus_start))
+                    // Small question + people icon: opens Versus / Together.
+                    TextButton(onClick = onStartVersus) {
+                        Text(stringResource(R.string.with_friends_question), style = MaterialTheme.typography.labelMedium)
+                        Icon(
+                            painterResource(R.drawable.ic_versus),
+                            contentDescription = null,
+                            modifier = Modifier.padding(start = 6.dp),
+                        )
                     }
                 },
             )

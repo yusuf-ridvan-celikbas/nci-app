@@ -24,7 +24,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.CenterAlignedTopAppBar
+import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilledTonalButton
@@ -79,7 +79,6 @@ private const val SLOW_TICK_MS = 30_000L
 fun GroupScreen(
     viewModel: GroupViewModel,
     game: GameViewModel,
-    onOpenTab: () -> Unit,
     onEditSeats: () -> Unit,
     pinned: Boolean,
     onTogglePin: () -> Unit,
@@ -114,13 +113,8 @@ fun GroupScreen(
         SyncGamePlayers(game, session, gameOn)
         Scaffold(
             topBar = {
-                CenterAlignedTopAppBar(
+                TopAppBar(
                     title = { Text(stringResource(R.string.group_title)) },
-                    navigationIcon = {
-                        IconButton(onClick = onOpenTab) {
-                            Icon(painterResource(R.drawable.ic_receipt), stringResource(R.string.open_tab))
-                        }
-                    },
                     actions = {
                         if (!gameOn) {
                             val grid = layout == GroupLayout.GRID

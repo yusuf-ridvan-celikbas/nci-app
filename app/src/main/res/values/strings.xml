@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<resources>
+<resources xmlns:tools="http://schemas.android.com/tools">
     <string name="name_salgam" translatable="false">SalgamBalgam</string>
     <string name="plus_one" translatable="false">+1</string>
     <string name="minus_one" translatable="false">−1</string>
@@ -57,7 +57,8 @@
     <string name="channel_reminders">Reminders</string>
     <string name="channel_reminders_silent">Silent reminders</string>
     <string name="tab_title">Tab</string>
-    <string name="open_tab">Open tab</string>
+    <!-- used by iOS (gen_strings.py) -->
+    <string name="open_tab" tools:ignore="UnusedResources">Open tab</string>
     <string name="note_hint">Add a note</string>
     <string name="amount_hint">Amount</string>
     <string name="add_note">Add note</string>
@@ -132,7 +133,8 @@
     <string name="beer_finished_unset">Finished: not set</string>
     <string name="action_not_finished">Not finished</string>
     <string name="versus_title">Versus</string>
-    <string name="versus_start">Start Versus</string>
+    <!-- used by iOS (gen_strings.py) -->
+    <string name="versus_start" tools:ignore="UnusedResources">Start Versus</string>
     <string name="versus_edit">Edit sides</string>
     <string name="side_red">Red</string>
     <string name="side_blue">Blue</string>
@@ -427,4 +429,5 @@
     <string name="game_pick_tod_desc">Spin the glass: truth or dare questions for 2–10 people.</string>
     <string name="game_pick_versus_desc">Two sides, each with its own count and tab.</string>
     <string name="game_pick_group_desc">Up to 10 people, each with their own count, and a shared tab.</string>
+    <string name="with_friends_question">Are you with your friends?</string>
 </resources>
