@@ -1,6 +1,6 @@
 # Progress
 
-Current phase: **P14–P26 done on Android (branch feature/p20-plus, local only, NOT pushed). Phone review paused by user (2026-11-01): user reviews P20–P23 later in order, then we merge. iOS: CansinCore has P14–P23 rules (uncompiled); app/widget never compiled; see ios/PORT_PLAN.md (needs a Mac).**
+Current phase: **P13–P26 approved on the phone (2026-11-06) and merged into master locally (fast-forward), NOT pushed yet. iOS: CansinCore has the rules (uncompiled); app/widget never compiled; see ios/PORT_PLAN.md (needs a Mac).**
 
 ## Phases
 - [x] Setup (project, wrapper, git, CLAUDE.md)
@@ -19,7 +19,7 @@ Current phase: **P14–P26 done on Android (branch feature/p20-plus, local only,
 - [x] P13 Friends, offline (Option A result cards; Android done, iOS core only) (design first)
 - Plan P14–P23 (2026-11-01, user-approved; file ~/.claude/plans/bright-swimming-diffie.md), branch feature/p14-plus:
   - [x] P14 Currency  - [x] P15 Quick tile + shortcuts  - [x] P16 Care messages  - [x] P17 Self-set limits
-  - [x] P18 PIN lock  - [x] P19 Settle up (branch feature/p18-pin, on top of p14-plus)  - [x] P20 Stats extras  - [ ] checkpoint: phone test + merge (paused by user)
+  - [x] P18 PIN lock  - [x] P19 Settle up (branch feature/p18-pin, on top of p14-plus)  - [x] P20 Stats extras  - [x] checkpoint: phone test + merge (2026-11-06, local)
   - [x] P21 Restore backup  - [x] P22 Other drinks (DB v4)  - [x] P23 Group mode 2–6 (DB v5, no winner/race)  - [x] P24 Screen pinning in Versus/Together  - [x] P25 Bottom navigation  - [x] P26 Truth or Dare game (branch feature/p20-plus on top of p18-pin)
 
 ## Code map
@@ -142,7 +142,8 @@ Current phase: **P14–P26 done on Android (branch feature/p20-plus, local only,
   6. Counts in widget/stats/result card now mean all drinks, not only beer.
 - Known limits: the Stats "water per drink" in a group counts everyone's water; in a group, the counter's water bar duplicates my seat's water button.
 
-## Phone review (2026-11-05)
+## Phone review (2026-11-05/06) — all approved
+- Approved: P24, P25, P26 + all changes below. Release APK 1.85 MB (unsigned). Permissions: POST_NOTIFICATIONS, RECEIVE_BOOT_COMPLETED, AndroidX DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION; no INTERNET. Lint 0 errors.
 - Approved: P24, P25. Fixed: ending Versus/Together sends a game with that session's people back to setup (c7a9558).
 - User: Together and the game go up to 10 people. Seats 7–10 = TEAL, PINK, ORANGE, GREY (`Palettes.extraSeats`, AA-tested; stored as TEXT, no DB migration). Glass chips narrower from 7 players. iOS core limits updated (iOS group UI not ported yet).
 - User: Together layout preference Rows (default) / Grid (the first P23 design: 2 columns, coloured cards, big count, −1/+1 with long-press picker, water). Switch in the Together top bar (hidden while the game is shown) and Settings → Together; DataStore `group_layout`. Grid has no per-person timer or "… ago" lines (use Rows for those). iOS: not ported.
