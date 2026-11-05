@@ -95,9 +95,7 @@ fun HistoryScreen(viewModel: HistoryViewModel, onBack: () -> Unit, onOpen: (Long
                     title = { Text(stringResource(R.string.history_title)) },
                     actions = {
                         if (tab == 0 && !summaries.isNullOrEmpty()) {
-                            IconButton(onClick = { viewModel.startSelecting() }) {
-                                Icon(painterResource(R.drawable.ic_checklist), stringResource(R.string.select_mode))
-                            }
+                            TextButton(onClick = { viewModel.startSelecting() }) { Text(stringResource(R.string.select_short)) }
                         }
                     },
                 )
