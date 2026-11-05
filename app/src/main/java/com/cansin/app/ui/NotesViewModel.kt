@@ -65,12 +65,12 @@ class NotesViewModel(private val repository: SessionRepository) : ViewModel() {
     fun delete(note: Note) = viewModelScope.launch { repository.deleteNote(note) }
 
     fun addDrink(line: DrinkLine) = viewModelScope.launch {
-        repository.addBeer(side = line.beerSide, drink = com.cansin.app.domain.DrinkChoice(line.kind, com.cansin.app.domain.BeerSize(line.sizeMl, line.abv)))
+        repository.addBeer(side = line.beerSide, drink = com.cansin.app.domain.DrinkChoice(line.kind, com.cansin.app.domain.BeerSize(line.sizeMl, line.abv), line.brand))
     }
 
-    fun removeDrink(line: DrinkLine) = viewModelScope.launch { repository.removeLatestDrink(line.kind, line.sizeMl, line.beerSide) }
+    fun removeDrink(line: DrinkLine) = viewModelScope.launch { repository.removeLatestDrink(line.kind, line.sizeMl, line.beerSide, line.brand) }
 
-    fun setPrice(line: DrinkLine, minor: Long?) = viewModelScope.launch { repository.setDrinkPrice(line.kind, line.sizeMl, line.beerSide, minor) }
+    fun setPrice(line: DrinkLine, minor: Long?) = viewModelScope.launch { repository.setDrinkPrice(line.kind, line.sizeMl, line.beerSide, minor, line.brand) }
 
     companion object {
         fun factory(repository: SessionRepository): ViewModelProvider.Factory = viewModelFactory {

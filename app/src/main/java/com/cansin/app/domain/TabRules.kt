@@ -20,6 +20,7 @@ data class DrinkLine(
     val beerSide: Side = Side.SOLO,
     val unitMinor: Long? = null,
     val abv: Double = 5.0,
+    val brand: String? = null,
 )
 
 /**
@@ -45,15 +46,15 @@ object TabRules {
 
     fun drinkTotal(beers: List<BeerEvent>): Long = beers.sumOf { it.priceMinor ?: 0 }
 
-    /** Every drink tonight grouped by kind + size + person (priced or not), in first-added order. */
+    /** Every drink tonight grouped by kind + size + person + brand (priced or not), in first-added order. */
     fun drinkLines(beers: List<BeerEvent>, mode: SessionMode?): List<DrinkLine> {
-        val lines = LinkedHashMap<Triple<DrinkKind, Int, Side>, DrinkLine>()
+        val lines = LinkedHashMap<List<Any?>, DrinkLine>()
         beers.sortedWith(compareBy({ it.at }, { it.id })).forEach { b ->
-            val key = Triple(b.kind, b.sizeMl, b.side)
+            val key = listOf(b.kind, b.sizeMl, b.side, b.brand)
             val price = b.priceMinor?.takeIf { it > 0 }
             val line = lines[key]
             lines[key] = if (line == null) {
-                DrinkLine(b.kind, b.sizeMl, mode?.let { VersusRules.noteSide(b.side, it) }, 1, price ?: 0, b.side, price, b.abv)
+                DrinkLine(b.kind, b.sizeMl, mode?.let { VersusRules.noteSide(b.side, it) }, 1, price ?: 0, b.side, price, b.abv, b.brand)
             } else {
                 line.copy(count = line.count + 1, totalMinor = line.totalMinor + (price ?: 0), unitMinor = price ?: line.unitMinor, abv = b.abv)
             }

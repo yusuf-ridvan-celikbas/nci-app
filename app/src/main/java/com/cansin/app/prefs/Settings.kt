@@ -67,6 +67,8 @@ data class Settings(
     val compressAfter: com.cansin.app.domain.CompressAfter = com.cansin.app.domain.CompressAfter.NEVER,
     /** P28: price per drink kind (beer per size) in minor units; drinks with a price go on the Tab. */
     val prices: Map<com.cansin.app.domain.PriceSlot, Long> = emptyMap(),
+    /** P29: optional brand the big +1 uses for beer. */
+    val defaultBrand: String? = null,
     val shareName: String? = null,
     val currency: Currency = Currency.NONE,
     val careEnabled: Boolean = true,

@@ -250,7 +250,8 @@ class MainActivity : ComponentActivity() {
         }
         BackHandler(screen != Screen.COUNTER) { screen = if (screen == Screen.DETAIL) Screen.HISTORY else Screen.COUNTER }
 
-        CansinTheme(dark, settings.accent) { CompositionLocalProvider(LocalCurrency provides settings.currency) {
+        val recentBrands by app.sessionRepository.recentBrands.collectAsState(initial = emptyList())
+        CansinTheme(dark, settings.accent) { CompositionLocalProvider(LocalCurrency provides settings.currency, com.cansin.app.ui.LocalRecentBrands provides recentBrands) {
             val tab = screen.tab()
             val showBar = settings.ageConfirmed && !showLock && tab != null
             Scaffold(
@@ -308,7 +309,7 @@ class MainActivity : ComponentActivity() {
                     pinned = pinned,
                     onTogglePin = { togglePin(settings.pinInfoSeen) },
                     resumed = resumed,
-                    defaultDrink = com.cansin.app.domain.Drinks.default(settings.defaultDrink, settings.beerSize),
+                    defaultDrink = com.cansin.app.domain.Drinks.default(settings.defaultDrink, settings.beerSize, settings.defaultBrand),
                     beerSize = settings.beerSize,
                     layout = settings.groupLayout,
                     onLayout = { layout -> update { setGroupLayout(layout) } },
@@ -326,7 +327,7 @@ class MainActivity : ComponentActivity() {
                 else -> CounterScreen(
                     viewModel = counter,
                     title = stringResource(R.string.name_salgam),
-                    defaultDrink = com.cansin.app.domain.Drinks.default(settings.defaultDrink, settings.beerSize),
+                    defaultDrink = com.cansin.app.domain.Drinks.default(settings.defaultDrink, settings.beerSize, settings.defaultBrand),
                     beerSize = settings.beerSize,
                     onStartVersus = { choosingMode = true },
                     promilleCard = { CareSlot(); PromilleSlot(onOpen = { screen = Screen.PROMILLE }) },
@@ -498,6 +499,7 @@ class MainActivity : ComponentActivity() {
         onKeepHistory = { app.settingsStore.setKeepHistory(it) },
         onCompressAfter = { app.settingsStore.setCompressAfter(it) },
         onPrice = { slot, minor -> update { setPrice(slot, minor) } },
+        onDefaultBrand = { brand -> update { setDefaultBrand(brand) } },
     )
 
     private fun update(block: suspend SettingsStore.() -> Unit) {

@@ -62,6 +62,7 @@ private val WATER_EVERY = intPreferencesKey("water_every")
 private val TIMER_ENABLED = booleanPreferencesKey("timer_enabled")
 private val GROUP_LAYOUT = stringPreferencesKey("group_layout")
 private val KEEP_HISTORY = stringPreferencesKey("keep_history")
+private val DEFAULT_BRAND = stringPreferencesKey("default_brand")
 /** "price_BEER" = beer 50 cl (P28 key kept), "price_BEER_33", "price_BEER_1L", "price_WINE", … */
 private fun priceKey(slot: PriceSlot) = longPreferencesKey("price_" + slot.name)
 private val COMPRESS_AFTER = stringPreferencesKey("compress_after")
@@ -109,6 +110,7 @@ class SettingsStore(private val context: Context) {
             waterEvery = WaterRules.clamp(p[WATER_EVERY] ?: WaterRules.DEFAULT_EVERY),
             timerEnabled = p[TIMER_ENABLED] ?: true,
             groupLayout = enumOr(p[GROUP_LAYOUT], GroupLayout.ROWS),
+            defaultBrand = com.cansin.app.domain.BrandRules.clean(p[DEFAULT_BRAND]),
             keepHistory = enumOr(p[KEEP_HISTORY], KeepHistory.FOREVER),
             compressAfter = enumOr(p[COMPRESS_AFTER], CompressAfter.NEVER),
             prices = PriceSlot.entries.mapNotNull { k -> p[priceKey(k)]?.takeIf { it > 0 && NoteRules.isValidAmount(it) }?.let { k to it } }.toMap(),
@@ -242,6 +244,8 @@ class SettingsStore(private val context: Context) {
     suspend fun setGroupLayout(value: GroupLayout) = edit { it[GROUP_LAYOUT] = value.name }
 
     suspend fun setPrice(slot: PriceSlot, minor: Long?) = edit { it.putOrRemove(priceKey(slot), minor?.takeIf { m -> m > 0 && NoteRules.isValidAmount(m) }) }
+
+    suspend fun setDefaultBrand(value: String?) = edit { it.putOrRemove(DEFAULT_BRAND, com.cansin.app.domain.BrandRules.clean(value)) }
 
     suspend fun setKeepHistory(value: KeepHistory) = edit { it[KEEP_HISTORY] = value.name }
     suspend fun setCompressAfter(value: CompressAfter) = edit { it[COMPRESS_AFTER] = value.name }

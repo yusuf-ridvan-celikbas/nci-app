@@ -82,4 +82,12 @@ class TabRulesTest {
         val t = StorageRules.summarize(s, listOf(beer(1), beer(2)), emptyList(), notes, null, 0)
         assertEquals(38_000L, t.spentMinor)
     }
+
+    @Test
+    fun brandsGetTheirOwnLines() {
+        val beers = listOf(beer(1).copy(brand = "Efes"), beer(2).copy(brand = "Guinness", priceMinor = 25_000), beer(3).copy(brand = "Efes"), beer(4))
+        val lines = TabRules.drinkLines(beers, SessionMode.SOLO)
+        assertEquals(listOf("Efes" to 2, "Guinness" to 1, null to 1), lines.map { it.brand to it.count })
+        assertEquals(25_000L, lines[1].totalMinor)
+    }
 }

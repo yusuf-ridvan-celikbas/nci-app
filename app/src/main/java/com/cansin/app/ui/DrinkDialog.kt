@@ -23,6 +23,8 @@ import com.cansin.app.R
 import com.cansin.app.data.BeerEvent
 import com.cansin.app.data.DrinkKind
 import com.cansin.app.domain.BeerRules
+import com.cansin.app.domain.BrandRules
+import androidx.compose.foundation.layout.padding
 import com.cansin.app.domain.BeerSize
 import com.cansin.app.domain.DrinkChoice
 import com.cansin.app.domain.Drinks
@@ -41,7 +43,12 @@ fun drinkName(kind: DrinkKind): Int = when (kind) {
 @Composable
 fun drinkLabel(event: BeerEvent): String {
     val size = beerSizeLabel(BeerSize(event.sizeMl, event.abv))
-    return if (event.kind == DrinkKind.BEER) size else stringResource(drinkName(event.kind)) + " · " + size
+    val brand = event.brand
+    return when {
+        brand != null -> "$brand · $size"
+        event.kind == DrinkKind.BEER -> size
+        else -> stringResource(drinkName(event.kind)) + " · " + size
+    }
 }
 
 /** "Beer: 2 · Wine: 1", only when not all beer. */
@@ -55,6 +62,8 @@ fun drinkBreakdown(kinds: List<DrinkKind>): String? {
 /** Long-press +1: pick a kind (fills its usual size) and adjust size/alcohol if needed. */
 @Composable
 fun DrinkDialog(initial: DrinkChoice, beer: BeerSize, onConfirm: (DrinkChoice) -> Unit, onDismiss: () -> Unit) {
+    var brand by rememberSaveable { mutableStateOf(initial.brand.orEmpty()) }
+    val recentBrands = LocalRecentBrands.current
     val separator = rememberDecimalSeparator()
     var kind by rememberSaveable { mutableStateOf(initial.kind) }
     var clText by rememberSaveable { mutableStateOf(BeerRules.formatCl(initial.size.sizeMl, separator)) }
@@ -99,15 +108,49 @@ fun DrinkDialog(initial: DrinkChoice, beer: BeerSize, onConfirm: (DrinkChoice) -
                 }
                 NumberField(clText, { clText = it }, R.string.size_custom_cl, R.string.invalid_size, sizeMl == null)
                 NumberField(abvText, { abvText = it }, R.string.abv_label, R.string.invalid_abv, abv == null)
+                BrandPicker(brand, { brand = it }, if (kind == DrinkKind.BEER) BrandRules.choices(recentBrands) else recentBrands)
             }
         },
         confirmButton = {
             TextButton(
                 enabled = sizeMl != null && abv != null,
-                onClick = { if (sizeMl != null && abv != null) onConfirm(DrinkChoice(kind, BeerSize(sizeMl, abv))) },
+                onClick = { if (sizeMl != null && abv != null) onConfirm(DrinkChoice(kind, BeerSize(sizeMl, abv), BrandRules.clean(brand))) },
             ) { Text(stringResource(R.string.action_add)) }
         },
         dismissButton = { TextButton(onClick = onDismiss) { Text(stringResource(R.string.action_cancel)) } },
+    )
+}
+
+/** Brands used lately (newest first), provided by MainActivity for the pickers. */
+val LocalRecentBrands = androidx.compose.runtime.staticCompositionLocalOf { emptyList<String>() }
+
+/** "Brand (optional)": None + quick picks + free text. */
+@Composable
+fun BrandPicker(value: String, onChange: (String) -> Unit, choices: List<String>) {
+    androidx.compose.material3.Text(
+        stringResource(R.string.brand_optional),
+        style = androidx.compose.material3.MaterialTheme.typography.titleSmall,
+        modifier = Modifier.padding(top = 12.dp),
+    )
+    androidx.compose.foundation.layout.FlowRow(
+        Modifier.fillMaxWidth().selectableGroup(),
+        horizontalArrangement = androidx.compose.foundation.layout.Arrangement.spacedBy(8.dp),
+    ) {
+        (listOf("") + choices).forEach { option ->
+            androidx.compose.material3.FilterChip(
+                selected = value.trim().equals(option, ignoreCase = true),
+                onClick = { onChange(option) },
+                label = { Text(if (option.isEmpty()) stringResource(R.string.brand_none) else option) },
+                modifier = Modifier.semantics { role = androidx.compose.ui.semantics.Role.RadioButton },
+            )
+        }
+    }
+    androidx.compose.material3.OutlinedTextField(
+        value = value,
+        onValueChange = { onChange(it.take(BrandRules.MAX_LENGTH)) },
+        label = { Text(stringResource(R.string.brand_other)) },
+        singleLine = true,
+        modifier = Modifier.fillMaxWidth(),
     )
 }
 

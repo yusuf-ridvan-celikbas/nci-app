@@ -144,6 +144,15 @@ Current phase: **P28 (drinks on the Tab + Tonight −1 rows) on branch feature/p
   6. Counts in widget/stats/result card now mean all drinks, not only beer.
 - Known limits: the Stats "water per drink" in a group counts everyone's water; in a group, the counter's water bar duplicates my seat's water button.
 
+## P28 follow-ups from the phone test (2026-11-06)
+- Tonight: screen scrolls / is more compact (timer + water rows were below the fold, late card made it overflow).
+- Tab: "Drinks tonight" count section always shown; every drink (priced or not) grouped by kind + size + person + brand with −1/+1; tap a line = tonight's pub price (`setDrinkPrice`), "Remove from tab"; tonight's price sticks for new drinks of that kind/size/brand (`BeerDao.latestPrice`).
+- Prices per beer size: `domain/PriceRules.kt` PriceSlot BEER_33 / BEER (50 cl, old key) / BEER_1L / WINE / RAKI / SHOT / COCKTAIL; missing size scales from 50 cl, rounded to whole units. 1 L added to beer presets and picker chips.
+- Keyboard bug on Tab (screen pushed up twice): `windowSoftInputMode="adjustResize"`.
+- P29 brands (optional): `BeerEvent.brand` (DB v9, AutoMigration 8→9), `domain/BrandRules.kt` (clean ≤30, no control/bidi; suggestions Efes, Tuborg, Belfast, Guinness, Carlsberg, Bomonti, Heineken + recent brands first). Picker "Brand (optional)"; Settings → Drinks → default beer brand for +1; labels "Efes · 50 cl · 5.0%"; Tab lines and tonight prices per brand; backup `brand`. No % or price presets per brand (decided – confirm).
+- Explained to the user: ABV is strength, not amount; size already scales grams.
+- Tests 219/219, lint 0 errors. Phone: v8→v9 migration ran, app starts.
+
 ## P28 report (2026-11-06) — drinks on the Tab, clearer Tonight controls (user request)
 - User choices: price per drink type; Tab shows grouped automatic lines; water −1; bigger drink −1 (same row style as water). Not chosen: timer always visible, Together changes.
 - DB v8 (AutoMigration 7→8): `BeerEvent.priceMinor` (nullable). `SessionRepository.insertBeer` saves `price(kind)` from Settings at add time (every path: Tonight, picker, widget, tile, Versus, Together). Undo/−1 remove the charge with the drink; later price changes don't touch earlier drinks.

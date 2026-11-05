@@ -183,12 +183,14 @@ class RestoreParserTest {
     @Test
     fun drinkPricesRoundTrip() {
         val priced = data.copy(
-            beers = data.beers.map { if (it.sessionId == 1L) it.copy(priceMinor = 15_000) else it },
+            beers = data.beers.map { if (it.sessionId == 1L) it.copy(priceMinor = 15_000, brand = "Efes") else it },
             prices = mapOf(PriceSlot.BEER to 15_000L, PriceSlot.BEER_1L to 28_000L, PriceSlot.RAKI to 22_000L),
         )
         val j = ExportJson.build(priced, includeProfile = false, exportedAt = 0)
         val r = ok(j)
         assertEquals(15_000L, r.sessions[0].beers.single().priceMinor)
+        assertEquals("Efes", r.sessions[0].beers.single().brand)
+        assertEquals(RestoreError.INVALID, fail(j.replace("\"brand\":\"Efes\"", "\"brand\":\"   \"")))
         assertNull(r.sessions[1].beers.single().priceMinor)
         assertEquals(mapOf(PriceSlot.BEER to 15_000L, PriceSlot.BEER_1L to 28_000L, PriceSlot.RAKI to 22_000L), r.prices)
         assertNull(ok(json).prices)

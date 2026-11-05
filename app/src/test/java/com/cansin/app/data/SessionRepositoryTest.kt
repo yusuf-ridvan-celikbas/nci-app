@@ -302,4 +302,22 @@ class SessionRepositoryTest {
         assertEquals(15_000L, priced.snapshot().tabMinor)
         assertEquals(3, priced.snapshot().count)
     }
+
+    @Test
+    fun brandIsSavedAndHasItsOwnTonightPrice() = runBlocking {
+        val priced = SessionRepository(sessions, beers, notes, water, clock = { now }, price = { _, _ -> 15_000L })
+        val efes = DrinkChoice(DrinkKind.BEER, BeerSize(500, 5.0), "  Efes  ")
+        val guinness = DrinkChoice(DrinkKind.BEER, BeerSize(500, 4.2), "Guinness")
+        priced.addBeer(drink = efes)
+        priced.addBeer(drink = guinness)
+        assertEquals(listOf("Efes", "Guinness"), beers.rows.value.map { it.brand })
+        priced.setDrinkPrice(DrinkKind.BEER, 500, Side.SOLO, 25_000, "Guinness")
+        now += 1_000
+        priced.addBeer(drink = guinness)
+        priced.addBeer(drink = efes)
+        assertEquals(listOf(15_000L, 25_000L, 25_000L, 15_000L), beers.rows.value.map { it.priceMinor })
+        priced.removeLatestDrink(DrinkKind.BEER, 500, Side.SOLO, "Guinness")
+        assertEquals(listOf("Efes", "Guinness", "Efes"), beers.rows.value.map { it.brand })
+        assertEquals(listOf("Efes", "Guinness"), priced.recentBrands.first())
+    }
 }

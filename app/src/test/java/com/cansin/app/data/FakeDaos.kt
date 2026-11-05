@@ -50,14 +50,19 @@ class FakeBeerDao : BeerDao {
         rows.value = rows.value.map { if (it.id == id && it.finishedAt == null) it.copy(finishedAt = at) else it }
     }
     override suspend fun count(sessionId: Long) = rows.value.count { it.sessionId == sessionId }
-    override suspend fun latestPrice(sessionId: Long, kind: DrinkKind, sizeMl: Int) =
-        rows.value.filter { it.sessionId == sessionId && it.kind == kind && it.sizeMl == sizeMl && it.priceMinor != null }
+    override suspend fun latestPrice(sessionId: Long, kind: DrinkKind, sizeMl: Int, brand: String?) =
+        rows.value.filter { it.sessionId == sessionId && it.kind == kind && it.sizeMl == sizeMl && it.brand == brand && it.priceMinor != null }
             .maxWithOrNull(compareBy({ it.at }, { it.id }))?.priceMinor
-    override suspend fun setPrice(sessionId: Long, kind: DrinkKind, sizeMl: Int, side: Side, priceMinor: Long?) {
-        rows.value = rows.value.map { if (it.sessionId == sessionId && it.kind == kind && it.sizeMl == sizeMl && it.side == side) it.copy(priceMinor = priceMinor) else it }
+    override suspend fun setPrice(sessionId: Long, kind: DrinkKind, sizeMl: Int, side: Side, brand: String?, priceMinor: Long?) {
+        rows.value = rows.value.map {
+            if (it.sessionId == sessionId && it.kind == kind && it.sizeMl == sizeMl && it.side == side && it.brand == brand) it.copy(priceMinor = priceMinor) else it
+        }
     }
-    override suspend fun latestMatching(sessionId: Long, side: Side, kind: DrinkKind, sizeMl: Int) =
-        rows.value.filter { it.sessionId == sessionId && it.side == side && it.kind == kind && it.sizeMl == sizeMl }.maxWithOrNull(compareBy({ it.at }, { it.id }))
+    override suspend fun latestMatching(sessionId: Long, side: Side, kind: DrinkKind, sizeMl: Int, brand: String?) =
+        rows.value.filter { it.sessionId == sessionId && it.side == side && it.kind == kind && it.sizeMl == sizeMl && it.brand == brand }
+            .maxWithOrNull(compareBy({ it.at }, { it.id }))
+    override fun observeRecentBrands(): Flow<List<String>> =
+        rows.map { list -> list.filter { it.brand != null }.sortedByDescending { it.at }.mapNotNull { it.brand }.distinct().take(8) }
     override suspend fun totalPriceMinor(sessionId: Long) = rows.value.filter { it.sessionId == sessionId }.sumOf { it.priceMinor ?: 0 }
     override fun observeCount(sessionId: Long): Flow<Int> = rows.map { list -> list.count { it.sessionId == sessionId } }
     override fun observeEnded(): Flow<List<BeerEvent>> = rows

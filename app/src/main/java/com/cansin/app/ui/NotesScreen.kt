@@ -116,7 +116,7 @@ private fun NotesContent(viewModel: NotesViewModel, state: NotesState, onBack: (
                             )
                         }
                     }
-                    items(state.drinkLines, key = { "d" + it.kind + it.sizeMl + it.beerSide }) { line ->
+                    items(state.drinkLines, key = { "d" + it.kind + it.sizeMl + it.beerSide + it.brand }) { line ->
                         DrinkLineRow(
                             line, state, format,
                             onTap = { pricing = line },
@@ -152,7 +152,7 @@ private fun NotesContent(viewModel: NotesViewModel, state: NotesState, onBack: (
     if (settling) SettleDialog(state, onDismiss = { settling = false })
     pricing?.let { line ->
         PriceDialog(
-            title = stringResource(R.string.tab_price_title, stringResource(drinkName(line.kind)) + " · " + sizeText(line.sizeMl)),
+            title = stringResource(R.string.tab_price_title, (line.brand ?: stringResource(drinkName(line.kind))) + " · " + sizeText(line.sizeMl)),
             current = line.unitMinor,
             note = R.string.tab_price_note,
             clearLabel = R.string.tab_price_remove,
@@ -235,7 +235,7 @@ private fun NoteRow(note: Note, state: NotesState, format: (Long) -> String, onC
 /** Tab drink line: "Beer · 50 cl ×3", price each, sum, −1/+1. Tap = price for tonight (this pub). */
 @Composable
 private fun DrinkLineRow(line: com.cansin.app.domain.DrinkLine, state: NotesState, format: (Long) -> String, onTap: () -> Unit, onRemove: () -> Unit, onAdd: () -> Unit) {
-    val name = stringResource(drinkName(line.kind))
+    val name = line.brand ?: stringResource(drinkName(line.kind))
     Row(
         Modifier.fillMaxWidth().clickable(onClick = onTap).padding(start = 16.dp, end = 8.dp, top = 6.dp, bottom = 6.dp),
         verticalAlignment = Alignment.CenterVertically,
