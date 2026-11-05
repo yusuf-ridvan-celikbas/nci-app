@@ -1,6 +1,6 @@
 # Progress
 
-Current phase: **P28 (drinks on the Tab + Tonight −1 rows) on branch feature/p28-tab-drinks, on top of P27 (feature/p27-storage); both local, NOT pushed, installed on the phone, waiting for review. master holds P13–P26 (merged locally, not pushed). iOS: rules up to P26 in CansinCore (uncompiled); see ios/PORT_PLAN.md.**
+Current phase: **P13–P30 approved on the phone (2026-11-06), merged into master and pushed. iOS: rules up to P26 in CansinCore (uncompiled); P27–P30 still to port (see ios/PORT_PLAN.md, needs a Mac).**
 
 ## Phases
 - [x] Setup (project, wrapper, git, CLAUDE.md)
@@ -20,8 +20,8 @@ Current phase: **P28 (drinks on the Tab + Tonight −1 rows) on branch feature/p
 - Plan P14–P23 (2026-11-01, user-approved; file ~/.claude/plans/bright-swimming-diffie.md), branch feature/p14-plus:
   - [x] P14 Currency  - [x] P15 Quick tile + shortcuts  - [x] P16 Care messages  - [x] P17 Self-set limits
   - [x] P18 PIN lock  - [x] P19 Settle up (branch feature/p18-pin, on top of p14-plus)  - [x] P20 Stats extras  - [x] checkpoint: phone test + merge (2026-11-06, local)
-  - [ ] P27 Storage controls (branch feature/p27-storage, waiting for phone review)
-  - [ ] P28 Drinks on the Tab + Tonight −1 rows (branch feature/p28-tab-drinks, waiting for phone review)
+  - [x] P27 Storage controls
+  - [x] P28 Drinks on the Tab + Tonight −1 rows  - [x] P29 Brands (optional)  - [x] P30 History filters + multi-select delete
   - [x] P21 Restore backup  - [x] P22 Other drinks (DB v4)  - [x] P23 Group mode 2–6 (DB v5, no winner/race)  - [x] P24 Screen pinning in Versus/Together  - [x] P25 Bottom navigation  - [x] P26 Truth or Dare game (branch feature/p20-plus on top of p18-pin)
 
 ## Code map
