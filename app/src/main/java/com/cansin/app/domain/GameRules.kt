@@ -16,7 +16,7 @@ enum class GamePack { FRIENDS, BEST_FRIENDS, COUPLES }
  */
 object GameRules {
     const val MIN_PLAYERS = 2
-    const val MAX_PLAYERS = 8
+    const val MAX_PLAYERS = GroupRules.MAX_SEATS
     const val DEFAULT_TURNS = 4
 
     fun cleanPlayers(names: List<String?>): List<String> =
