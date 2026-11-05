@@ -321,7 +321,7 @@
     <string name="drink_count">%1$s: %2$d</string>
     <string name="mode_title">Kim içiyor?</string>
     <string name="mode_versus">Kapışma (2 taraf)</string>
-    <string name="mode_group">Birlikte (2–6 kişi)</string>
+    <string name="mode_group">Birlikte (2–10 kişi)</string>
     <string name="group_title">Birlikte</string>
     <string name="group_start">Birlikte başlat</string>
     <string name="group_edit">Kişileri düzenle</string>

@@ -116,7 +116,7 @@ Current phase: **P14–P26 done on Android (branch feature/p20-plus, local only,
 ## P25–P26 report (2026-11-01)
 - P25: bottom `NavigationBar` (`ui/AppNavBar.kt`): Tonight (counter, or the open Versus/Together) · Tab · Game · History · Settings. History/Settings icons removed from the top bars, back arrows removed on root tabs; system back → Tonight. Promille/detail open on top without the bar. The outer Scaffold consumes insets so inner bottom bars don't double-pad.
 - P23 redesign (63a6fbf, user-approved on phone): full-width person rows, last drink/water "… ago", at the table, per-person drink timer (my seat = normal DrinkTimer; others in DataStore `group_timers`, strict codec `domain/SeatTimes.kt`, cleared on session end), long-press drink picker.
-- P26: Truth or Dare with a spinning wine glass (`ui/SpinGlass.kt`, Animatable 2.8 s ease-out, haptic on stop, no VIBRATE permission). `domain/GameRules.kt` (players 2–6, same as Together, avoid-repeat pick, spin target/pointed-at math, ShuffleBag with no repeats until exhausted, linked players from Versus/Together). Packs Friends / Best friends / Couples (romantic, not explicit), 24 truths + 16 dares each, EN+TR in `res/values*/game_questions.xml`. `GameContentTest` enforces equal EN/TR counts and no alcohol words (Unicode-aware regex, with a sanity test). Skip is always free; there's no link to drink counts and answers are never stored. Own questions: DB v6 (AutoMigration 5→6) `custom_question` (≤200 chars, ≤300 items), in export/restore and delete-all.
+- P26: Truth or Dare with a spinning wine glass (`ui/SpinGlass.kt`, Animatable 2.8 s ease-out, haptic on stop, no VIBRATE permission). `domain/GameRules.kt` (players 2–10, same as Together, avoid-repeat pick, spin target/pointed-at math, ShuffleBag with no repeats until exhausted, linked players from Versus/Together). Packs Friends / Best friends / Couples (romantic, not explicit), 24 truths + 16 dares each, EN+TR in `res/values*/game_questions.xml`. `GameContentTest` enforces equal EN/TR counts and no alcohol words (Unicode-aware regex, with a sanity test). Skip is always free; there's no link to drink counts and answers are never stored. Own questions: DB v6 (AutoMigration 5→6) `custom_question` (≤200 chars, ≤300 items), in export/restore and delete-all.
 - Release APK 1.80 MB. Permissions unchanged, no INTERNET, no new libraries. Lint 0 errors. Tests 188/188.
 - Decided – confirm: TR labels "Kankalar" (best friends) and "Sevgililer" (couples); the glass button says "Kadehi çevir".
 
@@ -141,6 +141,10 @@ Current phase: **P14–P26 done on Android (branch feature/p20-plus, local only,
   5. Restore keeps your settings and PIN and replaces only the data (sessions, notes, water, friends, friend results).
   6. Counts in widget/stats/result card now mean all drinks, not only beer.
 - Known limits: the Stats "water per drink" in a group counts everyone's water; in a group, the counter's water bar duplicates my seat's water button.
+
+## Phone review (2026-11-05)
+- Approved: P24, P25. Fixed: ending Versus/Together sends a game with that session's people back to setup (c7a9558).
+- User: Together and the game go up to 10 people. Seats 7–10 = TEAL, PINK, ORANGE, GREY (`Palettes.extraSeats`, AA-tested; stored as TEXT, no DB migration). Glass chips narrower from 7 players. iOS core limits updated (iOS group UI not ported yet).
 
 ## Phone review status (end of 2026-11-01)
 - Approved on the phone: P13, P14, P15, P16, P17, P18, P19, P20, P21, P22, P23 (incl. the redesign 63a6fbf).

@@ -48,9 +48,12 @@ import kotlin.math.sin
 
 private const val SPIN_MS = 2_800
 private val CHIP_MAX = 104.dp
+/** Narrower name chips from 7 players up so ten still fit around the glass. */
+private val CHIP_MAX_CROWDED = 84.dp
+private const val CROWDED = 7
 private val GLASS_BOX = 150.dp
 
-/** Seat colour of a player: from Versus/Together, else by position (cycling the six seat colours). */
+/** Seat colour of a player: from Versus/Together, else by position (cycling the seat colours). */
 @Composable
 fun playerColors(player: GamePlayer, index: Int): Pair<Color, Color> =
     sideColor(player.side) ?: seatColors(GroupRules.SIDES[index % GroupRules.SIDES.size])
@@ -74,7 +77,8 @@ fun SpinGlass(state: GameState, onSpin: () -> Unit, onSpinDone: () -> Unit) {
     val count = state.players.size
     val spinLabel = stringResource(R.string.game_spin_description)
     BoxWithConstraints(Modifier.fillMaxWidth().aspectRatio(1f).padding(8.dp)) {
-        val radius = (maxWidth / 2) - (CHIP_MAX / 2) + 8.dp
+        val chipMax = if (count >= CROWDED) CHIP_MAX_CROWDED else CHIP_MAX
+        val radius = (maxWidth / 2) - (chipMax / 2) + 8.dp
         state.players.forEachIndexed { i, player ->
             val theta = Math.toRadians(GameRules.angleFor(i, count).toDouble())
             val settled = !state.spinning
@@ -103,10 +107,10 @@ fun SpinGlass(state: GameState, onSpin: () -> Unit, onSpinDone: () -> Unit) {
                 modifier = Modifier
                     .align(Alignment.Center)
                     .offset(x = radius * sin(theta).toFloat(), y = -radius * cos(theta).toFloat())
-                    .widthIn(max = CHIP_MAX)
+                    .widthIn(max = chipMax)
                     .then(if (label != null) Modifier.semantics(mergeDescendants = true) { contentDescription = label } else Modifier),
             ) {
-                Column(Modifier.padding(horizontal = 12.dp, vertical = 6.dp), horizontalAlignment = Alignment.CenterHorizontally) {
+                Column(Modifier.padding(horizontal = if (count >= CROWDED) 8.dp else 12.dp, vertical = 6.dp), horizontalAlignment = Alignment.CenterHorizontally) {
                     Text(
                         player.name,
                         style = if (answers || asks) MaterialTheme.typography.titleMedium else MaterialTheme.typography.bodyMedium,

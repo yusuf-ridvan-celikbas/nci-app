@@ -21,7 +21,7 @@ class GroupRulesTest {
         assertEquals(listOf(Side.RED, Side.BLUE, Side.GREEN), seats.map { it.side })
         assertEquals(listOf("Ali", null, "Can"), seats.map { it.name })
         assertEquals(2, GroupRules.seats(1, GroupSetup(listOf("x"))).size)
-        assertEquals(6, GroupRules.seats(1, GroupSetup(List(9) { "p$it" })).size)
+        assertEquals(10, GroupRules.seats(1, GroupSetup(List(13) { "p$it" })).size)
     }
 
     @Test

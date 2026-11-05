@@ -277,8 +277,8 @@ public struct SeatPays: Equatable, Sendable {
 /// Framed as a shared tab, not a race: tallies stay in seat order, nothing is ranked.
 public enum GroupRules {
     public static let minSeats = 2
-    public static let maxSeats = 6
-    public static let allSides: [Side] = [.RED, .BLUE, .GREEN, .PURPLE, .AMBER, .YELLOW]
+    public static let maxSeats = 10
+    public static let allSides: [Side] = [.RED, .BLUE, .GREEN, .PURPLE, .AMBER, .YELLOW, .TEAL, .PINK, .ORANGE, .GREY]
 
     public static func sides(_ count: Int) -> [Side] { Array(allSides.prefix(count.clamped(minSeats, maxSeats))) }
     public static func isSeatSide(_ side: Side?) -> Bool { side.map(allSides.contains) ?? false }

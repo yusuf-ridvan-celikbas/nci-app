@@ -44,6 +44,18 @@ class PaletteContrastTest {
     }
 
     @Test
+    fun everySeatHasAnAAColour() {
+        for (side in com.cansin.app.domain.GroupRules.SIDES) {
+            val t = Palettes.seat(side)
+            assertTrue("$side has no colour", t != null)
+            assertAA("$side onPrimary", t!!.onPrimary, t.primary)
+            assertAA("$side onContainer", t.onContainer, t.container)
+            assertAA("$side on light surface", t.primary, Palettes.neutralLight.surface)
+        }
+        assertTrue(Palettes.seat(com.cansin.app.data.Side.SOLO) == null)
+    }
+
+    @Test
     fun neutralsMeetWcagAA() {
         for (n in listOf(Palettes.neutralLight, Palettes.neutralDark)) {
             assertAA("onSurface", n.onSurface, n.surface)

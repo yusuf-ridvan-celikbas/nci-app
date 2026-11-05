@@ -127,7 +127,7 @@ fun GroupSetupDialog(
     )
 }
 
-/** Counter's "people" button: classic two-sided Versus or the 2–6 seat "together" mode. */
+/** Counter's "people" button: classic two-sided Versus or the 2–10 seat "together" mode. */
 @Composable
 fun ModeChooserDialog(onVersus: () -> Unit, onGroup: () -> Unit, onDismiss: () -> Unit) {
     AlertDialog(

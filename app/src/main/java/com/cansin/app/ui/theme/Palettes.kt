@@ -1,5 +1,6 @@
 package com.cansin.app.ui.theme
 
+import com.cansin.app.data.Side
 import com.cansin.app.prefs.Accent
 
 data class AccentTones(val primary: Long, val onPrimary: Long, val container: Long, val onContainer: Long)
@@ -76,6 +77,26 @@ object Palettes {
     val versusBlue: AccentTones get() = accents.getValue(Accent.BLUE).light
     val danger: AccentPalette get() = accents.getValue(Accent.RED)
     val caution: AccentPalette get() = accents.getValue(Accent.AMBER)
+
+    /** Seats 7–10 in Together (not app accents); light tones, fixed in every theme like the other seats. */
+    val extraSeats: Map<Side, AccentTones> = mapOf(
+        Side.TEAL to AccentTones(0xFF006A6A, 0xFFFFFFFF, 0xFF6FF7F6, 0xFF002020),
+        Side.PINK to AccentTones(0xFFB0256E, 0xFFFFFFFF, 0xFFFFD9E4, 0xFF3E0021),
+        Side.ORANGE to AccentTones(0xFFB04A00, 0xFFFFFFFF, 0xFFFFDBC9, 0xFF351000),
+        Side.GREY to AccentTones(0xFF5D5F5F, 0xFFFFFFFF, 0xFFE2E3E3, 0xFF1A1C1C),
+    )
+
+    private val seatAccents: Map<Side, Accent> = mapOf(
+        Side.RED to Accent.RED,
+        Side.BLUE to Accent.BLUE,
+        Side.GREEN to Accent.GREEN,
+        Side.PURPLE to Accent.PURPLE,
+        Side.AMBER to Accent.AMBER,
+        Side.YELLOW to Accent.YELLOW,
+    )
+
+    /** Fixed colour of a Together seat (null for SOLO/unknown). */
+    fun seat(side: Side?): AccentTones? = seatAccents[side]?.let { accents.getValue(it).light } ?: extraSeats[side]
 
     fun of(accent: Accent): AccentPalette = accents[accent] ?: accents.getValue(Accent.AMBER)
 }

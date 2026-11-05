@@ -15,11 +15,14 @@ data class SeatTally(val side: Side, val drinks: Int, val water: Int)
 /** What each seat pays: own notes plus an even share of shared notes. */
 data class SeatPays(val side: Side, val own: Long, val pays: Long)
 
-/** P23 "drinking together": 2–6 seats. Framed as a shared tab, not a race (store policy). */
+/** P23 "drinking together": 2–10 seats. Framed as a shared tab, not a race (store policy). */
 object GroupRules {
     const val MIN_SEATS = 2
-    const val MAX_SEATS = 6
-    val SIDES = listOf(Side.RED, Side.BLUE, Side.GREEN, Side.PURPLE, Side.AMBER, Side.YELLOW)
+    const val MAX_SEATS = 10
+    val SIDES = listOf(
+        Side.RED, Side.BLUE, Side.GREEN, Side.PURPLE, Side.AMBER, Side.YELLOW,
+        Side.TEAL, Side.PINK, Side.ORANGE, Side.GREY,
+    )
 
     fun sides(count: Int): List<Side> = SIDES.take(count.coerceIn(MIN_SEATS, MAX_SEATS))
 

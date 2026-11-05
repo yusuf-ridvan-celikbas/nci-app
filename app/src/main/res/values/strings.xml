@@ -328,7 +328,7 @@
     <string name="drink_count">%1$s: %2$d</string>
     <string name="mode_title">Who\'s drinking?</string>
     <string name="mode_versus">Versus (2 sides)</string>
-    <string name="mode_group">Together (2–6 people)</string>
+    <string name="mode_group">Together (2–10 people)</string>
     <string name="group_title">Together</string>
     <string name="group_start">Start together</string>
     <string name="group_edit">Edit seats</string>

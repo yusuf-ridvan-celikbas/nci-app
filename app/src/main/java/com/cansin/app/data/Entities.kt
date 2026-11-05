@@ -10,7 +10,7 @@ import androidx.room.PrimaryKey
 enum class SessionMode { SOLO, VERSUS, GROUP }
 
 /** RED/BLUE = versus sides; group seats use [com.cansin.app.domain.GroupRules.SIDES]. */
-enum class Side { SOLO, RED, BLUE, GREEN, PURPLE, AMBER, YELLOW }
+enum class Side { SOLO, RED, BLUE, GREEN, PURPLE, AMBER, YELLOW, TEAL, PINK, ORANGE, GREY }
 
 /** P22: what was drunk. Table and class keep the "beer" name to avoid a risky rename. */
 enum class DrinkKind { BEER, WINE, RAKI, SHOT, COCKTAIL, CUSTOM }

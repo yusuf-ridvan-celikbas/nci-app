@@ -16,7 +16,7 @@ class GameRulesTest {
     @Test
     fun playersAreCleanedAndCapped() {
         assertEquals(listOf("Ali", "Can"), GameRules.cleanPlayers(listOf(" Ali ", "", null, "Can")))
-        assertEquals(6, GameRules.cleanPlayers(List(12) { "p$it" }).size)
+        assertEquals(10, GameRules.cleanPlayers(List(12) { "p$it" }).size)
         assertFalse(GameRules.canStart(listOf("solo")))
         assertTrue(GameRules.canStart(listOf("a", "b")))
     }

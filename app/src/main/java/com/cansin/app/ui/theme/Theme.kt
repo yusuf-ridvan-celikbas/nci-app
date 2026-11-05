@@ -40,17 +40,8 @@ val VersusColors = SideColors(
 )
 
 /** Fixed seat colours for group mode (light tones, same in every theme like Versus RED/BLUE); AA-tested via Palettes. */
-val SeatAccents: Map<com.cansin.app.data.Side, Accent> = mapOf(
-    com.cansin.app.data.Side.RED to Accent.RED,
-    com.cansin.app.data.Side.BLUE to Accent.BLUE,
-    com.cansin.app.data.Side.GREEN to Accent.GREEN,
-    com.cansin.app.data.Side.PURPLE to Accent.PURPLE,
-    com.cansin.app.data.Side.AMBER to Accent.AMBER,
-    com.cansin.app.data.Side.YELLOW to Accent.YELLOW,
-)
-
 fun seatColors(side: com.cansin.app.data.Side?): Pair<Color, Color>? =
-    SeatAccents[side]?.let { Palettes.accents.getValue(it).light }?.let { Color(it.primary) to Color(it.onPrimary) }
+    Palettes.seat(side)?.let { Color(it.primary) to Color(it.onPrimary) }
 
 @Composable
 fun CansinTheme(dark: Boolean, accent: Accent, content: @Composable () -> Unit) {
