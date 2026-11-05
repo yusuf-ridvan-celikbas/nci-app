@@ -1,6 +1,7 @@
 package com.cansin.app.data
 
 import androidx.room.ColumnInfo
+import androidx.room.Embedded
 import androidx.room.Entity
 import androidx.room.ForeignKey
 import androidx.room.Index
@@ -26,6 +27,25 @@ data class Session(
     val redFriendId: Long? = null,
     val blueFriendId: Long? = null,
     val meSide: Side? = null,
+    /** P27: set when the night was compressed (its drink, water and note rows were removed). */
+    @Embedded(prefix = "t_") val totals: SessionTotals? = null,
+)
+
+/**
+ * P27 totals kept for a compressed night. [mine]/[myWater] are null when there is no "me" (Versus without a side).
+ * [sides] = per side/seat drinks and water, see [com.cansin.app.domain.StorageRules.encodeSides].
+ */
+data class SessionTotals(
+    val compressedAt: Long,
+    val drinks: Int,
+    val mine: Int?,
+    val water: Int,
+    val myWater: Int?,
+    val notes: Int,
+    val spentMinor: Long,
+    val paceMin: Double?,
+    val peak: Double?,
+    val sides: String?,
 )
 
 @Entity(

@@ -430,4 +430,41 @@
     <string name="settings_privacy">Gizlilik ve veriler</string>
     <string name="settings_privacy_summary">PIN kilidi, yedekleme, geri yükleme, tümünü sil</string>
     <string name="settings_no_friends">Henüz kayıtlı arkadaş yok.</string>
+    <string name="section_storage">Depolama</string>
+    <string name="storage_usage">Bu telefonda %1$s kullanıyor</string>
+    <string name="storage_compressed">sıkıştırılmış: %1$d</string>
+    <string name="storage_questions">kendi soruların: %1$d</string>
+    <string name="storage_free_up">Yer aç</string>
+    <string name="storage_freed">%1$s boşaltıldı</string>
+    <string name="storage_already">Zaten derli toplu</string>
+    <string name="storage_free_note">Geçici dosyaları ve kullanılmayan alanı temizler. Kaydettiğin hiçbir şey silinmez.</string>
+    <string name="setting_keep_history">Geçmişi sakla</string>
+    <string name="keep_forever">Süresiz</string>
+    <string name="keep_year_1">1 yıl</string>
+    <string name="keep_months_6">6 ay</string>
+    <string name="keep_months_3">3 ay</string>
+    <string name="setting_compress">Eski geceleri sıkıştır</string>
+    <string name="compress_never">Hiçbir zaman</string>
+    <string name="compress_month_1">1 ay sonra</string>
+    <string name="compress_months_3">3 ay sonra</string>
+    <string name="compress_months_6">6 ay sonra</string>
+    <string name="compress_note">Sıkıştırılan geceler Geçmiş ve İstatistikler için toplamlarını korur; içki saatleri ve notlar silinir.</string>
+    <string name="confirm_delete_nights_title">Eski geceler silinsin mi?</string>
+    <string name="confirm_compress_title">Eski geceler sıkıştırılsın mı?</string>
+    <string name="confirm_backup_first">Önce yedek al</string>
+    <string name="history_compressed_tag">sıkıştırılmış</string>
+    <string name="detail_compressed_note">Ayrıntılar yer açmak için %1$s tarihinde sıkıştırıldı.</string>
+    <string name="detail_spent_total">Hesap toplamı: %1$s</string>
+    <plurals name="storage_nights">
+        <item quantity="one">%d gece</item>
+        <item quantity="other">%d gece</item>
+    </plurals>
+    <plurals name="confirm_delete_nights_body">
+        <item quantity="one">Bu, şimdi %d geceyi siler. Geri alınamaz.</item>
+        <item quantity="other">Bu, şimdi %d geceyi siler. Geri alınamaz.</item>
+    </plurals>
+    <plurals name="confirm_compress_body">
+        <item quantity="one">%d gece yalnızca toplamlarını tutacak. İçki saatleri ve notlar geri getirilemez.</item>
+        <item quantity="other">%d gece yalnızca toplamlarını tutacak. İçki saatleri ve notlar geri getirilemez.</item>
+    </plurals>
 </resources>

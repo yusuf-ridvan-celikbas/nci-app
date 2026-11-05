@@ -10,6 +10,7 @@ import com.cansin.app.data.QuestionKind
 import com.cansin.app.data.Note
 import com.cansin.app.data.Session
 import com.cansin.app.data.SessionMode
+import com.cansin.app.data.SessionTotals
 import com.cansin.app.data.Side
 import com.cansin.app.data.WaterEvent
 import org.junit.Assert.assertEquals
@@ -156,5 +157,26 @@ class RestoreParserTest {
     fun miniJsonBasics() {
         assertEquals(mapOf("a" to listOf(1L, -2.5, true, null, "xé")), MiniJson.parse("""{ "a": [1, -2.5, true, null, "xé"] }"""))
         assertEquals("\t/", MiniJson.parse("\"\\t\\/\""))
+    }
+
+    private val compressed = SessionTotals(15, 3, 2, 1, 1, 1, 300, 12.5, 0.42, "RED:2:1,BLUE:1:0")
+    private val compressedData = ExportData(
+        sessions = listOf(Session(id = 7, startedAt = 10, endedAt = 50, mode = SessionMode.VERSUS, meSide = Side.RED, totals = compressed)),
+        beers = emptyList(), water = emptyList(), notes = emptyList(), friends = emptyList(), profile = null,
+    )
+    private val compressedJson = ExportJson.build(compressedData, includeProfile = false, exportedAt = 0)
+
+    @Test
+    fun compressedTotalsRoundTrip() {
+        assertEquals(compressed, ok(compressedJson).sessions.single().session.totals)
+        assertNull(ok(json).sessions[0].session.totals)
+    }
+
+    @Test
+    fun rejectsBadTotals() {
+        assertEquals(RestoreError.INVALID, fail(compressedJson.replace("\"drinks\":3", "\"drinks\":-3")))
+        assertEquals(RestoreError.INVALID, fail(compressedJson.replace("\"sides\":\"RED:2:1,BLUE:1:0\"", "\"sides\":\"RED:2:1,TEAL:1:0\"")))
+        assertEquals(RestoreError.INVALID, fail(compressedJson.replace("\"endedAt\":50", "\"endedAt\":null")))
+        assertEquals(RestoreError.INVALID, fail(compressedJson.replace("\"beers\":[]", "\"beers\":[{\"side\":\"RED\",\"sizeMl\":500,\"abv\":5.0,\"at\":11}]")))
     }
 }

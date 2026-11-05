@@ -85,6 +85,9 @@ class SettingsActions(
     val onReadBackup: suspend (android.net.Uri) -> com.cansin.app.domain.RestoreResult,
     val onRestore: suspend (com.cansin.app.domain.RestoreData) -> Unit,
     val onDeleteAll: () -> Unit,
+    val storage: com.cansin.app.system.StorageMaintenance,
+    val onKeepHistory: suspend (com.cansin.app.domain.KeepHistory) -> Unit,
+    val onCompressAfter: suspend (com.cansin.app.domain.CompressAfter) -> Unit,
 )
 
 /** Settings is a short list of groups; each opens its own page. */
@@ -185,6 +188,8 @@ fun SettingsScreen(
                     PinSection(settings, actions.lock, actions.onPinHidesWidget, actions.onPinChanged)
                     HorizontalDivider(Modifier.padding(vertical = 16.dp))
                     DataSection(actions.onExport, actions.onReadBackup, actions.onRestore, actions.onDeleteAll)
+                    HorizontalDivider(Modifier.padding(vertical = 16.dp))
+                    StorageSection(settings, actions.storage, actions.onKeepHistory, actions.onCompressAfter, actions.onExport)
                 }
             }
         }

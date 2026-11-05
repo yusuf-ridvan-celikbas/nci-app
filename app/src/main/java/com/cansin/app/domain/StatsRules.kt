@@ -31,6 +31,8 @@ object StatsRules {
 
     fun session(session: Session, beers: List<BeerEvent>, profile: BodyProfile?): SessionStats? {
         if (VersusRules.meSide(session) == null) return null
+        // P27: a compressed night has no rows left; its stored totals stand in.
+        session.totals?.let { t -> return SessionStats(session.id, session.startedAt, t.mine ?: return null, t.peak, t.paceMin) }
         val mine = beers.filter { it.sessionId == session.id && VersusRules.isMine(it, session) }
         return SessionStats(session.id, session.startedAt, mine.size, peak(profile, mine), paceMin(mine.map { it.at }))
     }

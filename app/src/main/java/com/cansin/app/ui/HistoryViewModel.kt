@@ -97,7 +97,8 @@ class HistoryViewModel(private val history: HistoryRepository, private val setti
         val stats = detail.stats ?: return null
         val duration = StatsRules.durationMs(detail.session) ?: return null
         val day = Instant.ofEpochMilli(detail.session.startedAt).atZone(ZoneId.systemDefault()).toLocalDate()
-        return ResultCards.card(name, day, stats.beers, duration, detail.water.count { VersusRules.isMineWater(it, detail.session) })
+        val water = detail.session.totals?.let { it.myWater ?: 0 } ?: detail.water.count { VersusRules.isMineWater(it, detail.session) }
+        return ResultCards.card(name, day, stats.beers, duration, water)
     }
 
     fun saveShareName(name: String) = viewModelScope.launch { settingsStore.setShareName(name) }

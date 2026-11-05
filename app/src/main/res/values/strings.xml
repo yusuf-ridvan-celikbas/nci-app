@@ -441,4 +441,41 @@
     <string name="settings_privacy">Privacy &amp; data</string>
     <string name="settings_privacy_summary">PIN lock, backup, restore, delete all</string>
     <string name="settings_no_friends">No saved friends yet.</string>
+    <string name="section_storage">Storage</string>
+    <string name="storage_usage">Uses %1$s on this phone</string>
+    <string name="storage_compressed">compressed: %1$d</string>
+    <string name="storage_questions">own questions: %1$d</string>
+    <string name="storage_free_up">Free up space</string>
+    <string name="storage_freed">Freed %1$s</string>
+    <string name="storage_already">Already compact</string>
+    <string name="storage_free_note">Removes temporary files and unused space. Nothing you saved is deleted.</string>
+    <string name="setting_keep_history">Keep history</string>
+    <string name="keep_forever">Forever</string>
+    <string name="keep_year_1">1 year</string>
+    <string name="keep_months_6">6 months</string>
+    <string name="keep_months_3">3 months</string>
+    <string name="setting_compress">Compress old nights</string>
+    <string name="compress_never">Never</string>
+    <string name="compress_month_1">After 1 month</string>
+    <string name="compress_months_3">After 3 months</string>
+    <string name="compress_months_6">After 6 months</string>
+    <string name="compress_note">Compressed nights keep their totals for History and Stats; drink times and notes are removed.</string>
+    <string name="confirm_delete_nights_title">Delete old nights?</string>
+    <string name="confirm_compress_title">Compress old nights?</string>
+    <string name="confirm_backup_first">Export a backup first</string>
+    <string name="history_compressed_tag">compressed</string>
+    <string name="detail_compressed_note">Details were compressed on %1$s to save space.</string>
+    <string name="detail_spent_total">Tab total: %1$s</string>
+    <plurals name="storage_nights">
+        <item quantity="one">%d night</item>
+        <item quantity="other">%d nights</item>
+    </plurals>
+    <plurals name="confirm_delete_nights_body">
+        <item quantity="one">This deletes %d night now. It can\'t be undone.</item>
+        <item quantity="other">This deletes %d nights now. It can\'t be undone.</item>
+    </plurals>
+    <plurals name="confirm_compress_body">
+        <item quantity="one">%d night will keep only its totals. Drink times and notes can\'t be brought back.</item>
+        <item quantity="other">%d nights will keep only their totals. Drink times and notes can\'t be brought back.</item>
+    </plurals>
 </resources>

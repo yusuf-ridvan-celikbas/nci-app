@@ -37,6 +37,7 @@ import com.cansin.app.data.Side
 import com.cansin.app.domain.BeerSize
 import com.cansin.app.domain.SeatTimeRules
 import com.cansin.app.domain.StatsRules
+import com.cansin.app.domain.StorageRules
 import com.cansin.app.domain.VersusRules
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -89,7 +90,28 @@ private fun DetailContent(viewModel: HistoryViewModel, detail: SessionDetail?, o
                             StatsRules.durationMs(session)?.let { formatDuration(it) },
                         ).joinToString(" · "),
                     )
-                    if (session.mode == SessionMode.VERSUS) {
+                    val totals = session.totals
+                    if (totals != null) {
+                        // P27 compressed night: totals only.
+                        val sides = StorageRules.decodeSides(totals.sides)
+                        if (sides.isNotEmpty()) {
+                            sides.forEach { c ->
+                                val name = sideName(session, c.side)
+                                Text(
+                                    stringResource(
+                                        R.string.group_detail_row,
+                                        if (session.meSide == c.side) stringResource(R.string.versus_name_me, name) else name,
+                                        pluralStringResource(R.plurals.beers_count, c.drinks, c.drinks),
+                                        stringResource(R.string.water_count, c.water),
+                                    ),
+                                )
+                            }
+                        } else {
+                            Text(stringResource(R.string.detail_beers, totals.drinks))
+                            Text(stringResource(R.string.water_count, totals.water))
+                        }
+                        if (totals.spentMinor > 0) Text(stringResource(R.string.detail_spent_total, format(totals.spentMinor)))
+                    } else if (session.mode == SessionMode.VERSUS) {
                         listOf(Side.RED, Side.BLUE).forEach { side ->
                             val name = sideName(session, side)
                             val count = d.beers.count { it.side == side }
@@ -114,11 +136,18 @@ private fun DetailContent(viewModel: HistoryViewModel, detail: SessionDetail?, o
                     } else {
                         Text(stringResource(R.string.detail_beers, d.beers.size))
                     }
-                    if (session.mode != SessionMode.GROUP) Text(stringResource(R.string.water_count, d.water.size))
+                    if (totals == null && session.mode != SessionMode.GROUP) Text(stringResource(R.string.water_count, d.water.size))
                     d.stats?.paceMin?.let { Text(stringResource(R.string.stats_pace, formatDecimal(it))) }
                     d.stats?.peak?.let {
                         Text(stringResource(R.string.promille_peak, formatPromille(it)))
                         Disclaimer()
+                    }
+                    totals?.let {
+                        Text(
+                            stringResource(R.string.detail_compressed_note, formatDate(it.compressedAt)),
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        )
                     }
                 }
                 HorizontalDivider()

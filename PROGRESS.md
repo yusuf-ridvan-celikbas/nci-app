@@ -1,6 +1,6 @@
 # Progress
 
-Current phase: **P13–P26 approved on the phone (2026-11-06) and merged into master locally (fast-forward), NOT pushed yet. iOS: CansinCore has the rules (uncompiled); app/widget never compiled; see ios/PORT_PLAN.md (needs a Mac).**
+Current phase: **P27 storage controls built on branch feature/p27-storage (from master; local, NOT pushed), installed on the phone, waiting for review. master holds P13–P26 (merged locally, not pushed). iOS: CansinCore has the rules up to P26 (uncompiled); see ios/PORT_PLAN.md (needs a Mac).**
 
 ## Phases
 - [x] Setup (project, wrapper, git, CLAUDE.md)
@@ -20,6 +20,7 @@ Current phase: **P13–P26 approved on the phone (2026-11-06) and merged into ma
 - Plan P14–P23 (2026-11-01, user-approved; file ~/.claude/plans/bright-swimming-diffie.md), branch feature/p14-plus:
   - [x] P14 Currency  - [x] P15 Quick tile + shortcuts  - [x] P16 Care messages  - [x] P17 Self-set limits
   - [x] P18 PIN lock  - [x] P19 Settle up (branch feature/p18-pin, on top of p14-plus)  - [x] P20 Stats extras  - [x] checkpoint: phone test + merge (2026-11-06, local)
+  - [ ] P27 Storage controls (branch feature/p27-storage, waiting for phone review)
   - [x] P21 Restore backup  - [x] P22 Other drinks (DB v4)  - [x] P23 Group mode 2–6 (DB v5, no winner/race)  - [x] P24 Screen pinning in Versus/Together  - [x] P25 Bottom navigation  - [x] P26 Truth or Dare game (branch feature/p20-plus on top of p18-pin)
 
 ## Code map
@@ -141,6 +142,17 @@ Current phase: **P13–P26 approved on the phone (2026-11-06) and merged into ma
   5. Restore keeps your settings and PIN and replaces only the data (sessions, notes, water, friends, friend results).
   6. Counts in widget/stats/result card now mean all drinks, not only beer.
 - Known limits: the Stats "water per drink" in a group counts everyone's water; in a group, the counter's water bar duplicates my seat's water button.
+
+## P27 report (2026-11-06) — storage controls (user request: "control the data the app is using")
+- No network: "data" = storage. Before: db 72 KB + WAL 404 KB (never checkpointed) + leftover cache/export files.
+- DB v7 (AutoMigration 6→7): nullable `@Embedded(prefix="t_") SessionTotals` on `session` (compressedAt, drinks, mine, water, myWater, notes, spentMinor, paceMin, peak, sides "RED:2:1,…"). `observeHistory` uses stored totals for compressed nights (CASE). Seats are kept (names).
+- `domain/StorageRules.kt`: KeepHistory (Forever/1 y/6 m/3 m), CompressAfter (Never/1/3/6 m), calendar-month cutoffs, isDue (24 h or clock back), summarize (reuses StatsRules/VersusRules, so stats/share card match), strict sides codec, `valid()` ranges.
+- `system/StorageMaintenance.kt` (+ `data/StorageDao.kt`): delete old ended nights, compress old ended nights (one transaction each), clear cache/export, `wal_checkpoint(TRUNCATE)`, VACUUM when something changed or >25% free pages. Runs quietly once a day from `CansinApp.onCreate` (appScope), under `SessionRepository.exclusive` (write lock). Open night never touched. Delete-all/restore also compact.
+- UI: Settings → Privacy & data → Storage: usage ("Uses 104 KB", nights, compressed, own questions), "Free up space" (no data loss; shows freed bytes), Keep history + Compress radios with confirm dialog (count of affected nights, "Export a backup first"). History row tag "compressed"; detail shows totals card + "Details were compressed on …".
+- Backup: optional `totals` object per session (format still v1, additive); restore checks ranges, ended only, empty event arrays, sides fit the mode.
+- Verified on the phone: v6→v7 migration ran over real data, app starts; first quiet run truncated WAL 404 KB → 0 and removed cache/export. Compress/delete/free-up buttons not yet tried by the user.
+- Release APK 1.88 MB (+20 KB). Permissions unchanged, no INTERNET. Lint 0 errors. Tests 203/203 (new StorageRulesTest 6, RestoreParserTest +2).
+- iOS: not ported yet (StorageRules + v7 fields + UI) — noted in ios/PORT_PLAN.md.
 
 ## Phone review (2026-11-05/06) — all approved
 - Approved: P24, P25, P26 + all changes below. Release APK 1.85 MB (unsigned). Permissions: POST_NOTIFICATIONS, RECEIVE_BOOT_COMPLETED, AndroidX DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION; no INTERNET. Lint 0 errors.

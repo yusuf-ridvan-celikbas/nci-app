@@ -19,7 +19,9 @@ import com.cansin.app.domain.ResultCards
 import com.cansin.app.domain.BeerSize
 import com.cansin.app.domain.BodyProfile
 import com.cansin.app.domain.CareRules
+import com.cansin.app.domain.CompressAfter
 import com.cansin.app.domain.Currency
+import com.cansin.app.domain.KeepHistory
 import com.cansin.app.domain.License
 import com.cansin.app.domain.Sex
 import com.cansin.app.domain.TimerState
@@ -57,6 +59,9 @@ private val WATER_ENABLED = booleanPreferencesKey("water_enabled")
 private val WATER_EVERY = intPreferencesKey("water_every")
 private val TIMER_ENABLED = booleanPreferencesKey("timer_enabled")
 private val GROUP_LAYOUT = stringPreferencesKey("group_layout")
+private val KEEP_HISTORY = stringPreferencesKey("keep_history")
+private val COMPRESS_AFTER = stringPreferencesKey("compress_after")
+private val MAINTENANCE_AT = longPreferencesKey("storage_maintenance_at")
 private val SHARE_NAME = stringPreferencesKey("share_name")
 private val CURRENCY = stringPreferencesKey("currency")
 private val CARE_ENABLED = booleanPreferencesKey("care_enabled")
@@ -100,6 +105,8 @@ class SettingsStore(private val context: Context) {
             waterEvery = WaterRules.clamp(p[WATER_EVERY] ?: WaterRules.DEFAULT_EVERY),
             timerEnabled = p[TIMER_ENABLED] ?: true,
             groupLayout = enumOr(p[GROUP_LAYOUT], GroupLayout.ROWS),
+            keepHistory = enumOr(p[KEEP_HISTORY], KeepHistory.FOREVER),
+            compressAfter = enumOr(p[COMPRESS_AFTER], CompressAfter.NEVER),
             shareName = ResultCards.cleanName(p[SHARE_NAME]),
             currency = enumOr(p[CURRENCY], Currency.NONE),
             careEnabled = p[CARE_ENABLED] ?: true,
@@ -228,6 +235,11 @@ class SettingsStore(private val context: Context) {
     }
 
     suspend fun setGroupLayout(value: GroupLayout) = edit { it[GROUP_LAYOUT] = value.name }
+
+    suspend fun setKeepHistory(value: KeepHistory) = edit { it[KEEP_HISTORY] = value.name }
+    suspend fun setCompressAfter(value: CompressAfter) = edit { it[COMPRESS_AFTER] = value.name }
+    suspend fun maintenanceAt(): Long? = context.dataStore.data.first()[MAINTENANCE_AT]
+    suspend fun setMaintenanceAt(at: Long) = edit { it[MAINTENANCE_AT] = at }
 
     suspend fun setCurrency(value: Currency) = edit { it[CURRENCY] = value.name }
 

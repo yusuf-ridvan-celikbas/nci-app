@@ -63,6 +63,8 @@ data class Settings(
     val waterEvery: Int = WaterRules.DEFAULT_EVERY,
     val timerEnabled: Boolean = true,
     val groupLayout: GroupLayout = GroupLayout.ROWS,
+    val keepHistory: com.cansin.app.domain.KeepHistory = com.cansin.app.domain.KeepHistory.FOREVER,
+    val compressAfter: com.cansin.app.domain.CompressAfter = com.cansin.app.domain.CompressAfter.NEVER,
     val shareName: String? = null,
     val currency: Currency = Currency.NONE,
     val careEnabled: Boolean = true,

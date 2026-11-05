@@ -39,3 +39,8 @@ The App/Shared/Widget code has never been compiled (P12). New enum cases (`Sessi
 - No network or tracking SDKs. Maps/share sheets are system apps.
 - Group mode has no winner and no ranking. Neither mode rewards quantity.
 - `PrivacyInfo.xcprivacy`: Keychain and file import add no new "required reason" API. Re-check `UserDefaults` (CA92.1) if you add App Group defaults.
+
+## P27 storage controls (Android 2026-11-06) — to port
+- CansinCore: `StorageRules` (KeepHistory/CompressAfter, cutoff, isDue, summarize, sides codec, valid) + tests mirroring `StorageRulesTest.kt`.
+- SwiftData: optional totals on the session record (same fields as Android `SessionTotals`); export/restore `totals` object.
+- App: Settings → Privacy & data → Storage (usage, free up space, keep history, compress) and a daily upkeep on launch. SwiftData has no VACUUM API; "free up space" = delete temp export files only.

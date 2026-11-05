@@ -46,6 +46,21 @@ object ExportJson {
                     "redFriendId" to s.redFriendId,
                     "blueFriendId" to s.blueFriendId,
                     "meSide" to s.meSide?.name,
+                    // P27: only for compressed nights (their event arrays are empty).
+                    "totals" to s.totals?.let { t ->
+                        linkedMapOf<String, Any?>(
+                            "compressedAt" to t.compressedAt,
+                            "drinks" to t.drinks,
+                            "mine" to t.mine,
+                            "water" to t.water,
+                            "myWater" to t.myWater,
+                            "notes" to t.notes,
+                            "spentMinor" to t.spentMinor,
+                            "paceMin" to t.paceMin,
+                            "peak" to t.peak,
+                            "sides" to t.sides,
+                        )
+                    },
                     "seats" to seats[s.id]?.let { GroupRules.ordered(it).map { seat -> linkedMapOf("side" to seat.side.name, "name" to seat.name) } },
                     "beers" to beers[s.id].orEmpty().map {
                         linkedMapOf<String, Any?>("side" to it.side.name, "sizeMl" to it.sizeMl, "abv" to it.abv, "at" to it.at, "finishedAt" to it.finishedAt)

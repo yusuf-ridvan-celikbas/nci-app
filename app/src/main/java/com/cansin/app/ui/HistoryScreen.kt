@@ -113,6 +113,7 @@ private fun SessionList(summaries: List<SessionSummary>, onOpen: (Long) -> Unit)
                         StatsRules.durationMs(session)?.let { formatDuration(it) },
                         pluralStringResource(R.plurals.notes_count, summary.notes, summary.notes),
                         summary.spentMinor.takeIf { it > 0 }?.let { amount(it) },
+                        session.totals?.let { stringResource(R.string.history_compressed_tag) },
                     ).joinToString(" · "),
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,

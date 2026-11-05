@@ -8,6 +8,7 @@ import com.cansin.app.data.CustomQuestion
 import com.cansin.app.data.Note
 import com.cansin.app.data.Session
 import com.cansin.app.data.SessionMode
+import com.cansin.app.data.SessionTotals
 import com.cansin.app.data.Side
 import com.cansin.app.data.WaterEvent
 import java.time.LocalDate
@@ -140,7 +141,34 @@ object RestoreParser {
                     side = side,
                 )
             }
-            return RestoreSession(session, beers, water, notes, seats)
+            val totals = o["totals"]?.let { totals(obj(it), mode, end) }
+            if (totals != null && (beers.isNotEmpty() || water.isNotEmpty() || notes.isNotEmpty())) throw Bad()
+            return RestoreSession(session.copy(totals = totals), beers, water, notes, seats)
+        }
+
+        /** P27 compressed night: strict ranges; only for ended nights; sides must fit the mode. */
+        fun totals(t: Map<*, *>, mode: SessionMode, end: Long?): SessionTotals {
+            if (end == null) throw Bad()
+            fun optInt(v: Any?): Int? = v?.let { int(it) }
+            fun optDouble(v: Any?): Double? = v?.let { double(it) }
+            val sides = t["sides"]?.let { str(it) }
+            val totals = SessionTotals(
+                compressedAt = time(t["compressedAt"]),
+                drinks = int(t["drinks"]),
+                mine = optInt(t["mine"]),
+                water = int(t["water"]),
+                myWater = optInt(t["myWater"]),
+                notes = int(t["notes"]),
+                spentMinor = long(t["spentMinor"]),
+                paceMin = optDouble(t["paceMin"]),
+                peak = optDouble(t["peak"]),
+                sides = sides,
+            )
+            if (!StorageRules.valid(totals)) throw Bad()
+            val decoded = StorageRules.decodeSides(sides)
+            if (sides != null && (decoded.size != sides.split(',').size || decoded.any { !VersusRules.fits(it.side, mode) })) throw Bad()
+            if (sides != null && !VersusRules.hasSides(mode)) throw Bad()
+            return totals
         }
 
         /** Exactly the first N seat sides, each once; names cleaned (null = default label). */

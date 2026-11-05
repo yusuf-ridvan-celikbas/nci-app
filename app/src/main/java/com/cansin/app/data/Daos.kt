@@ -37,10 +37,11 @@ interface SessionDao {
 
     @Query(
         "SELECT s.*, " +
-            "(SELECT COUNT(*) FROM beer_event b WHERE b.sessionId = s.id) AS beers, " +
-            "(SELECT COUNT(*) FROM note n WHERE n.sessionId = s.id) AS notes, " +
-            "(SELECT COUNT(*) FROM water_event w WHERE w.sessionId = s.id) AS water, " +
-            "(SELECT COALESCE(SUM(n2.amountMinor), 0) FROM note n2 WHERE n2.sessionId = s.id) AS spentMinor " +
+            // Compressed nights (P27) keep stored totals; live ones count their rows.
+            "CASE WHEN s.t_compressedAt IS NOT NULL THEN s.t_drinks ELSE (SELECT COUNT(*) FROM beer_event b WHERE b.sessionId = s.id) END AS beers, " +
+            "CASE WHEN s.t_compressedAt IS NOT NULL THEN s.t_notes ELSE (SELECT COUNT(*) FROM note n WHERE n.sessionId = s.id) END AS notes, " +
+            "CASE WHEN s.t_compressedAt IS NOT NULL THEN s.t_water ELSE (SELECT COUNT(*) FROM water_event w WHERE w.sessionId = s.id) END AS water, " +
+            "CASE WHEN s.t_compressedAt IS NOT NULL THEN s.t_spentMinor ELSE (SELECT COALESCE(SUM(n2.amountMinor), 0) FROM note n2 WHERE n2.sessionId = s.id) END AS spentMinor " +
             "FROM session s WHERE s.endedAt IS NOT NULL ORDER BY s.startedAt DESC",
     )
     fun observeHistory(): Flow<List<SessionSummary>>

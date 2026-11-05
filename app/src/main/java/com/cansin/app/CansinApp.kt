@@ -18,8 +18,15 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.launch
 
 class CansinApp : Application() {
+    override fun onCreate() {
+        super.onCreate()
+        // P27: quiet daily upkeep (retention, compression, compaction); never blocks start-up.
+        appScope.launch { runCatching { storage.runIfDue() } }
+    }
+
     val appScope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
     private val database by lazy { AppDatabase.build(this) }
     val settingsStore: SettingsStore by lazy { SettingsStore(this) }
@@ -28,7 +35,10 @@ class CansinApp : Application() {
         HistoryRepository(database.sessionDao(), database.beerDao(), database.noteDao(), database.waterDao(), database.friendResultDao(), database.groupSeatDao())
     }
     val dataManager: DataManager by lazy {
-        DataManager(this, database, settingsStore, { reminders.cancel() }, { CounterWidget.refreshAll(this) })
+        DataManager(this, database, settingsStore, { reminders.cancel() }, { CounterWidget.refreshAll(this) }, { storage.compactNow() })
+    }
+    val storage: com.cansin.app.system.StorageMaintenance by lazy {
+        com.cansin.app.system.StorageMaintenance(this, database, settingsStore, { block -> sessionRepository.exclusive { block() } })
     }
     val appLock: AppLock by lazy { AppLock(settingsStore) }
     val drinkTimer: DrinkTimer by lazy { DrinkTimer(settingsStore, { sessionRepository }) }

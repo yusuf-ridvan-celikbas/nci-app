@@ -41,6 +41,8 @@ class DataManager(
     private val store: SettingsStore,
     private val cancelReminders: suspend () -> Unit,
     private val refreshWidgets: suspend () -> Unit,
+    /** P27: compacts the database file after a wipe or restore so the space really goes back. */
+    private val compact: suspend () -> Unit = {},
 ) {
     private val exportDir get() = File(context.cacheDir, EXPORT_DIR)
 
@@ -109,6 +111,7 @@ class DataManager(
             }
             exportDir.deleteRecursively()
         }
+        compact()
         data.currency?.let { store.setCurrency(it) }
         data.profile?.let { store.setProfile(it) }
         refreshWidgets()
@@ -120,6 +123,7 @@ class DataManager(
             database.clearAllTables()
             exportDir.deleteRecursively()
         }
+        compact()
         store.clearUserData()
         refreshWidgets()
     }

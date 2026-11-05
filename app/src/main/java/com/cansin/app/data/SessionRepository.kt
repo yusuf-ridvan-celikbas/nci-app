@@ -238,6 +238,9 @@ class SessionRepository(
 
     suspend fun closeIfStale() = write { activeSession(clock()) }
 
+    /** P27 storage upkeep: runs [block] under the write lock so it never races a +1. No events are sent. */
+    suspend fun <T> exclusive(block: suspend () -> T): T = writeLock.withLock { block() }
+
     private suspend fun <T> write(block: suspend () -> T): T {
         val (result, events) = writeLock.withLock {
             val r = block()

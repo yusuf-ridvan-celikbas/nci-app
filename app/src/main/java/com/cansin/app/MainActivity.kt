@@ -494,6 +494,9 @@ class MainActivity : ComponentActivity() {
         onReadBackup = { uri -> app.dataManager.readBackup(uri) },
         onRestore = { data -> app.dataManager.restore(data) },
         onDeleteAll = { lifecycleScope.launch { app.dataManager.deleteAll() } },
+        storage = app.storage,
+        onKeepHistory = { app.settingsStore.setKeepHistory(it) },
+        onCompressAfter = { app.settingsStore.setCompressAfter(it) },
     )
 
     private fun update(block: suspend SettingsStore.() -> Unit) {
