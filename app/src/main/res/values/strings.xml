@@ -426,4 +426,5 @@
     <string name="group_show_rows">Show as rows</string>
     <string name="game_pick_tod_desc">Spin the glass: truth or dare questions for 2–10 people.</string>
     <string name="game_pick_versus_desc">Two sides, each with its own count and tab.</string>
+    <string name="game_pick_group_desc">Up to 10 people, each with their own count, and a shared tab.</string>
 </resources>

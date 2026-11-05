@@ -146,7 +146,7 @@ Current phase: **P14–P26 done on Android (branch feature/p20-plus, local only,
 - Approved: P24, P25. Fixed: ending Versus/Together sends a game with that session's people back to setup (c7a9558).
 - User: Together and the game go up to 10 people. Seats 7–10 = TEAL, PINK, ORANGE, GREY (`Palettes.extraSeats`, AA-tested; stored as TEXT, no DB migration). Glass chips narrower from 7 players. iOS core limits updated (iOS group UI not ported yet).
 - User: Together layout preference Rows (default) / Grid (the first P23 design: 2 columns, coloured cards, big count, −1/+1 with long-press picker, water). Switch in the Together top bar (hidden while the game is shown) and Settings → Together; DataStore `group_layout`. Grid has no per-person timer or "… ago" lines (use Rows for those). iOS: not ported.
-- User: Game tab opens a chooser: Soy tu Tentación (Truth or Dare) or Versus (asked on every Game tap unless a Truth or Dare game is running; back arrow/system back on setup returns to it). Versus → Tonight if a Versus/Together is open, else Versus setup → Tonight. Title "Soy tu Tentación (Truth or Dare)" on one line; separate subtitle line removed.
+- User: Game tab tap opens a bottom sheet (M3 ModalBottomSheet, `ui/GameSheet.kt`) instead of a screen: Soy tu Tentación (Truth or Dare) → Game screen; Versus / Together → Tonight if that mode is open, else its setup dialog → Tonight. Title "Soy tu Tentación (Truth or Dare)" on one line; separate subtitle line removed.
 
 ## Phone review status (end of 2026-11-01)
 - Approved on the phone: P13, P14, P15, P16, P17, P18, P19, P20, P21, P22, P23 (incl. the redesign 63a6fbf).

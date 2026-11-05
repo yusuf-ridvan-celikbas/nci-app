@@ -1,6 +1,5 @@
 package com.cansin.app.ui
 
-import androidx.activity.compose.BackHandler
 import androidx.annotation.ArrayRes
 import androidx.annotation.StringRes
 import androidx.compose.foundation.layout.Arrangement
@@ -47,7 +46,6 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.role
 import androidx.compose.ui.semantics.semantics
-import androidx.compose.foundation.clickable
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.style.TextAlign
@@ -80,7 +78,7 @@ internal fun packArray(pack: GamePack, kind: QuestionKind): Int = when (pack) {
 
 /** "Soy tu Tentación (Truth or Dare)" on one line; the part in brackets a bit smaller. */
 @Composable
-private fun GameTitle() {
+internal fun GameTitle() {
     val sub = MaterialTheme.typography.titleSmall
     val text = buildAnnotatedString {
         append(stringResource(R.string.game_title))
@@ -91,60 +89,18 @@ private fun GameTitle() {
     Text(text, maxLines = 1, overflow = TextOverflow.Ellipsis)
 }
 
-/** Game tab: first a choice between Soy tu Tentación and Versus. */
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-private fun GameChooser(onTruthOrDare: () -> Unit, onVersus: () -> Unit) {
-    Scaffold(topBar = { TopAppBar(title = { Text(stringResource(R.string.nav_game)) }) }) { padding ->
-        Column(
-            Modifier.fillMaxSize().padding(padding).verticalScroll(rememberScrollState()).padding(16.dp),
-            verticalArrangement = Arrangement.spacedBy(12.dp),
-        ) {
-            ChoiceCard(onTruthOrDare, R.drawable.ic_game, { GameTitle() }, R.string.game_pick_tod_desc)
-            ChoiceCard(onVersus, R.drawable.ic_versus, { Text(stringResource(R.string.mode_versus)) }, R.string.game_pick_versus_desc)
-        }
-    }
-}
-
-@Composable
-private fun ChoiceCard(onClick: () -> Unit, icon: Int, title: @Composable () -> Unit, @StringRes description: Int) {
-    ElevatedCard(Modifier.fillMaxWidth().clickable(role = Role.Button, onClick = onClick)) {
-        Row(Modifier.padding(16.dp).heightIn(min = 72.dp), verticalAlignment = Alignment.CenterVertically) {
-            Icon(painterResource(icon), null, tint = MaterialTheme.colorScheme.primary)
-            Column(Modifier.padding(start = 16.dp).weight(1f), verticalArrangement = Arrangement.spacedBy(4.dp)) {
-                CompositionLocalProvider(
-                    androidx.compose.material3.LocalTextStyle provides MaterialTheme.typography.titleMedium,
-                ) { title() }
-                Text(stringResource(description), style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
-            }
-        }
-    }
-}
-
 /** P26 Truth or Dare. Players can come from an open Versus/Together session ([session] + [seats]). */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun GameScreen(viewModel: GameViewModel, session: Session?, seats: List<GroupSeat>, onVersus: () -> Unit) {
+fun GameScreen(viewModel: GameViewModel, session: Session?, seats: List<GroupSeat>) {
     val state by viewModel.state.collectAsState()
     val own by viewModel.own.collectAsState()
     var managing by rememberSaveable { mutableStateOf(false) }
-    if (!state.playing && !state.picked) {
-        GameChooser(onTruthOrDare = viewModel::pickTruthOrDare, onVersus = onVersus)
-        return
-    }
-    BackHandler(!state.playing) { viewModel.showChooser() }
     CompositionLocalProvider(LocalSeats provides seats) {
         Scaffold(
             topBar = {
                 TopAppBar(
                     title = { if (state.playing) Text(stringResource(packName(state.pack))) else GameTitle() },
-                    navigationIcon = {
-                        if (!state.playing) {
-                            IconButton(onClick = viewModel::showChooser) {
-                                Icon(painterResource(R.drawable.ic_arrow_back), stringResource(R.string.back))
-                            }
-                        }
-                    },
                     actions = {
                         if (state.playing) TextButton(onClick = viewModel::backToSetup) { Text(stringResource(R.string.game_change_players)) }
                     },
