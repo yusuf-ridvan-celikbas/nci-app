@@ -17,7 +17,6 @@
     <string name="back">Geri</string>
     <string name="section_general">Genel</string>
     <string name="section_appearance">Görünüm</string>
-    <string name="name_change_note">Ana ekran simgesinin güncellenmesi birkaç saniye sürebilir.</string>
     <string name="setting_language">Dil</string>
     <string name="language_system">Sistem varsayılanı</string>
     <string name="setting_theme_mode">Tema</string>
@@ -420,4 +419,15 @@
     <string name="game_pick_versus_desc">İki taraf, her birinin kendi sayısı ve hesabı.</string>
     <string name="game_pick_group_desc">En fazla 10 kişi, herkesin kendi sayısı ve ortak hesap.</string>
     <string name="with_friends_question">Arkadaşlarınla mısın?</string>
+    <string name="settings_general">Genel ve görünüm</string>
+    <string name="settings_general_summary">Dil, para birimi, tema, renk</string>
+    <string name="settings_drinks">İçecekler</string>
+    <string name="settings_drinks_summary">Varsayılan içecek ve boyut, içme zamanlayıcısı</string>
+    <string name="settings_health">Sağlık ve hatırlatmalar</string>
+    <string name="settings_health_summary">Su, özen ve sınırlar, vücut profili, hatırlatmalar</string>
+    <string name="settings_friends">Arkadaşlar ve Birlikte</string>
+    <string name="settings_friends_summary">Kişi düzeni, kayıtlı arkadaşlar</string>
+    <string name="settings_privacy">Gizlilik ve veriler</string>
+    <string name="settings_privacy_summary">PIN kilidi, yedekleme, geri yükleme, tümünü sil</string>
+    <string name="settings_no_friends">Henüz kayıtlı arkadaş yok.</string>
 </resources>

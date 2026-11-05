@@ -1,5 +1,7 @@
 package com.cansin.app.ui
 
+import androidx.activity.compose.BackHandler
+import androidx.annotation.DrawableRes
 import androidx.annotation.StringRes
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
@@ -17,6 +19,7 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.ListItem
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Scaffold
@@ -84,6 +87,15 @@ class SettingsActions(
     val onDeleteAll: () -> Unit,
 )
 
+/** Settings is a short list of groups; each opens its own page. */
+enum class SettingsPage(@StringRes val title: Int, @StringRes val summary: Int, @DrawableRes val icon: Int) {
+    GENERAL(R.string.settings_general, R.string.settings_general_summary, R.drawable.ic_settings),
+    DRINKS(R.string.settings_drinks, R.string.settings_drinks_summary, R.drawable.ic_shortcut_beer),
+    HEALTH(R.string.settings_health, R.string.settings_health_summary, R.drawable.ic_shortcut_water),
+    FRIENDS(R.string.settings_friends, R.string.settings_friends_summary, R.drawable.ic_versus),
+    PRIVACY(R.string.settings_privacy, R.string.settings_privacy_summary, R.drawable.ic_lock),
+}
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SettingsScreen(
@@ -94,64 +106,87 @@ fun SettingsScreen(
     friends: List<FriendProfile>,
     actions: SettingsActions,
 ) {
+    var page by rememberSaveable { mutableStateOf<SettingsPage?>(null) }
+    BackHandler(page != null) { page = null }
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text(stringResource(R.string.settings)) },
+                title = { Text(stringResource(page?.title ?: R.string.settings)) },
+                navigationIcon = {
+                    if (page != null) {
+                        IconButton(onClick = { page = null }) {
+                            Icon(painterResource(R.drawable.ic_arrow_back), stringResource(R.string.back))
+                        }
+                    }
+                },
             )
         },
     ) { padding ->
+        val current = page
+        if (current == null) {
+            Column(Modifier.padding(padding).verticalScroll(rememberScrollState()).padding(vertical = 8.dp)) {
+                SettingsPage.entries.forEach { p ->
+                    ListItem(
+                        headlineContent = { Text(stringResource(p.title)) },
+                        supportingContent = { Text(stringResource(p.summary)) },
+                        leadingContent = { Icon(painterResource(p.icon), null, tint = MaterialTheme.colorScheme.primary) },
+                        modifier = Modifier.clickable(role = Role.Button) { page = p },
+                    )
+                }
+            }
+            return@Scaffold
+        }
         Column(
             Modifier.padding(padding).verticalScroll(rememberScrollState()).padding(horizontal = 16.dp, vertical = 8.dp),
         ) {
-            SectionHeader(R.string.section_general)
-            Text(
-                stringResource(R.string.name_change_note),
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-            )
-            ChoiceGroup(R.string.setting_language, Language.entries, language, { it.label }, actions.onLanguage)
-            ChoiceGroup(R.string.setting_currency, Currency.entries, settings.currency, ::currencyLabel, actions.onCurrency)
-            HorizontalDivider(Modifier.padding(vertical = 16.dp))
-            SectionHeader(R.string.section_appearance)
-            ChoiceGroup(R.string.setting_theme_mode, ThemeMode.entries, settings.themeMode, { it.label }, actions.onThemeMode)
-            val accents = Accent.entries.filter { it != Accent.DYNAMIC || dynamicAvailable }
-            ChoiceGroup(R.string.setting_color, accents, settings.accent, { it.label }, actions.onAccent)
-            HorizontalDivider(Modifier.padding(vertical = 16.dp))
-            BeerSection(settings.beerSize, actions.onBeerSize, settings.defaultDrink, actions.onDefaultDrink)
-            HorizontalDivider(Modifier.padding(vertical = 16.dp))
-            WaterSection(settings, actions)
-            HorizontalDivider(Modifier.padding(vertical = 16.dp))
-            CareSection(settings, actions)
-            HorizontalDivider(Modifier.padding(vertical = 16.dp))
-            SectionHeader(R.string.setting_timer)
-            SwitchRow(R.string.setting_timer, settings.timerEnabled, actions.onTimerEnabled)
-            Text(
-                stringResource(R.string.setting_timer_note),
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-            )
-            HorizontalDivider(Modifier.padding(vertical = 16.dp))
-            SectionHeader(R.string.group_title)
-            ChoiceGroup(
-                R.string.setting_group_layout,
-                com.cansin.app.prefs.GroupLayout.entries,
-                settings.groupLayout,
-                { it.label },
-                actions.onGroupLayout,
-            )
-            HorizontalDivider(Modifier.padding(vertical = 16.dp))
-            ProfileSection(settings.profile, actions.onProfile)
-            if (friends.isNotEmpty()) {
-                HorizontalDivider(Modifier.padding(vertical = 16.dp))
-                FriendsSection(friends, actions.onDeleteFriend)
+            when (current) {
+                SettingsPage.GENERAL -> {
+                    ChoiceGroup(R.string.setting_language, Language.entries, language, { it.label }, actions.onLanguage)
+                    ChoiceGroup(R.string.setting_currency, Currency.entries, settings.currency, ::currencyLabel, actions.onCurrency)
+                    HorizontalDivider(Modifier.padding(vertical = 16.dp))
+                    SectionHeader(R.string.section_appearance)
+                    ChoiceGroup(R.string.setting_theme_mode, ThemeMode.entries, settings.themeMode, { it.label }, actions.onThemeMode)
+                    val accents = Accent.entries.filter { it != Accent.DYNAMIC || dynamicAvailable }
+                    ChoiceGroup(R.string.setting_color, accents, settings.accent, { it.label }, actions.onAccent)
+                }
+                SettingsPage.DRINKS -> {
+                    BeerSection(settings.beerSize, actions.onBeerSize, settings.defaultDrink, actions.onDefaultDrink)
+                    HorizontalDivider(Modifier.padding(vertical = 16.dp))
+                    SectionHeader(R.string.setting_timer)
+                    SwitchRow(R.string.setting_timer, settings.timerEnabled, actions.onTimerEnabled)
+                    Text(
+                        stringResource(R.string.setting_timer_note),
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                }
+                SettingsPage.HEALTH -> {
+                    WaterSection(settings, actions)
+                    HorizontalDivider(Modifier.padding(vertical = 16.dp))
+                    CareSection(settings, actions)
+                    HorizontalDivider(Modifier.padding(vertical = 16.dp))
+                    ProfileSection(settings.profile, actions.onProfile)
+                    HorizontalDivider(Modifier.padding(vertical = 16.dp))
+                    ReminderSection(settings, notificationAccess, actions)
+                }
+                SettingsPage.FRIENDS -> {
+                    SectionHeader(R.string.group_title)
+                    ChoiceGroup(
+                        R.string.setting_group_layout,
+                        com.cansin.app.prefs.GroupLayout.entries,
+                        settings.groupLayout,
+                        { it.label },
+                        actions.onGroupLayout,
+                    )
+                    HorizontalDivider(Modifier.padding(vertical = 16.dp))
+                    FriendsSection(friends, actions.onDeleteFriend)
+                }
+                SettingsPage.PRIVACY -> {
+                    PinSection(settings, actions.lock, actions.onPinHidesWidget, actions.onPinChanged)
+                    HorizontalDivider(Modifier.padding(vertical = 16.dp))
+                    DataSection(actions.onExport, actions.onReadBackup, actions.onRestore, actions.onDeleteAll)
+                }
             }
-            HorizontalDivider(Modifier.padding(vertical = 16.dp))
-            ReminderSection(settings, notificationAccess, actions)
-            HorizontalDivider(Modifier.padding(vertical = 16.dp))
-            PinSection(settings, actions.lock, actions.onPinHidesWidget, actions.onPinChanged)
-            HorizontalDivider(Modifier.padding(vertical = 16.dp))
-            DataSection(actions.onExport, actions.onReadBackup, actions.onRestore, actions.onDeleteAll)
         }
     }
 }
@@ -245,6 +280,9 @@ private fun WaterSection(settings: Settings, actions: SettingsActions) {
 @Composable
 private fun FriendsSection(friends: List<FriendProfile>, onDelete: (Long) -> Unit) {
     SectionHeader(R.string.section_friends)
+    if (friends.isEmpty()) {
+        Text(stringResource(R.string.settings_no_friends), color = MaterialTheme.colorScheme.onSurfaceVariant)
+    }
     friends.forEach { friend ->
         Row(Modifier.fillMaxWidth().heightIn(min = 48.dp), verticalAlignment = Alignment.CenterVertically) {
             Text(friend.name, Modifier.weight(1f))

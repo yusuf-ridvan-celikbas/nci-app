@@ -33,7 +33,7 @@ The App/Shared/Widget code has never been compiled (P12). New enum cases (`Sessi
 | P24 screen lock | — | iOS has no public API to start Guided Access from an app. In Versus/Together, show a lock button that opens an info card: "Settings → Accessibility → Guided Access, then triple-click the side button" | — (`UIAccessibility.isGuidedAccessEnabled` only reads the state) |
 | P25 bottom navigation | — | `TabView`: Tonight (counter/versus/together) · Tab · Game · History · Settings | — |
 | P26 Truth or Dare | — (Android `GameRules`, `ShuffleBag`) | Port the rules, a spinning glass (`rotationEffect` + `withAnimation(.easeOut)`), packs from `game_questions.xml` (extend gen_strings for string-arrays), SwiftData `CustomQuestionRecord`, linked players from Versus/Together | `UIImpactFeedbackGenerator` |
-| Name (2026-11-01) | — | App = SalgamBalgam only (project.yml already updated): remove the `AppName` enum/picker in `Shared/Settings.swift`, `App/SettingsView.swift` and `AppModel.swift`; the game title is "Soy tu Tentación" | — |
+| Name (2026-11-01) | — | App = Salgam only (renamed from SalgamBalgam 2026-11-06) (project.yml already updated): remove the `AppName` enum/picker in `Shared/Settings.swift`, `App/SettingsView.swift` and `AppModel.swift`; the game title is "Soy tu Tentación" | — |
 
 ## Store/privacy checks (same as Android)
 - No network or tracking SDKs. Maps/share sheets are system apps.
