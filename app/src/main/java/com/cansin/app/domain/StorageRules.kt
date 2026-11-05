@@ -73,7 +73,7 @@ object StorageRules {
             water = water.size.coerceAtMost(MAX_COUNT),
             myWater = me?.let { water.count { w -> VersusRules.isMineWater(w, session) }.coerceAtMost(MAX_COUNT) },
             notes = notes.size.coerceAtMost(MAX_COUNT),
-            spentMinor = notes.sumOf { it.amountMinor ?: 0 }.coerceIn(0, MAX_SPENT_MINOR),
+            spentMinor = (notes.sumOf { it.amountMinor ?: 0 } + TabRules.drinkTotal(beers)).coerceIn(0, MAX_SPENT_MINOR),
             paceMin = stats?.paceMin,
             peak = stats?.peak,
             sides = sides,

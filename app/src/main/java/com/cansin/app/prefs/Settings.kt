@@ -65,6 +65,8 @@ data class Settings(
     val groupLayout: GroupLayout = GroupLayout.ROWS,
     val keepHistory: com.cansin.app.domain.KeepHistory = com.cansin.app.domain.KeepHistory.FOREVER,
     val compressAfter: com.cansin.app.domain.CompressAfter = com.cansin.app.domain.CompressAfter.NEVER,
+    /** P28: price per drink kind in minor units; drinks with a price go on the Tab. */
+    val prices: Map<com.cansin.app.data.DrinkKind, Long> = emptyMap(),
     val shareName: String? = null,
     val currency: Currency = Currency.NONE,
     val careEnabled: Boolean = true,

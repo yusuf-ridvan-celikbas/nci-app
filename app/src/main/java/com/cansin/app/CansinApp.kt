@@ -65,6 +65,7 @@ class CansinApp : Application() {
             },
             defaultDrink = { settingsStore.settings.first().let { Drinks.default(it.defaultDrink, it.beerSize) } },
             seats = database.groupSeatDao(),
+            price = { kind -> settingsStore.settings.first().prices[kind] },
         )
     }
 }

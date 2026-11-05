@@ -1,6 +1,6 @@
 # Progress
 
-Current phase: **P27 storage controls built on branch feature/p27-storage (from master; local, NOT pushed), installed on the phone, waiting for review. master holds P13–P26 (merged locally, not pushed). iOS: CansinCore has the rules up to P26 (uncompiled); see ios/PORT_PLAN.md (needs a Mac).**
+Current phase: **P28 (drinks on the Tab + Tonight −1 rows) on branch feature/p28-tab-drinks, on top of P27 (feature/p27-storage); both local, NOT pushed, installed on the phone, waiting for review. master holds P13–P26 (merged locally, not pushed). iOS: rules up to P26 in CansinCore (uncompiled); see ios/PORT_PLAN.md.**
 
 ## Phases
 - [x] Setup (project, wrapper, git, CLAUDE.md)
@@ -21,6 +21,7 @@ Current phase: **P27 storage controls built on branch feature/p27-storage (from 
   - [x] P14 Currency  - [x] P15 Quick tile + shortcuts  - [x] P16 Care messages  - [x] P17 Self-set limits
   - [x] P18 PIN lock  - [x] P19 Settle up (branch feature/p18-pin, on top of p14-plus)  - [x] P20 Stats extras  - [x] checkpoint: phone test + merge (2026-11-06, local)
   - [ ] P27 Storage controls (branch feature/p27-storage, waiting for phone review)
+  - [ ] P28 Drinks on the Tab + Tonight −1 rows (branch feature/p28-tab-drinks, waiting for phone review)
   - [x] P21 Restore backup  - [x] P22 Other drinks (DB v4)  - [x] P23 Group mode 2–6 (DB v5, no winner/race)  - [x] P24 Screen pinning in Versus/Together  - [x] P25 Bottom navigation  - [x] P26 Truth or Dare game (branch feature/p20-plus on top of p18-pin)
 
 ## Code map
@@ -142,6 +143,17 @@ Current phase: **P27 storage controls built on branch feature/p27-storage (from 
   5. Restore keeps your settings and PIN and replaces only the data (sessions, notes, water, friends, friend results).
   6. Counts in widget/stats/result card now mean all drinks, not only beer.
 - Known limits: the Stats "water per drink" in a group counts everyone's water; in a group, the counter's water bar duplicates my seat's water button.
+
+## P28 report (2026-11-06) — drinks on the Tab, clearer Tonight controls (user request)
+- User choices: price per drink type; Tab shows grouped automatic lines; water −1; bigger drink −1 (same row style as water). Not chosen: timer always visible, Together changes.
+- DB v8 (AutoMigration 7→8): `BeerEvent.priceMinor` (nullable). `SessionRepository.insertBeer` saves `price(kind)` from Settings at add time (every path: Tonight, picker, widget, tile, Versus, Together). Undo/−1 remove the charge with the drink; later price changes don't touch earlier drinks.
+- `domain/TabRules.kt`: `charges` (priced drinks as note-like items, side via `VersusRules.noteSide`), `withDrinks`, `drinkLines` (grouped kind+size+side), `drinkTotal`. Used by the Tab totals, Versus/Together split, Settle up, budget warning (`CareViewModel`), widget Tab page (`snapshot.tabMinor`), History/calendar spent (`observeHistory`), and P27 compression (`spentMinor`).
+- Settings → Drinks → Prices (`ui/PriceSection.kt`): beer, wine, rakı, shot, cocktail; DataStore `price_<KIND>`; Clear. Tab: "Drinks (automatic)" block (read-only, "change with −1 or Undo on Tonight"); hint to set prices when there are drinks but no tab.
+- Tonight: `CountRow` "Drinks: n · −1 · +1" and "Water: n · −1 · +1" (48 dp, content descriptions). Water −1 = `removeLatestWater` (new `WaterDao.latest`), deletes an empty session like drink −1. Versus gets the water row too.
+- Backup: beer `priceMinor` and top-level `drinkPrices` (optional, format v1); restore checks ranges and kinds.
+- Verified on the phone: v7→v8 migration over real data, app starts, no crash. Prices/Tab/−1 rows not yet tried by the user.
+- Release APK 1.89 MB (+10 KB). Permissions unchanged, no INTERNET. Lint 0 errors. Tests 212/212 (new TabRulesTest 6, price/water/restore tests).
+- Decided – confirm: Settle up "by person" puts priced drinks under "no name" in solo (like unnamed notes).
 
 ## P27 report (2026-11-06) — storage controls (user request: "control the data the app is using")
 - No network: "data" = storage. Before: db 72 KB + WAL 404 KB (never checkpointed) + leftover cache/export files.

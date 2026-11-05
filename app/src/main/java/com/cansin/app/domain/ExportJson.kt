@@ -21,6 +21,8 @@ data class ExportData(
     val seats: List<GroupSeat> = emptyList(),
     val customQuestions: List<CustomQuestion> = emptyList(),
     val currency: Currency = Currency.NONE,
+    /** P28 price per drink kind (minor units). */
+    val prices: Map<DrinkKind, Long> = emptyMap(),
 )
 
 object ExportJson {
@@ -64,7 +66,10 @@ object ExportJson {
                     "seats" to seats[s.id]?.let { GroupRules.ordered(it).map { seat -> linkedMapOf("side" to seat.side.name, "name" to seat.name) } },
                     "beers" to beers[s.id].orEmpty().map {
                         linkedMapOf<String, Any?>("side" to it.side.name, "sizeMl" to it.sizeMl, "abv" to it.abv, "at" to it.at, "finishedAt" to it.finishedAt)
-                            .apply { if (it.kind != DrinkKind.BEER) put("kind", it.kind.name) }
+                            .apply {
+                                if (it.kind != DrinkKind.BEER) put("kind", it.kind.name)
+                                it.priceMinor?.let { p -> put("priceMinor", p) }
+                            }
                     },
                     "water" to water[s.id].orEmpty().map { w ->
                         linkedMapOf<String, Any?>("at" to w.at).apply { w.side?.let { put("side", it.name) } }
@@ -87,6 +92,7 @@ object ExportJson {
             },
         )
         if (data.currency != Currency.NONE) root["currency"] = data.currency.name
+        if (data.prices.isNotEmpty()) root["drinkPrices"] = data.prices.entries.sortedBy { it.key.ordinal }.associateTo(linkedMapOf()) { it.key.name to it.value }
         if (data.customQuestions.isNotEmpty()) {
             root["customQuestions"] = data.customQuestions.map { linkedMapOf("kind" to it.kind.name, "text" to it.text, "createdAt" to it.createdAt) }
         }

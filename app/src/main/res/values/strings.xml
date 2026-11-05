@@ -433,7 +433,7 @@
     <string name="settings_general">General &amp; look</string>
     <string name="settings_general_summary">Language, currency, theme, colour</string>
     <string name="settings_drinks">Drinks</string>
-    <string name="settings_drinks_summary">Default drink and size, drinking timer</string>
+    <string name="settings_drinks_summary">Default drink and size, prices, drinking timer</string>
     <string name="settings_health">Health &amp; reminders</string>
     <string name="settings_health_summary">Water, care and limits, body profile, reminders</string>
     <string name="settings_friends">Friends &amp; Together</string>
@@ -478,4 +478,14 @@
         <item quantity="one">%d night will keep only its totals. Drink times and notes can\'t be brought back.</item>
         <item quantity="other">%d nights will keep only their totals. Drink times and notes can\'t be brought back.</item>
     </plurals>
+    <string name="tab_drinks_auto">Drinks (automatic)</string>
+    <string name="tab_drinks_hint">Change with −1 or Undo on Tonight.</string>
+    <string name="tab_drink_line">%1$s · %2$s cl ×%3$d</string>
+    <string name="tab_price_hint">Set drink prices in Settings → Drinks to put drinks on the tab automatically.</string>
+    <string name="water_remove">Remove the last glass of water</string>
+    <string name="section_prices">Prices</string>
+    <string name="price_not_set">Not set</string>
+    <string name="price_title">Price: %1$s</string>
+    <string name="price_clear">Clear</string>
+    <string name="price_note">Drinks with a price go on the tab automatically. Changing a price doesn\'t change drinks already added.</string>
 </resources>

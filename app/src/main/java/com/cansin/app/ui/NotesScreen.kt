@@ -82,14 +82,30 @@ private fun NotesContent(viewModel: NotesViewModel, state: NotesState, onBack: (
         bottomBar = { QuickAdd(state, onAdd = viewModel::add) },
     ) { padding ->
         Column(Modifier.fillMaxSize().padding(padding)) {
-            if (state.notes.isEmpty()) {
+            if (state.notes.isEmpty() && state.drinkLines.isEmpty()) {
                 Text(
-                    stringResource(R.string.no_notes),
+                    stringResource(if (state.showPriceHint) R.string.tab_price_hint else R.string.no_notes),
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     modifier = Modifier.padding(16.dp),
                 )
             }
             LazyColumn(Modifier.weight(1f)) {
+                if (state.drinkLines.isNotEmpty()) {
+                    item(key = "drinks_header") {
+                        Column(Modifier.padding(horizontal = 16.dp, vertical = 8.dp)) {
+                            Text(stringResource(R.string.tab_drinks_auto), style = MaterialTheme.typography.titleSmall)
+                            Text(
+                                stringResource(R.string.tab_drinks_hint),
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            )
+                        }
+                    }
+                    items(state.drinkLines, key = { "d" + it.kind + it.sizeMl + it.side }) { line ->
+                        DrinkLineRow(line, state, format)
+                    }
+                    item(key = "drinks_divider") { HorizontalDivider() }
+                }
                 items(state.notes, key = { it.id }) { note ->
                     NoteRow(note, state, format) { editing = note }
                     HorizontalDivider()
@@ -103,7 +119,7 @@ private fun NotesContent(viewModel: NotesViewModel, state: NotesState, onBack: (
                     }
                 }
                 if (state.group) {
-                    val (own, shared) = GroupRules.tab(state.seats, state.notes)
+                    val (own, shared) = GroupRules.tab(state.seats, state.tab)
                     (GroupRules.ordered(state.seats).map { it.side to (own[it.side] ?: 0L) } + (null to shared)).forEach { (side, amount) ->
                         Text(stringResource(R.string.tab_side_total, sideName(state.session, side), format(amount)))
                     }
@@ -183,6 +199,37 @@ private fun NoteRow(note: Note, state: NotesState, format: (Long) -> String, onC
             }
         }
         note.amountMinor?.let { Text(format(it), style = MaterialTheme.typography.bodyLarge) }
+    }
+}
+
+/** P28 automatic line: "Beer · 50 cl ×3" with side chip and sum. Read-only (fix with −1 / Undo on Tonight). */
+@Composable
+private fun DrinkLineRow(line: com.cansin.app.domain.DrinkLine, state: NotesState, format: (Long) -> String) {
+    val separator = rememberDecimalSeparator()
+    Row(Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 10.dp), verticalAlignment = Alignment.Top) {
+        Column(Modifier.weight(1f)) {
+            Text(
+                stringResource(
+                    R.string.tab_drink_line,
+                    stringResource(drinkName(line.kind)),
+                    com.cansin.app.domain.BeerRules.formatCl(line.sizeMl, separator),
+                    line.count,
+                ),
+                style = MaterialTheme.typography.bodyLarge,
+            )
+            if (state.sided) {
+                val colors = sideColor(line.side)
+                Text(
+                    sideName(state.session, line.side),
+                    style = MaterialTheme.typography.labelSmall,
+                    color = colors?.second ?: MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier
+                        .background(colors?.first ?: Color.Transparent, RoundedCornerShape(4.dp))
+                        .padding(horizontal = 6.dp, vertical = 2.dp),
+                )
+            }
+        }
+        Text(format(line.totalMinor), style = MaterialTheme.typography.bodyLarge)
     }
 }
 

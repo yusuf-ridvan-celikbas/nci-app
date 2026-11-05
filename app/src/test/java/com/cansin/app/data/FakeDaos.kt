@@ -50,6 +50,7 @@ class FakeBeerDao : BeerDao {
         rows.value = rows.value.map { if (it.id == id && it.finishedAt == null) it.copy(finishedAt = at) else it }
     }
     override suspend fun count(sessionId: Long) = rows.value.count { it.sessionId == sessionId }
+    override suspend fun totalPriceMinor(sessionId: Long) = rows.value.filter { it.sessionId == sessionId }.sumOf { it.priceMinor ?: 0 }
     override fun observeCount(sessionId: Long): Flow<Int> = rows.map { list -> list.count { it.sessionId == sessionId } }
     override fun observeEnded(): Flow<List<BeerEvent>> = rows
     override fun observe(sessionId: Long): Flow<List<BeerEvent>> =
@@ -92,6 +93,8 @@ class FakeWaterDao : WaterDao {
     override suspend fun count(sessionId: Long) = rows.value.count { it.sessionId == sessionId }
     override suspend fun lastAt(sessionId: Long) = rows.value.filter { it.sessionId == sessionId }.maxOfOrNull { it.at }
     override suspend fun countOnSide(sessionId: Long, side: Side?) = rows.value.count { it.sessionId == sessionId && it.side == side }
+    override suspend fun latest(sessionId: Long, side: Side?) =
+        rows.value.filter { it.sessionId == sessionId && it.side == side }.maxWithOrNull(compareBy({ it.at }, { it.id }))
     override fun observe(sessionId: Long): Flow<List<WaterEvent>> = rows.map { list -> list.filter { it.sessionId == sessionId } }
 }
 

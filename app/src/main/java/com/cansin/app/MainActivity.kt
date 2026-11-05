@@ -433,7 +433,7 @@ class MainActivity : ComponentActivity() {
             )
         }
         UndoEffect(water.waterAdded, snackbar, water::undo, R.string.water_added)
-        WaterBar(state, onAdd = water::add, onDismiss = water::dismiss)
+        WaterBar(state, onAdd = water::add, onRemove = water::removeLatest, onDismiss = water::dismiss)
     }
 
     @Composable
@@ -497,6 +497,7 @@ class MainActivity : ComponentActivity() {
         storage = app.storage,
         onKeepHistory = { app.settingsStore.setKeepHistory(it) },
         onCompressAfter = { app.settingsStore.setCompressAfter(it) },
+        onPrice = { kind, minor -> update { setPrice(kind, minor) } },
     )
 
     private fun update(block: suspend SettingsStore.() -> Unit) {

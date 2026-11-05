@@ -46,4 +46,19 @@ class WaterRepositoryTest {
         repo.undoWater(glass)
         assertEquals(0, sessions.rows.value.size)
     }
+
+    @Test
+    fun waterMinusOneRemovesLatestGlassAndEmptySession() = runBlocking {
+        val beer = repo.add()
+        repo.addWater()
+        now += 1_000
+        val second = repo.addWater()!!
+        repo.removeLatestWater()
+        assertEquals(1, water.rows.value.size)
+        assertEquals(false, water.rows.value.any { it.id == second.id })
+        repo.removeLatestWater()
+        repo.undo(beer)
+        assertNull(repo.openSession.first())
+        repo.removeLatestWater() // nothing open: no-op
+    }
 }

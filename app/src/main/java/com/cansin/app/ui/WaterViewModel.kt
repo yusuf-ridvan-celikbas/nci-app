@@ -57,6 +57,8 @@ class WaterViewModel(private val repository: SessionRepository, settingsStore: S
 
     fun undo(event: WaterEvent) = viewModelScope.launch { repository.undoWater(event) }
 
+    fun removeLatest() = viewModelScope.launch { repository.removeLatestWater() }
+
     fun dismiss() {
         dismissedAt.value = state.value.since
     }

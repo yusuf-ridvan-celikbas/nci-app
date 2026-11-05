@@ -32,6 +32,8 @@ data class RestoreData(
     val currency: Currency?,
     val profile: BodyProfile?,
     val customQuestions: List<CustomQuestion> = emptyList(),
+    /** P28: null = not in the file (keep current prices). */
+    val prices: Map<DrinkKind, Long>? = null,
 ) {
     val beerCount get() = sessions.sumOf { it.beers.size }
 }
@@ -84,7 +86,13 @@ object RestoreParser {
             val currency = root["currency"]?.let { c -> Currency.entries.firstOrNull { it.name == c && it != Currency.NONE } ?: throw Bad() }
             val profile = root["bodyProfile"]?.let { profile(obj(it)) }
             val questions = list(root["customQuestions"], CustomQuestion.MAX_COUNT, optional = true).map { question(obj(it)) }
-            return RestoreData(sessions, friends, results, currency, profile, questions)
+            val prices = root["drinkPrices"]?.let { v ->
+                obj(v).entries.associate { (k, p) ->
+                    val kind = enum<DrinkKind>(k).also { if (it !in Drinks.DEFAULT_KINDS) throw Bad() }
+                    kind to long(p).also { if (it <= 0 || !NoteRules.isValidAmount(it)) throw Bad() }
+                }
+            }
+            return RestoreData(sessions, friends, results, currency, profile, questions, prices)
         }
 
         fun question(o: Map<*, *>): CustomQuestion {
@@ -118,7 +126,8 @@ object RestoreParser {
                 val size = int(b["sizeMl"]).also { if (it !in BeerRules.MIN_ML..BeerRules.MAX_ML) throw Bad() }
                 val abv = double(b["abv"]).also { if (it !in BeerRules.MIN_ABV..BeerRules.MAX_ABV) throw Bad() }
                 val kind = b["kind"]?.let { enum<DrinkKind>(it) } ?: DrinkKind.BEER
-                BeerEvent(sessionId = 0, side = side, sizeMl = size, abv = abv, at = time(b["at"]), finishedAt = b["finishedAt"]?.let { time(it) }, kind = kind)
+                val price = b["priceMinor"]?.let { long(it) }?.also { if (it <= 0 || !NoteRules.isValidAmount(it)) throw Bad() }
+                BeerEvent(sessionId = 0, side = side, sizeMl = size, abv = abv, at = time(b["at"]), finishedAt = b["finishedAt"]?.let { time(it) }, kind = kind, priceMinor = price)
             }
             val water = events(o["water"]).map { w ->
                 val side = w["side"]?.let { enum<Side>(it) }

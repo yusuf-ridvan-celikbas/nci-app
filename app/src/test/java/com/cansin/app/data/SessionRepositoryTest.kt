@@ -266,4 +266,21 @@ class SessionRepositoryTest {
         repo.finishBeer(beer.id, beer.sessionId)
         assertEquals(now, beers.rows.value.single().finishedAt)
     }
+
+    @Test
+    fun priceIsSavedOnTheDrinkAndLeavesWithIt() = runBlocking {
+        val prices = mapOf(DrinkKind.BEER to 15_000L)
+        val priced = SessionRepository(sessions, beers, notes, water, clock = { now }, price = { prices[it] })
+        val first = priced.addBeer()!!
+        priced.addBeer()
+        priced.addBeer(drink = DrinkChoice(DrinkKind.WINE, BeerSize(150, 12.0)))
+        assertEquals(15_000L, first.priceMinor)
+        assertEquals(listOf(15_000L, 15_000L, null), beers.rows.value.map { it.priceMinor })
+        assertEquals(30_000L, priced.snapshot().tabMinor)
+        priced.removeLatest() // wine (no price)
+        priced.removeLatest()
+        assertEquals(15_000L, priced.snapshot().tabMinor)
+        priced.undo(first)
+        assertEquals(0L, beers.rows.value.sumOf { it.priceMinor ?: 0 })
+    }
 }

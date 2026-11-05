@@ -42,10 +42,10 @@ fun SettleDialog(state: NotesState, onDismiss: () -> Unit) {
     val lines = mutableListOf<String>()
 
     if (state.group) {
-        GroupRules.split(state.seats, state.notes, splitShared).forEach {
+        GroupRules.split(state.seats, state.tab, splitShared).forEach {
             lines += stringResource(R.string.tab_side_total, sideName(state.session, it.side), format(it.pays))
         }
-        if (!splitShared) lines += stringResource(R.string.tab_side_total, sideName(state.session, null), format(GroupRules.tab(state.seats, state.notes).second))
+        if (!splitShared) lines += stringResource(R.string.tab_side_total, sideName(state.session, null), format(GroupRules.tab(state.seats, state.tab).second))
     } else if (state.versus) {
         val totals = state.totals
         val (red, blue) = if (splitShared) SettleRules.splitShared(totals) else totals.red to totals.blue
@@ -53,7 +53,7 @@ fun SettleDialog(state: NotesState, onDismiss: () -> Unit) {
         lines += stringResource(R.string.tab_side_total, sideName(state.session, Side.BLUE), format(blue))
         if (!splitShared) lines += stringResource(R.string.tab_side_total, sideName(state.session, null), format(totals.shared))
     } else {
-        SettleRules.byPerson(state.notes).forEach { lines += stringResource(R.string.tab_side_total, it.person ?: unnamed, format(it.minor)) }
+        SettleRules.byPerson(state.tab).forEach { lines += stringResource(R.string.tab_side_total, it.person ?: unnamed, format(it.minor)) }
     }
     val totalLine = stringResource(R.string.tab_total, format(total))
     val peopleText = pluralStringResource(R.plurals.settle_people, people, people)

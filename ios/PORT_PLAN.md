@@ -44,3 +44,6 @@ The App/Shared/Widget code has never been compiled (P12). New enum cases (`Sessi
 - CansinCore: `StorageRules` (KeepHistory/CompressAfter, cutoff, isDue, summarize, sides codec, valid) + tests mirroring `StorageRulesTest.kt`.
 - SwiftData: optional totals on the session record (same fields as Android `SessionTotals`); export/restore `totals` object.
 - App: Settings → Privacy & data → Storage (usage, free up space, keep history, compress) and a daily upkeep on launch. SwiftData has no VACUUM API; "free up space" = delete temp export files only.
+
+## P28 drinks on the Tab (Android 2026-11-06) — to port
+- `priceMinor` on the drink record + price per kind in settings; `TabRules` (charges/withDrinks/drinkLines) in CansinCore with tests mirroring `TabRulesTest.kt`; Tab "Drinks (automatic)" block; Tonight count rows with −1 for drinks and water.

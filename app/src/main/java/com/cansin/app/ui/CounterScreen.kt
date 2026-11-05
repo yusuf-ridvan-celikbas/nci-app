@@ -119,12 +119,15 @@ fun CounterScreen(
                 style = MaterialTheme.typography.bodyLarge,
                 textAlign = TextAlign.Center,
             )
-            val removeDescription = stringResource(R.string.remove_beer)
-            OutlinedButton(
-                onClick = { viewModel.removeLatest() },
-                enabled = state.count > 0,
-                modifier = Modifier.semantics { contentDescription = removeDescription },
-            ) { Text(stringResource(R.string.minus_one), fontSize = 24.sp) }
+            // Same row style as water: count · −1 · +1 (the big circle stays the main +).
+            CountRow(
+                label = stringResource(R.string.detail_beers, state.count),
+                count = state.count,
+                removeDescription = stringResource(R.string.remove_beer),
+                addDescription = stringResource(R.string.add_beer),
+                onRemove = { viewModel.removeLatest() },
+                onAdd = { viewModel.add() },
+            )
             waterBar(snackbar)
         }
     }

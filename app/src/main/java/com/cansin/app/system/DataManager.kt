@@ -56,6 +56,7 @@ class DataManager(
             currency = settings.currency,
             seats = database.groupSeatDao().all(),
             customQuestions = database.customQuestionDao().all(),
+            prices = settings.prices,
         )
         val json = ExportJson.build(data, includeProfile, System.currentTimeMillis())
         exportDir.deleteRecursively()
@@ -113,6 +114,7 @@ class DataManager(
         }
         compact()
         data.currency?.let { store.setCurrency(it) }
+        data.prices?.forEach { (kind, minor) -> store.setPrice(kind, minor) }
         data.profile?.let { store.setProfile(it) }
         refreshWidgets()
     }

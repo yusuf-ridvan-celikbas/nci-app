@@ -19,10 +19,13 @@ import androidx.compose.ui.semantics.LiveRegionMode
 import androidx.compose.ui.semantics.liveRegion
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
+import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.layout.widthIn
+import androidx.compose.ui.semantics.contentDescription
 import com.cansin.app.R
 
 @Composable
-fun WaterBar(state: WaterState, onAdd: () -> Unit, onDismiss: () -> Unit) {
+fun WaterBar(state: WaterState, onAdd: () -> Unit, onRemove: () -> Unit, onDismiss: () -> Unit) {
     if (!state.available) return
     Column(Modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(8.dp)) {
         if (state.nudge) {
@@ -40,9 +43,34 @@ fun WaterBar(state: WaterState, onAdd: () -> Unit, onDismiss: () -> Unit) {
                 }
             }
         }
-        Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
-            Text(stringResource(R.string.water_count, state.count), modifier = Modifier.weight(1f))
-            FilledTonalButton(onClick = onAdd) { Text(stringResource(R.string.water_add)) }
-        }
+        CountRow(
+            label = stringResource(R.string.water_count, state.count),
+            count = state.count,
+            removeDescription = stringResource(R.string.water_remove),
+            addDescription = stringResource(R.string.water_add),
+            onRemove = onRemove,
+            onAdd = onAdd,
+        )
+    }
+}
+
+/** "Label: n" · −1 · +1, used for drinks and water on Tonight. −1 is off at 0. */
+@Composable
+fun CountRow(label: String, count: Int, removeDescription: String, addDescription: String, onRemove: () -> Unit, onAdd: () -> Unit) {
+    Row(
+        Modifier.fillMaxWidth(),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(8.dp),
+    ) {
+        Text(label, style = MaterialTheme.typography.titleMedium, modifier = Modifier.weight(1f))
+        androidx.compose.material3.OutlinedButton(
+            onClick = onRemove,
+            enabled = count > 0,
+            modifier = Modifier.heightIn(min = 48.dp).widthIn(min = 72.dp).semantics { contentDescription = removeDescription },
+        ) { Text(stringResource(R.string.minus_one), style = MaterialTheme.typography.titleMedium) }
+        FilledTonalButton(
+            onClick = onAdd,
+            modifier = Modifier.heightIn(min = 48.dp).widthIn(min = 72.dp).semantics { contentDescription = addDescription },
+        ) { Text(stringResource(R.string.plus_one), style = MaterialTheme.typography.titleMedium) }
     }
 }

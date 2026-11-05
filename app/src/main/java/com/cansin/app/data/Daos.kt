@@ -41,7 +41,8 @@ interface SessionDao {
             "CASE WHEN s.t_compressedAt IS NOT NULL THEN s.t_drinks ELSE (SELECT COUNT(*) FROM beer_event b WHERE b.sessionId = s.id) END AS beers, " +
             "CASE WHEN s.t_compressedAt IS NOT NULL THEN s.t_notes ELSE (SELECT COUNT(*) FROM note n WHERE n.sessionId = s.id) END AS notes, " +
             "CASE WHEN s.t_compressedAt IS NOT NULL THEN s.t_water ELSE (SELECT COUNT(*) FROM water_event w WHERE w.sessionId = s.id) END AS water, " +
-            "CASE WHEN s.t_compressedAt IS NOT NULL THEN s.t_spentMinor ELSE (SELECT COALESCE(SUM(n2.amountMinor), 0) FROM note n2 WHERE n2.sessionId = s.id) END AS spentMinor " +
+            "CASE WHEN s.t_compressedAt IS NOT NULL THEN s.t_spentMinor ELSE (SELECT COALESCE(SUM(n2.amountMinor), 0) FROM note n2 WHERE n2.sessionId = s.id) + " +
+            "(SELECT COALESCE(SUM(b2.priceMinor), 0) FROM beer_event b2 WHERE b2.sessionId = s.id) END AS spentMinor " +
             "FROM session s WHERE s.endedAt IS NOT NULL ORDER BY s.startedAt DESC",
     )
     fun observeHistory(): Flow<List<SessionSummary>>
@@ -66,6 +67,9 @@ interface WaterDao {
 
     @Query("SELECT MAX(at) FROM water_event WHERE sessionId = :sessionId")
     suspend fun lastAt(sessionId: Long): Long?
+
+    @Query("SELECT * FROM water_event WHERE sessionId = :sessionId AND side IS :side ORDER BY at DESC, id DESC LIMIT 1")
+    suspend fun latest(sessionId: Long, side: Side?): WaterEvent?
 
     @Query("SELECT COUNT(*) FROM water_event WHERE sessionId = :sessionId AND side IS :side")
     suspend fun countOnSide(sessionId: Long, side: Side?): Int
@@ -193,6 +197,10 @@ interface BeerDao {
 
     @Query("SELECT COUNT(*) FROM beer_event WHERE sessionId = :sessionId")
     suspend fun count(sessionId: Long): Int
+
+    /** P28: drinks on the Tab. */
+    @Query("SELECT COALESCE(SUM(priceMinor), 0) FROM beer_event WHERE sessionId = :sessionId")
+    suspend fun totalPriceMinor(sessionId: Long): Long
 
     @Query("SELECT COUNT(*) FROM beer_event WHERE sessionId = :sessionId")
     fun observeCount(sessionId: Long): Flow<Int>

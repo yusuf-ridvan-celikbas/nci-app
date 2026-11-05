@@ -62,6 +62,8 @@ data class BeerEvent(
     val at: Long,
     val finishedAt: Long? = null,
     @ColumnInfo(defaultValue = "BEER") val kind: DrinkKind = DrinkKind.BEER,
+    /** P28: price saved when the drink was added (minor units); null = not on the Tab. */
+    val priceMinor: Long? = null,
 ) {
     companion object {
         const val DEFAULT_SIZE_ML = 500

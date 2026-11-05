@@ -11,6 +11,8 @@ import com.cansin.app.data.SessionMode
 import com.cansin.app.data.SessionRepository
 import com.cansin.app.data.Side
 import com.cansin.app.data.GroupSeat
+import com.cansin.app.domain.DrinkLine
+import com.cansin.app.domain.TabRules
 import com.cansin.app.domain.TabTotals
 import kotlinx.coroutines.flow.combine
 import com.cansin.app.domain.VersusRules
@@ -23,12 +25,22 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 
-data class NotesState(val notes: List<Note> = emptyList(), val session: Session? = null, val seats: List<GroupSeat> = emptyList()) {
+data class NotesState(
+    val notes: List<Note> = emptyList(),
+    val session: Session? = null,
+    val seats: List<GroupSeat> = emptyList(),
+    val beers: List<com.cansin.app.data.BeerEvent> = emptyList(),
+) {
     val versus: Boolean get() = session?.mode == SessionMode.VERSUS
     val group: Boolean get() = session?.mode == SessionMode.GROUP
     /** Notes can be put on a side/seat. */
     val sided: Boolean get() = VersusRules.hasSides(session?.mode)
-    val totals: TabTotals get() = VersusRules.totals(notes)
+    /** P28: notes plus priced drinks; every total and Settle up use this. */
+    val tab: List<Note> get() = TabRules.withDrinks(notes, beers, session?.mode)
+    val totals: TabTotals get() = VersusRules.totals(tab)
+    val drinkLines: List<DrinkLine> get() = TabRules.drinkLines(beers, session?.mode)
+    /** Drinks tonight but nothing priced and no notes: point to Settings → Drinks → Prices. */
+    val showPriceHint: Boolean get() = beers.isNotEmpty() && notes.isEmpty() && drinkLines.isEmpty()
 }
 
 @OptIn(ExperimentalCoroutinesApi::class)
@@ -38,8 +50,10 @@ class NotesViewModel(private val repository: SessionRepository) : ViewModel() {
             when {
                 session == null -> flowOf(NotesState())
                 session.mode == SessionMode.GROUP ->
-                    combine(repository.notes(session.id), repository.seats(session.id)) { notes, seats -> NotesState(notes, session, seats) }
-                else -> repository.notes(session.id).map { NotesState(it, session) }
+                    combine(repository.notes(session.id), repository.seats(session.id), repository.beers(session.id)) { notes, seats, beers ->
+                        NotesState(notes, session, seats, beers)
+                    }
+                else -> combine(repository.notes(session.id), repository.beers(session.id)) { notes, beers -> NotesState(notes, session, beers = beers) }
             }
         }
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), NotesState())

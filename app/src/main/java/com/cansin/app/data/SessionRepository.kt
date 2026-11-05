@@ -53,6 +53,8 @@ class SessionRepository(
     private val listener: SessionListener = object : SessionListener {},
     private val defaultDrink: suspend () -> DrinkChoice = { DrinkChoice.DEFAULT },
     private val seats: GroupSeatDao = NoSeats,
+    /** P28: price per drink kind from Settings (null = not on the Tab); saved on the drink when added. */
+    private val price: suspend (DrinkKind) -> Long? = { null },
 ) {
     private sealed interface Event {
         data class BeerAdded(val event: BeerEvent, val mine: Boolean) : Event
@@ -86,7 +88,7 @@ class SessionRepository(
             red = if (versus) beers.countOnSide(session.id, Side.RED) else 0,
             blue = if (versus) beers.countOnSide(session.id, Side.BLUE) else 0,
             notes = notes.count(session.id),
-            tabMinor = notes.totalMinor(session.id),
+            tabMinor = notes.totalMinor(session.id) + beers.totalPriceMinor(session.id),
             water = if (group) me?.let { water.countOnSide(session.id, it) } ?: 0 else water.count(session.id),
             hasMe = me != null,
             myLatestBeer = me?.let { beers.latestOnSide(session.id, it) },
@@ -122,7 +124,8 @@ class SessionRepository(
         if (active?.mode == SessionMode.GROUP && seats.seats(active.id).none { it.side == side }) return null
         if (finishPrevious && active != null) beers.latestOnSide(active.id, side)?.let { beers.finish(it.id, now) }
         val session = active ?: Session(startedAt = now).let { it.copy(id = sessions.insert(it)) }
-        val event = BeerEvent(sessionId = session.id, side = side, sizeMl = size.sizeMl, abv = size.abv, at = now, kind = drink.kind)
+        val priced = price(drink.kind)?.takeIf { NoteRules.isValidAmount(it) && it > 0 }
+        val event = BeerEvent(sessionId = session.id, side = side, sizeMl = size.sizeMl, abv = size.abv, at = now, kind = drink.kind, priceMinor = priced)
         return event.copy(id = beers.insert(event)).also { pending += Event.BeerAdded(it, VersusRules.isMine(it, session)) }
     }
 
@@ -230,6 +233,14 @@ class SessionRepository(
         }
         val event = WaterEvent(sessionId = session.id, at = clock(), side = seat)
         event.copy(id = water.insert(event))
+    }
+
+    /** Water −1 on Tonight: removes my latest glass (solo/Versus water has no side). */
+    suspend fun removeLatestWater(side: Side? = null) = write {
+        val session = activeSession(clock()) ?: return@write
+        val latest = water.latest(session.id, side) ?: return@write
+        water.delete(latest.id)
+        deleteIfEmpty(session.id)
     }
 
     suspend fun undoWater(event: WaterEvent) = write {

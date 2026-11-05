@@ -422,7 +422,7 @@
     <string name="settings_general">Genel ve görünüm</string>
     <string name="settings_general_summary">Dil, para birimi, tema, renk</string>
     <string name="settings_drinks">İçecekler</string>
-    <string name="settings_drinks_summary">Varsayılan içecek ve boyut, içme zamanlayıcısı</string>
+    <string name="settings_drinks_summary">Varsayılan içecek ve boyut, fiyatlar, içme zamanlayıcısı</string>
     <string name="settings_health">Sağlık ve hatırlatmalar</string>
     <string name="settings_health_summary">Su, özen ve sınırlar, vücut profili, hatırlatmalar</string>
     <string name="settings_friends">Arkadaşlar ve Birlikte</string>
@@ -467,4 +467,14 @@
         <item quantity="one">%d gece yalnızca toplamlarını tutacak. İçki saatleri ve notlar geri getirilemez.</item>
         <item quantity="other">%d gece yalnızca toplamlarını tutacak. İçki saatleri ve notlar geri getirilemez.</item>
     </plurals>
+    <string name="tab_drinks_auto">İçkiler (otomatik)</string>
+    <string name="tab_drinks_hint">Bu gece ekranında −1 ya da Geri al ile değiştir.</string>
+    <string name="tab_drink_line">%1$s · %2$s cl ×%3$d</string>
+    <string name="tab_price_hint">İçkilerin hesaba kendiliğinden eklenmesi için Ayarlar → İçecekler\'den fiyat gir.</string>
+    <string name="water_remove">Son bardak suyu çıkar</string>
+    <string name="section_prices">Fiyatlar</string>
+    <string name="price_not_set">Girilmedi</string>
+    <string name="price_title">Fiyat: %1$s</string>
+    <string name="price_clear">Temizle</string>
+    <string name="price_note">Fiyatı girilen içkiler hesaba kendiliğinden eklenir. Fiyatı değiştirmek önceden eklenen içkileri değiştirmez.</string>
 </resources>
