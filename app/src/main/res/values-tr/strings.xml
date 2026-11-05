@@ -488,7 +488,6 @@
     <string name="tab_drinks_empty">Bu gece ekranında eklediğin içkiler burada −1 / +1 ile görünür. Fiyat için birine dokun.</string>
     <string name="brand_optional">Marka (isteğe bağlı)</string>
     <string name="brand_none">Yok</string>
-    <string name="brand_other">Başka marka</string>
     <string name="setting_default_brand">+1 için varsayılan bira markası</string>
     <string name="history_search">İsim, marka, not, tarih ara</string>
     <string name="search_clear">Aramayı temizle</string>

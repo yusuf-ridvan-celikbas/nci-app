@@ -499,7 +499,6 @@
     <string name="tab_drinks_empty">Drinks you add on Tonight show up here with −1 / +1. Tap one to set its price.</string>
     <string name="brand_optional">Brand (optional)</string>
     <string name="brand_none">None</string>
-    <string name="brand_other">Other brand</string>
     <string name="setting_default_brand">Default beer brand for +1</string>
     <string name="history_search">Search names, brands, notes, dates</string>
     <string name="search_clear">Clear search</string>

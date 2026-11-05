@@ -126,32 +126,51 @@ val LocalRecentBrands = androidx.compose.runtime.staticCompositionLocalOf { empt
 
 /** "Brand (optional)": None + quick picks + free text. */
 @Composable
+@OptIn(androidx.compose.material3.ExperimentalMaterial3Api::class)
 fun BrandPicker(value: String, onChange: (String) -> Unit, choices: List<String>) {
-    androidx.compose.material3.Text(
-        stringResource(R.string.brand_optional),
-        style = androidx.compose.material3.MaterialTheme.typography.titleSmall,
+    // One dropdown field: tap to pick (None, recent, suggestions) or type to filter / enter another brand.
+    var expanded by androidx.compose.runtime.remember { mutableStateOf(false) }
+    val typed = value.trim()
+    val shown = if (typed.isEmpty() || choices.any { it.equals(typed, ignoreCase = true) }) choices
+    else choices.filter { it.contains(typed, ignoreCase = true) }
+    androidx.compose.material3.ExposedDropdownMenuBox(
+        expanded = expanded,
+        onExpandedChange = { expanded = it },
         modifier = Modifier.padding(top = 12.dp),
-    )
-    androidx.compose.foundation.layout.FlowRow(
-        Modifier.fillMaxWidth().selectableGroup(),
-        horizontalArrangement = androidx.compose.foundation.layout.Arrangement.spacedBy(8.dp),
     ) {
-        (listOf("") + choices).forEach { option ->
-            androidx.compose.material3.FilterChip(
-                selected = value.trim().equals(option, ignoreCase = true),
-                onClick = { onChange(option) },
-                label = { Text(if (option.isEmpty()) stringResource(R.string.brand_none) else option) },
-                modifier = Modifier.semantics { role = androidx.compose.ui.semantics.Role.RadioButton },
+        androidx.compose.material3.OutlinedTextField(
+            value = value,
+            onValueChange = {
+                onChange(it.take(BrandRules.MAX_LENGTH))
+                expanded = true
+            },
+            label = { Text(stringResource(R.string.brand_optional)) },
+            placeholder = { Text(stringResource(R.string.brand_none)) },
+            singleLine = true,
+            trailingIcon = { androidx.compose.material3.ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) },
+            modifier = Modifier
+                .fillMaxWidth()
+                .menuAnchor(androidx.compose.material3.ExposedDropdownMenuAnchorType.PrimaryEditable),
+        )
+        ExposedDropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
+            androidx.compose.material3.DropdownMenuItem(
+                text = { Text(stringResource(R.string.brand_none)) },
+                onClick = {
+                    onChange("")
+                    expanded = false
+                },
             )
+            shown.forEach { option ->
+                androidx.compose.material3.DropdownMenuItem(
+                    text = { Text(option) },
+                    onClick = {
+                        onChange(option)
+                        expanded = false
+                    },
+                )
+            }
         }
     }
-    androidx.compose.material3.OutlinedTextField(
-        value = value,
-        onValueChange = { onChange(it.take(BrandRules.MAX_LENGTH)) },
-        label = { Text(stringResource(R.string.brand_other)) },
-        singleLine = true,
-        modifier = Modifier.fillMaxWidth(),
-    )
 }
 
 /** Settings: which kind the big +1 adds. */
