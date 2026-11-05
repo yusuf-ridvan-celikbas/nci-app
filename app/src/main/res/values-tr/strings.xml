@@ -365,7 +365,7 @@
     <string name="game_remove_player">Oyuncuyu kaldır</string>
     <string name="game_pack">Sorular</string>
     <string name="game_pack_friends">Arkadaşlar</string>
-    <string name="game_pack_best">Kankalar</string>
+    <string name="game_pack_best">Dostlar</string>
     <string name="game_pack_couples">Sevgililer</string>
     <string name="game_include_own">Kendi sorularımı da kat</string>
     <string name="game_my_questions">Sorularım (%1$d)</string>
