@@ -45,6 +45,8 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.foundation.layout.heightIn
 import com.cansin.app.R
 import com.cansin.app.domain.BeerSize
 import com.cansin.app.domain.DrinkChoice
@@ -98,10 +100,16 @@ fun CounterScreen(
             ) { Text(stringResource(R.string.end_session)) }
         },
     ) { padding ->
+        // Scrolls when cards (late / water nudge / promille) don't fit; stays centred when everything fits.
+        androidx.compose.foundation.layout.BoxWithConstraints(Modifier.fillMaxSize().padding(padding)) {
         Column(
-            modifier = Modifier.fillMaxSize().padding(padding).padding(24.dp),
+            modifier = Modifier
+                .fillMaxWidth()
+                .verticalScroll(androidx.compose.foundation.rememberScrollState())
+                .heightIn(min = maxHeight)
+                .padding(horizontal = 24.dp, vertical = 16.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.spacedBy(24.dp, Alignment.CenterVertically),
+            verticalArrangement = Arrangement.spacedBy(16.dp, Alignment.CenterVertically),
         ) {
             promilleCard()
             Text(
@@ -129,6 +137,7 @@ fun CounterScreen(
                 onAdd = { viewModel.add() },
             )
             waterBar(snackbar)
+        }
         }
     }
 
