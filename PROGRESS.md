@@ -144,6 +144,13 @@ Current phase: **P28 (drinks on the Tab + Tonight −1 rows) on branch feature/p
   6. Counts in widget/stats/result card now mean all drinks, not only beer.
 - Known limits: the Stats "water per drink" in a group counts everyone's water; in a group, the counter's water bar duplicates my seat's water button.
 
+## P30 report (2026-11-06) — History filters + multi-select delete (user request)
+- `domain/HistoryFilter.kt`: period (All / this month / last 3 months / this year / custom range, ends included), type (Solo/Versus/Together), search (Turkish-aware, letters folded: "isik" finds "Işık"; names, seat names, brands, notes, date text), "with tab" (spent > 0 incl. drink prices), sort (newest/oldest/most spent/most drinks, ties newest). List only; Stats stay complete.
+- Data: `SessionDao.deleteEnded(ids)` (ended only), `observeSearchText()` (UNION ALL of names/seats/brands/notes); `HistoryRepository.deleteMany` (chunks of 500), `searchText`.
+- UI: `ui/HistoryFilterBar.kt` (search + chips + count + "Clear filters"; M3 DateRangePicker for custom); selection mode via long-press or the checklist icon: checkboxes, "Selected: n", Select all (the filtered list), Delete with confirm ("Export a backup first" / Cancel); Back or ✕ exits; switching tabs exits.
+- Release APK 1.97 MB (+70 KB, DateRangePicker). Permissions unchanged, no INTERNET. Lint 0 errors. Tests 225/225 (HistoryFilterTest 4, HistoryRepositoryTest 2).
+- iOS: not ported.
+
 ## P28 follow-ups from the phone test (2026-11-06)
 - Tonight: screen scrolls / is more compact (timer + water rows were below the fold, late card made it overflow).
 - Tab: "Drinks tonight" count section always shown; every drink (priced or not) grouped by kind + size + person + brand with −1/+1; tap a line = tonight's pub price (`setDrinkPrice`), "Remove from tab"; tonight's price sticks for new drinks of that kind/size/brand (`BeerDao.latestPrice`).

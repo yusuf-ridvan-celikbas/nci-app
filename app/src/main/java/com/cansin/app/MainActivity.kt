@@ -291,6 +291,7 @@ class MainActivity : ComponentActivity() {
                 screen == Screen.TAB -> NotesScreen(notes, onBack = { screen = Screen.COUNTER })
                 screen == Screen.HISTORY -> HistoryScreen(
                     history,
+                    onBackup = { lifecycleScope.launch { startActivity(app.dataManager.export(false)) } },
                     onBack = { screen = Screen.COUNTER },
                     onOpen = { id ->
                         detailId = id

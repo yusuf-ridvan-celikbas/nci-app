@@ -490,4 +490,37 @@
     <string name="brand_none">Yok</string>
     <string name="brand_other">Başka marka</string>
     <string name="setting_default_brand">+1 için varsayılan bira markası</string>
+    <string name="history_search">İsim, marka, not, tarih ara</string>
+    <string name="search_clear">Aramayı temizle</string>
+    <string name="period_all">Tüm zamanlar</string>
+    <string name="period_this_month">Bu ay</string>
+    <string name="period_last_3">Son 3 ay</string>
+    <string name="period_this_year">Bu yıl</string>
+    <string name="period_custom">Tarih aralığı…</string>
+    <string name="period_range">%1$s – %2$s</string>
+    <string name="mode_chip_solo">Tek</string>
+    <string name="mode_chip_versus">Kapışma</string>
+    <string name="mode_chip_group">Birlikte</string>
+    <string name="filter_with_tab">Hesaplı</string>
+    <string name="sort_newest">En yeni</string>
+    <string name="sort_oldest">En eski</string>
+    <string name="sort_spent">En çok harcanan</string>
+    <string name="sort_drinks">En çok içki</string>
+    <string name="history_no_match">Eşleşen gece yok.</string>
+    <string name="filter_clear">Filtreleri temizle</string>
+    <string name="select_mode">Gece seç</string>
+    <string name="selected_count">Seçili: %1$d</string>
+    <string name="select_all">Tümünü seç</string>
+    <string name="delete_selected">Seçilenleri sil</string>
+    <string name="close_selection">Seçimi bitir</string>
+    <string name="delete_nights_body">Bu işlem geri alınamaz.</string>
+    <string name="action_apply">Uygula</string>
+    <plurals name="history_count">
+        <item quantity="one">%d gece</item>
+        <item quantity="other">%d gece</item>
+    </plurals>
+    <plurals name="delete_nights_title">
+        <item quantity="one">%d gece silinsin mi?</item>
+        <item quantity="other">%d gece silinsin mi?</item>
+    </plurals>
 </resources>

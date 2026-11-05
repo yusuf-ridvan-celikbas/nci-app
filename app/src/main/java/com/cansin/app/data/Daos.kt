@@ -7,6 +7,9 @@ import androidx.room.Query
 import androidx.room.Update
 import kotlinx.coroutines.flow.Flow
 
+/** P30: one piece of searchable text of a night. */
+data class SearchRow(val sessionId: Long, val text: String)
+
 data class SessionSummary(
     @Embedded val session: Session,
     val beers: Int,
@@ -52,6 +55,19 @@ interface SessionDao {
 
     @Query("DELETE FROM session WHERE id = :id AND endedAt IS NOT NULL")
     suspend fun deleteEnded(id: Long): Int
+
+    /** P30: delete several ended nights (the open night is never touched). */
+    @Query("DELETE FROM session WHERE endedAt IS NOT NULL AND id IN (:ids)")
+    suspend fun deleteEnded(ids: List<Long>): Int
+
+    /** P30: searchable text per night: Versus names, seat names, brands, notes. */
+    @Query(
+        "SELECT id AS sessionId, COALESCE(redName, '') || ' ' || COALESCE(blueName, '') AS text FROM session WHERE endedAt IS NOT NULL " +
+            "UNION ALL SELECT sessionId, COALESCE(name, '') FROM group_seat " +
+            "UNION ALL SELECT sessionId, brand FROM beer_event WHERE brand IS NOT NULL " +
+            "UNION ALL SELECT sessionId, text || ' ' || COALESCE(person, '') FROM note",
+    )
+    fun observeSearchText(): Flow<List<SearchRow>>
 }
 
 @Dao

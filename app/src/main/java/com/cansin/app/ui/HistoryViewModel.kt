@@ -15,6 +15,8 @@ import com.cansin.app.data.Session
 import com.cansin.app.data.SessionSummary
 import com.cansin.app.data.WaterEvent
 import com.cansin.app.domain.DaySession
+import com.cansin.app.domain.HistoryFilter
+import com.cansin.app.domain.HistoryFilterRules
 import com.cansin.app.domain.Overview
 import com.cansin.app.domain.ResultCard
 import com.cansin.app.domain.ResultCards
@@ -65,6 +67,60 @@ class HistoryViewModel(private val history: HistoryRepository, private val setti
     val daySessions: StateFlow<List<DaySession>?> = history.summaries
         .map { list -> list.map { DaySession(it.session.id, it.session.startedAt, it.spentMinor) } }
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), null)
+
+    // P30: list filter (list only; Stats stay complete) and multi-select delete.
+    private val filterState = MutableStateFlow(HistoryFilter())
+    val filter: StateFlow<HistoryFilter> = filterState
+
+    fun setFilter(value: HistoryFilter) {
+        filterState.value = value.copy(query = value.query.take(HistoryFilterRules.MAX_QUERY))
+    }
+
+    private val dateFormat = java.time.format.DateTimeFormatter.ofPattern("d MMMM yyyy dd.MM.yyyy EEEE", java.util.Locale.getDefault())
+
+    val filtered: StateFlow<List<SessionSummary>?> = combine(history.summaries, filterState, history.searchText) { list, f, text ->
+        HistoryFilterRules.apply(list, f, text, LocalDate.now()) { millis ->
+            Instant.ofEpochMilli(millis).atZone(ZoneId.systemDefault()).format(dateFormat)
+        }
+    }
+        .flowOn(Dispatchers.Default)
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), null)
+
+    private val picked = MutableStateFlow<Set<Long>>(emptySet())
+    val picks: StateFlow<Set<Long>> = picked
+    private val selectingState = MutableStateFlow(false)
+    val selecting: StateFlow<Boolean> = selectingState
+
+    fun startSelecting(id: Long? = null) {
+        selectingState.value = true
+        if (id != null) picked.value = picked.value + id
+    }
+
+    fun toggle(id: Long) {
+        picked.value = if (id in picked.value) picked.value - id else picked.value + id
+    }
+
+    /** Selects every night the filter shows (not hidden ones). */
+    fun selectAll() {
+        picked.value = filtered.value.orEmpty().map { it.session.id }.toSet()
+    }
+
+    fun stopSelecting() {
+        selectingState.value = false
+        picked.value = emptySet()
+    }
+
+    fun deleteSelected() = viewModelScope.launch {
+        history.deleteMany(picked.value)
+        stopSelecting()
+    }
+
+    init {
+        // Hidden or deleted nights drop out of the selection.
+        viewModelScope.launch {
+            filtered.collect { list -> list?.let { visible -> picked.value = picked.value intersect visible.map { it.session.id }.toSet() } }
+        }
+    }
 
     private val selected = MutableStateFlow<Long?>(null)
 

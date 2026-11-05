@@ -501,4 +501,38 @@
     <string name="brand_none">None</string>
     <string name="brand_other">Other brand</string>
     <string name="setting_default_brand">Default beer brand for +1</string>
+    <string name="history_search">Search names, brands, notes, dates</string>
+    <string name="search_clear">Clear search</string>
+    <string name="period_all">All time</string>
+    <string name="period_this_month">This month</string>
+    <string name="period_last_3">Last 3 months</string>
+    <string name="period_this_year">This year</string>
+    <string name="period_custom">Custom range…</string>
+    <string name="period_range">%1$s – %2$s</string>
+    <string name="mode_chip_solo">Solo</string>
+    <string name="mode_chip_versus">Versus</string>
+    <string name="mode_chip_group">Together</string>
+    <string name="filter_with_tab">With tab</string>
+    <string name="sort_newest">Newest first</string>
+    <string name="sort_oldest">Oldest first</string>
+    <string name="sort_spent">Most spent</string>
+    <string name="sort_drinks">Most drinks</string>
+    <string name="history_no_match">No nights match.</string>
+    <string name="filter_clear">Clear filters</string>
+    <string name="select_mode">Select nights</string>
+    <string name="selected_count">Selected: %1$d</string>
+    <string name="select_all">Select all</string>
+    <string name="delete_selected">Delete selected</string>
+    <string name="close_selection">Stop selecting</string>
+    <string name="delete_nights_body">This can\'t be undone.</string>
+    <string name="action_apply">Apply</string>
+    <string name="chip_menu" translatable="false">%1$s ▾</string>
+    <plurals name="history_count">
+        <item quantity="one">%d night</item>
+        <item quantity="other">%d nights</item>
+    </plurals>
+    <plurals name="delete_nights_title">
+        <item quantity="one">Delete %d night?</item>
+        <item quantity="other">Delete %d nights?</item>
+    </plurals>
 </resources>

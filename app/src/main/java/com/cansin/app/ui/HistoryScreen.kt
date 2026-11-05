@@ -33,6 +33,16 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import androidx.activity.compose.BackHandler
+import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.combinedClickable
+import androidx.compose.foundation.layout.Row
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Checkbox
+import androidx.compose.material3.TextButton
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.ui.Alignment
 import com.cansin.app.R
 import com.cansin.app.data.SessionMode
 import com.cansin.app.data.SessionSummary
@@ -56,25 +66,70 @@ internal fun formatDecimal(value: Double): String = String.format(LocalConfigura
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun HistoryScreen(viewModel: HistoryViewModel, onBack: () -> Unit, onOpen: (Long) -> Unit) {
+fun HistoryScreen(viewModel: HistoryViewModel, onBack: () -> Unit, onOpen: (Long) -> Unit, onBackup: () -> Unit = {}) {
     var tab by rememberSaveable { mutableIntStateOf(0) }
+    val selecting by viewModel.selecting.collectAsState()
+    val picks by viewModel.picks.collectAsState()
+    val summaries by viewModel.summaries.collectAsState()
+    var confirmDelete by remember { mutableStateOf(false) }
+    BackHandler(selecting) { viewModel.stopSelecting() }
     Scaffold(
         topBar = {
-            TopAppBar(
-                title = { Text(stringResource(R.string.history_title)) },
-            )
+            if (selecting) {
+                TopAppBar(
+                    title = { Text(stringResource(R.string.selected_count, picks.size)) },
+                    navigationIcon = {
+                        IconButton(onClick = viewModel::stopSelecting) {
+                            Icon(painterResource(R.drawable.ic_close), stringResource(R.string.close_selection))
+                        }
+                    },
+                    actions = {
+                        TextButton(onClick = viewModel::selectAll) { Text(stringResource(R.string.select_all)) }
+                        IconButton(onClick = { confirmDelete = true }, enabled = picks.isNotEmpty()) {
+                            Icon(painterResource(R.drawable.ic_delete), stringResource(R.string.delete_selected))
+                        }
+                    },
+                )
+            } else {
+                TopAppBar(
+                    title = { Text(stringResource(R.string.history_title)) },
+                    actions = {
+                        if (tab == 0 && !summaries.isNullOrEmpty()) {
+                            IconButton(onClick = { viewModel.startSelecting() }) {
+                                Icon(painterResource(R.drawable.ic_checklist), stringResource(R.string.select_mode))
+                            }
+                        }
+                    },
+                )
+            }
         },
     ) { padding ->
         Column(Modifier.fillMaxSize().padding(padding)) {
             PrimaryTabRow(selectedTabIndex = tab) {
                 Tab(selected = tab == 0, onClick = { tab = 0 }, text = { Text(stringResource(R.string.history_sessions)) })
-                Tab(selected = tab == 1, onClick = { tab = 1 }, text = { Text(stringResource(R.string.history_stats)) })
-                Tab(selected = tab == 2, onClick = { tab = 2 }, text = { Text(stringResource(R.string.history_friends)) })
+                Tab(selected = tab == 1, onClick = { tab = 1; viewModel.stopSelecting() }, text = { Text(stringResource(R.string.history_stats)) })
+                Tab(selected = tab == 2, onClick = { tab = 2; viewModel.stopSelecting() }, text = { Text(stringResource(R.string.history_friends)) })
             }
             when (tab) {
                 0 -> {
-                    val summaries by viewModel.summaries.collectAsState()
-                    summaries?.let { SessionList(it, onOpen) }
+                    val all = summaries
+                    val filtered by viewModel.filtered.collectAsState()
+                    val filter by viewModel.filter.collectAsState()
+                    if (all != null && all.isEmpty()) {
+                        Text(stringResource(R.string.history_empty), Modifier.padding(16.dp), color = MaterialTheme.colorScheme.onSurfaceVariant)
+                    } else {
+                        filtered?.let { list ->
+                            HistoryFilterBar(filter, list.size, viewModel::setFilter)
+                            SessionList(
+                                list,
+                                selecting = selecting,
+                                picks = picks,
+                                onOpen = onOpen,
+                                onToggle = viewModel::toggle,
+                                onLongPress = viewModel::startSelecting,
+                            )
+                        }
+                    }
                 }
                 1 -> {
                     val overview by viewModel.overview.collectAsState()
@@ -85,19 +140,58 @@ fun HistoryScreen(viewModel: HistoryViewModel, onBack: () -> Unit, onOpen: (Long
             }
         }
     }
+    if (confirmDelete) {
+        AlertDialog(
+            onDismissRequest = { confirmDelete = false },
+            title = { Text(pluralStringResource(R.plurals.delete_nights_title, picks.size, picks.size)) },
+            text = { Text(stringResource(R.string.delete_nights_body)) },
+            confirmButton = {
+                TextButton(onClick = {
+                    confirmDelete = false
+                    viewModel.deleteSelected()
+                }) { Text(stringResource(R.string.action_delete)) }
+            },
+            dismissButton = {
+                Row {
+                    TextButton(onClick = {
+                        confirmDelete = false
+                        onBackup()
+                    }) { Text(stringResource(R.string.confirm_backup_first)) }
+                    TextButton(onClick = { confirmDelete = false }) { Text(stringResource(R.string.action_cancel)) }
+                }
+            },
+        )
+    }
 }
 
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
-private fun SessionList(summaries: List<SessionSummary>, onOpen: (Long) -> Unit) {
-    if (summaries.isEmpty()) {
-        Text(stringResource(R.string.history_empty), Modifier.padding(16.dp), color = MaterialTheme.colorScheme.onSurfaceVariant)
-        return
-    }
+private fun SessionList(
+    summaries: List<SessionSummary>,
+    selecting: Boolean,
+    picks: Set<Long>,
+    onOpen: (Long) -> Unit,
+    onToggle: (Long) -> Unit,
+    onLongPress: (Long) -> Unit,
+) {
     val amount = rememberAmountFormat()
     LazyColumn {
         items(summaries, key = { it.session.id }) { summary ->
             val session = summary.session
-            Column(Modifier.fillMaxWidth().clickable { onOpen(session.id) }.padding(horizontal = 16.dp, vertical = 12.dp)) {
+            val picked = session.id in picks
+            Row(
+                Modifier
+                    .fillMaxWidth()
+                    .combinedClickable(
+                        onClick = { if (selecting) onToggle(session.id) else onOpen(session.id) },
+                        onLongClick = { if (selecting) onToggle(session.id) else onLongPress(session.id) },
+                        onLongClickLabel = stringResource(R.string.select_mode),
+                    )
+                    .padding(start = if (selecting) 4.dp else 16.dp, end = 16.dp, top = 12.dp, bottom = 12.dp),
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+            if (selecting) Checkbox(checked = picked, onCheckedChange = { onToggle(session.id) })
+            Column(Modifier.weight(1f)) {
                 val date = formatDate(session.startedAt) + " " + formatTime(session.startedAt)
                 Text(
                     when (session.mode) {
@@ -118,6 +212,7 @@ private fun SessionList(summaries: List<SessionSummary>, onOpen: (Long) -> Unit)
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
+            }
             }
             HorizontalDivider()
         }

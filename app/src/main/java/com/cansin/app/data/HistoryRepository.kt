@@ -2,6 +2,7 @@ package com.cansin.app.data
 
 import com.cansin.app.domain.ResultCard
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.map
 
 enum class ImportResult { ADDED, DUPLICATE }
 
@@ -25,6 +26,18 @@ class HistoryRepository(
     fun seats(id: Long): Flow<List<GroupSeat>> = groupSeats.observe(id)
 
     suspend fun delete(id: Long): Boolean = sessions.deleteEnded(id) > 0
+
+    /** P30: delete many ended nights; chunked to stay under SQLite's variable limit. */
+    suspend fun deleteMany(ids: Collection<Long>): Int = ids.distinct().chunked(DELETE_CHUNK).sumOf { sessions.deleteEnded(it) }
+
+    /** P30: all searchable text per night, joined. */
+    val searchText: Flow<Map<Long, String>> = sessions.observeSearchText().map { rows ->
+        rows.groupBy({ it.sessionId }, { it.text }).mapValues { (_, texts) -> texts.joinToString(" ") }
+    }
+
+    companion object {
+        const val DELETE_CHUNK = 500
+    }
 
     suspend fun importResult(card: ResultCard): ImportResult =
         if (friendResults.insert(FriendResult.of(card, clock())) == -1L) ImportResult.DUPLICATE else ImportResult.ADDED

@@ -29,6 +29,15 @@ class FakeSessionDao : SessionDao {
         rows.value = rows.value.filterNot { it.id == id && it.endedAt != null }
         return before - rows.value.size
     }
+    var deleteCalls = 0
+    override suspend fun deleteEnded(ids: List<Long>): Int {
+        deleteCalls++
+        val before = rows.value.size
+        rows.value = rows.value.filterNot { it.id in ids && it.endedAt != null }
+        return before - rows.value.size
+    }
+    val searchRows = MutableStateFlow(listOf<SearchRow>())
+    override fun observeSearchText(): Flow<List<SearchRow>> = searchRows
 }
 
 class FakeBeerDao : BeerDao {
@@ -126,3 +135,15 @@ class FakeGroupSeatDao : GroupSeatDao {
 
 suspend fun SessionRepository.add(finishPrevious: Boolean = false, size: BeerSize? = null): BeerEvent =
     checkNotNull(addBeer(finishPrevious, size))
+
+class FakeFriendResultDao : FriendResultDao {
+    val rows = MutableStateFlow(listOf<FriendResult>())
+    override fun observeAll(): Flow<List<FriendResult>> = rows
+    override suspend fun all() = rows.value
+    override suspend fun insert(result: FriendResult): Long = (rows.value.size + 1L).also { rows.value += result.copy(id = it) }
+    override suspend fun delete(id: Long): Int {
+        val before = rows.value.size
+        rows.value = rows.value.filterNot { it.id == id }
+        return before - rows.value.size
+    }
+}
