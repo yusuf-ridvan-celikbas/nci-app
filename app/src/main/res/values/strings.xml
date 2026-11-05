@@ -424,4 +424,6 @@
     <string name="setting_group_layout">People layout</string>
     <string name="group_show_grid">Show as grid</string>
     <string name="group_show_rows">Show as rows</string>
+    <string name="game_pick_tod_desc">Spin the glass: truth or dare questions for 2–10 people.</string>
+    <string name="game_pick_versus_desc">Two sides, each with its own count and tab.</string>
 </resources>

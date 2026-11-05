@@ -53,6 +53,8 @@ data class GameState(
     val spinId: Int = 0,
     val spinning: Boolean = false,
     val card: GameCard? = null,
+    /** Game tab: Truth or Dare picked on the chooser (false = show "Soy tu Tentación or Versus"). */
+    val picked: Boolean = false,
     /** Truth or Dare switched on inside Versus/Together (Versus stays the main view). */
     val shownInSession: Boolean = false,
 )
@@ -100,6 +102,11 @@ class GameViewModel(
         if (s.playing && s.players == players) return
         start(players)
     }
+
+    /** Game tab tapped: ask again, unless a Truth or Dare game is running. */
+    fun showChooser() = ui.update { if (it.playing) it else it.copy(picked = false) }
+
+    fun pickTruthOrDare() = ui.update { it.copy(picked = true) }
 
     fun setShownInSession(on: Boolean) = ui.update { it.copy(shownInSession = on) }
 

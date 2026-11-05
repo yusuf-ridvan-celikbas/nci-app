@@ -416,4 +416,6 @@
     <string name="setting_group_layout">Kişi düzeni</string>
     <string name="group_show_grid">Izgara olarak göster</string>
     <string name="group_show_rows">Satır olarak göster</string>
+    <string name="game_pick_tod_desc">Kadehi çevir: 2–10 kişi için doğruluk ya da cesaret soruları.</string>
+    <string name="game_pick_versus_desc">İki taraf, her birinin kendi sayısı ve hesabı.</string>
 </resources>

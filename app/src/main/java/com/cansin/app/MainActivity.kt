@@ -252,7 +252,12 @@ class MainActivity : ComponentActivity() {
             val tab = screen.tab()
             val showBar = settings.ageConfirmed && !showLock && tab != null
             Scaffold(
-                bottomBar = { if (showBar && tab != null) AppNavBar(tab, NAV_TABS) { screen = it.screen() } },
+                bottomBar = {
+                    if (showBar && tab != null) AppNavBar(tab, NAV_TABS) {
+                        if (it == RootTab.GAME) game.showChooser()
+                        screen = it.screen()
+                    }
+                },
                 contentWindowInsets = WindowInsets(0),
             ) { inner ->
             Box(Modifier.fillMaxSize().padding(inner).consumeWindowInsets(inner)) {
@@ -279,6 +284,10 @@ class MainActivity : ComponentActivity() {
                     game,
                     session = groupState.session ?: versusState.session,
                     seats = groupState.seats,
+                    onVersus = {
+                        // An open Versus/Together is shown on Tonight; otherwise set up a new Versus.
+                        if (versusState.session != null || groupState.session != null) screen = Screen.COUNTER else editingSides = true
+                    },
                 )
                 screen == Screen.TAB -> NotesScreen(notes, onBack = { screen = Screen.COUNTER })
                 screen == Screen.HISTORY -> HistoryScreen(
@@ -386,6 +395,7 @@ class MainActivity : ComponentActivity() {
                     onSave = { red, blue, me ->
                         versus.save(red, blue, me, start = session == null)
                         editingSides = false
+                        screen = Screen.COUNTER
                     },
                     onDismiss = { editingSides = false },
                 )
