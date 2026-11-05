@@ -39,8 +39,8 @@ data class NotesState(
     val tab: List<Note> get() = TabRules.withDrinks(notes, beers, session?.mode)
     val totals: TabTotals get() = VersusRules.totals(tab)
     val drinkLines: List<DrinkLine> get() = TabRules.drinkLines(beers, session?.mode)
-    /** Drinks tonight but nothing priced and no notes: point to Settings → Drinks → Prices. */
-    val showPriceHint: Boolean get() = beers.isNotEmpty() && notes.isEmpty() && drinkLines.isEmpty()
+    /** Drinks tonight but none has a price: point to Settings → Drinks → Prices (or tap a line). */
+    val showPriceHint: Boolean get() = beers.isNotEmpty() && beers.none { (it.priceMinor ?: 0) > 0 }
 }
 
 @OptIn(ExperimentalCoroutinesApi::class)
@@ -63,6 +63,14 @@ class NotesViewModel(private val repository: SessionRepository) : ViewModel() {
     fun update(note: Note) = viewModelScope.launch { repository.updateNote(note) }
 
     fun delete(note: Note) = viewModelScope.launch { repository.deleteNote(note) }
+
+    fun addDrink(line: DrinkLine) = viewModelScope.launch {
+        repository.addBeer(side = line.beerSide, drink = com.cansin.app.domain.DrinkChoice(line.kind, com.cansin.app.domain.BeerSize(line.sizeMl, line.abv)))
+    }
+
+    fun removeDrink(line: DrinkLine) = viewModelScope.launch { repository.removeLatestDrink(line.kind, line.sizeMl, line.beerSide) }
+
+    fun setPrice(line: DrinkLine, minor: Long?) = viewModelScope.launch { repository.setDrinkPrice(line.kind, line.sizeMl, line.beerSide, minor) }
 
     companion object {
         fun factory(repository: SessionRepository): ViewModelProvider.Factory = viewModelFactory {

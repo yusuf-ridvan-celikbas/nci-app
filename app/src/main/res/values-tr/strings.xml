@@ -467,10 +467,18 @@
         <item quantity="one">%d gece yalnızca toplamlarını tutacak. İçki saatleri ve notlar geri getirilemez.</item>
         <item quantity="other">%d gece yalnızca toplamlarını tutacak. İçki saatleri ve notlar geri getirilemez.</item>
     </plurals>
-    <string name="tab_drinks_auto">İçkiler (otomatik)</string>
-    <string name="tab_drinks_hint">Bu gece ekranında −1 ya da Geri al ile değiştir.</string>
-    <string name="tab_drink_line">%1$s · %2$s cl ×%3$d</string>
-    <string name="tab_price_hint">İçkilerin hesaba kendiliğinden eklenmesi için Ayarlar → İçecekler\'den fiyat gir.</string>
+    <string name="tab_drinks_auto">Bu geceki içkiler</string>
+    <string name="tab_drinks_hint">Bu gecenin fiyatı için bir satıra dokun (fiyat mekandan mekana değişir).</string>
+    <string name="tab_drink_line">%1$s · %2$s ×%3$d</string>
+    <string name="tab_price_hint">İpucu: Ayarlar → İçecekler\'den varsayılan fiyat gir ya da aşağıdaki bir içkiye dokun.</string>
+    <string name="tab_price_each">tanesi %1$s</string>
+    <string name="tab_add_price">Fiyat eklemek için dokun</string>
+    <string name="tab_remove_drink">Bir %1$s çıkar</string>
+    <string name="tab_add_drink">Bir %1$s ekle</string>
+    <string name="tab_price_title">Bu gece: %1$s</string>
+    <string name="tab_price_note">Bu gecenin tüm bu içkilerine ve yeni ekleyeceklerine uygulanır. Ayarlardaki varsayılan fiyatlar değişmez.</string>
+    <string name="tab_price_remove">Hesaptan çıkar</string>
+    <string name="size_liter">%1$d L</string>
     <string name="water_remove">Son bardak suyu çıkar</string>
     <string name="section_prices">Fiyatlar</string>
     <string name="price_not_set">Girilmedi</string>

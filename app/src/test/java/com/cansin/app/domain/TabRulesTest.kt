@@ -21,7 +21,11 @@ class TabRulesTest {
         val beers = listOf(beer(1), beer(2, price = null), beer(3, price = 0))
         assertEquals(1, TabRules.charges(beers, SessionMode.SOLO).size)
         assertEquals(15_000L, TabRules.drinkTotal(beers))
-        assertTrue(TabRules.drinkLines(listOf(beer(1, price = null)), SessionMode.SOLO).isEmpty())
+        // Unpriced drinks are still counted on the Tab (count section), with no price.
+        val line = TabRules.drinkLines(listOf(beer(1, price = null)), SessionMode.SOLO).single()
+        assertEquals(1, line.count)
+        assertNull(line.unitMinor)
+        assertEquals(0L, line.totalMinor)
     }
 
     @Test
@@ -31,11 +35,11 @@ class TabRulesTest {
         )
         assertEquals(
             listOf(
-                DrinkLine(DrinkKind.BEER, 500, null, 2, 30_000),
-                DrinkLine(DrinkKind.RAKI, 50, null, 1, 22_000),
-                DrinkLine(DrinkKind.BEER, 330, null, 1, 10_000),
+                Triple(DrinkKind.BEER, 500, 2) to (30_000L to 15_000L),
+                Triple(DrinkKind.RAKI, 50, 1) to (22_000L to 22_000L),
+                Triple(DrinkKind.BEER, 330, 1) to (10_000L to 10_000L),
             ),
-            TabRules.drinkLines(beers, SessionMode.SOLO),
+            TabRules.drinkLines(beers, SessionMode.SOLO).map { Triple(it.kind, it.sizeMl, it.count) to (it.totalMinor to it.unitMinor) },
         )
     }
 

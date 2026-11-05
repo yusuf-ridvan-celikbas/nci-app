@@ -48,6 +48,8 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import com.cansin.app.R
 import com.cansin.app.data.Note
 import com.cansin.app.data.Side
@@ -68,6 +70,7 @@ fun NotesScreen(viewModel: NotesViewModel, onBack: () -> Unit) {
 private fun NotesContent(viewModel: NotesViewModel, state: NotesState, onBack: () -> Unit) {
     var editing by remember { mutableStateOf<Note?>(null) }
     var settling by remember { mutableStateOf(false) }
+    var pricing by remember { mutableStateOf<com.cansin.app.domain.DrinkLine?>(null) }
     val format = rememberAmountFormat()
 
     Scaffold(
@@ -84,7 +87,7 @@ private fun NotesContent(viewModel: NotesViewModel, state: NotesState, onBack: (
         Column(Modifier.fillMaxSize().padding(padding)) {
             if (state.notes.isEmpty() && state.drinkLines.isEmpty()) {
                 Text(
-                    stringResource(if (state.showPriceHint) R.string.tab_price_hint else R.string.no_notes),
+                    stringResource(R.string.no_notes),
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     modifier = Modifier.padding(16.dp),
                 )
@@ -95,14 +98,19 @@ private fun NotesContent(viewModel: NotesViewModel, state: NotesState, onBack: (
                         Column(Modifier.padding(horizontal = 16.dp, vertical = 8.dp)) {
                             Text(stringResource(R.string.tab_drinks_auto), style = MaterialTheme.typography.titleSmall)
                             Text(
-                                stringResource(R.string.tab_drinks_hint),
+                                stringResource(if (state.showPriceHint) R.string.tab_price_hint else R.string.tab_drinks_hint),
                                 style = MaterialTheme.typography.bodySmall,
                                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                             )
                         }
                     }
-                    items(state.drinkLines, key = { "d" + it.kind + it.sizeMl + it.side }) { line ->
-                        DrinkLineRow(line, state, format)
+                    items(state.drinkLines, key = { "d" + it.kind + it.sizeMl + it.beerSide }) { line ->
+                        DrinkLineRow(
+                            line, state, format,
+                            onTap = { pricing = line },
+                            onRemove = { viewModel.removeDrink(line) },
+                            onAdd = { viewModel.addDrink(line) },
+                        )
                     }
                     item(key = "drinks_divider") { HorizontalDivider() }
                 }
@@ -130,6 +138,16 @@ private fun NotesContent(viewModel: NotesViewModel, state: NotesState, onBack: (
     }
 
     if (settling) SettleDialog(state, onDismiss = { settling = false })
+    pricing?.let { line ->
+        PriceDialog(
+            title = stringResource(R.string.tab_price_title, stringResource(drinkName(line.kind)) + " · " + sizeText(line.sizeMl)),
+            current = line.unitMinor,
+            note = R.string.tab_price_note,
+            clearLabel = R.string.tab_price_remove,
+            onSave = { viewModel.setPrice(line, it); pricing = null },
+            onDismiss = { pricing = null },
+        )
+    }
 
     editing?.let { note ->
         NoteEditDialog(
@@ -202,20 +220,21 @@ private fun NoteRow(note: Note, state: NotesState, format: (Long) -> String, onC
     }
 }
 
-/** P28 automatic line: "Beer · 50 cl ×3" with side chip and sum. Read-only (fix with −1 / Undo on Tonight). */
+/** Tab drink line: "Beer · 50 cl ×3", price each, sum, −1/+1. Tap = price for tonight (this pub). */
 @Composable
-private fun DrinkLineRow(line: com.cansin.app.domain.DrinkLine, state: NotesState, format: (Long) -> String) {
-    val separator = rememberDecimalSeparator()
-    Row(Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 10.dp), verticalAlignment = Alignment.Top) {
+private fun DrinkLineRow(line: com.cansin.app.domain.DrinkLine, state: NotesState, format: (Long) -> String, onTap: () -> Unit, onRemove: () -> Unit, onAdd: () -> Unit) {
+    val name = stringResource(drinkName(line.kind))
+    Row(
+        Modifier.fillMaxWidth().clickable(onClick = onTap).padding(start = 16.dp, end = 8.dp, top = 6.dp, bottom = 6.dp),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
         Column(Modifier.weight(1f)) {
+            Text(stringResource(R.string.tab_drink_line, name, sizeText(line.sizeMl), line.count), style = MaterialTheme.typography.bodyLarge)
             Text(
-                stringResource(
-                    R.string.tab_drink_line,
-                    stringResource(drinkName(line.kind)),
-                    com.cansin.app.domain.BeerRules.formatCl(line.sizeMl, separator),
-                    line.count,
-                ),
-                style = MaterialTheme.typography.bodyLarge,
+                line.unitMinor?.let { stringResource(R.string.tab_price_each, format(it)) + " · " + format(line.totalMinor) }
+                    ?: stringResource(R.string.tab_add_price),
+                style = MaterialTheme.typography.bodySmall,
+                color = if (line.unitMinor == null) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant,
             )
             if (state.sided) {
                 val colors = sideColor(line.side)
@@ -224,12 +243,23 @@ private fun DrinkLineRow(line: com.cansin.app.domain.DrinkLine, state: NotesStat
                     style = MaterialTheme.typography.labelSmall,
                     color = colors?.second ?: MaterialTheme.colorScheme.onSurfaceVariant,
                     modifier = Modifier
+                        .padding(top = 2.dp)
                         .background(colors?.first ?: Color.Transparent, RoundedCornerShape(4.dp))
                         .padding(horizontal = 6.dp, vertical = 2.dp),
                 )
             }
         }
-        Text(format(line.totalMinor), style = MaterialTheme.typography.bodyLarge)
+        val removeDescription = stringResource(R.string.tab_remove_drink, name)
+        val addDescription = stringResource(R.string.tab_add_drink, name)
+        androidx.compose.material3.OutlinedButton(
+            onClick = onRemove,
+            modifier = Modifier.semantics { contentDescription = removeDescription },
+        ) { Text(stringResource(R.string.minus_one)) }
+        androidx.compose.foundation.layout.Spacer(Modifier.width(6.dp))
+        androidx.compose.material3.FilledTonalButton(
+            onClick = onAdd,
+            modifier = Modifier.semantics { contentDescription = addDescription },
+        ) { Text(stringResource(R.string.plus_one)) }
     }
 }
 

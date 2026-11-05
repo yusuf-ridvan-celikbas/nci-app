@@ -15,6 +15,10 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.ui.semantics.role
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.unit.dp
 import com.cansin.app.R
 import com.cansin.app.data.BeerEvent
 import com.cansin.app.data.DrinkKind
@@ -74,6 +78,22 @@ fun DrinkDialog(initial: DrinkChoice, beer: BeerSize, onConfirm: (DrinkChoice) -
                                 clText = BeerRules.formatCl(p.sizeMl, separator)
                                 abvText = BeerRules.formatAbv(p.abv, separator)
                             }
+                        }
+                    }
+                }
+                if (kind == DrinkKind.BEER) {
+                    // Quick beer sizes: 33 cl, 50 cl, 1 L (Maß).
+                    androidx.compose.foundation.layout.FlowRow(
+                        Modifier.fillMaxWidth().selectableGroup(),
+                        horizontalArrangement = androidx.compose.foundation.layout.Arrangement.spacedBy(8.dp),
+                    ) {
+                        BeerRules.PRESETS_ML.forEach { ml ->
+                            androidx.compose.material3.FilterChip(
+                                selected = sizeMl == ml,
+                                onClick = { clText = BeerRules.formatCl(ml, separator) },
+                                label = { Text(sizeText(ml)) },
+                                modifier = Modifier.semantics { role = androidx.compose.ui.semantics.Role.RadioButton },
+                            )
                         }
                     }
                 }

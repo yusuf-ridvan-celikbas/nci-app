@@ -10,7 +10,7 @@ data class BeerSize(val sizeMl: Int, val abv: Double) {
 }
 
 object BeerRules {
-    val PRESETS_ML = listOf(330, 500)
+    val PRESETS_ML = listOf(330, 500, 1_000)
     const val MIN_ML = 20
     const val MAX_ML = 2_000
     const val MIN_ABV = 0.0

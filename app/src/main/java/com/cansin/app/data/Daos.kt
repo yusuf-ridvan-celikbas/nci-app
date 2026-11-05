@@ -198,6 +198,16 @@ interface BeerDao {
     @Query("SELECT COUNT(*) FROM beer_event WHERE sessionId = :sessionId")
     suspend fun count(sessionId: Long): Int
 
+    /** P28: tonight's price for this drink (latest priced one), so a price edited on the Tab sticks. */
+    @Query("SELECT priceMinor FROM beer_event WHERE sessionId = :sessionId AND kind = :kind AND sizeMl = :sizeMl AND priceMinor IS NOT NULL ORDER BY at DESC, id DESC LIMIT 1")
+    suspend fun latestPrice(sessionId: Long, kind: DrinkKind, sizeMl: Int): Long?
+
+    @Query("UPDATE beer_event SET priceMinor = :priceMinor WHERE sessionId = :sessionId AND kind = :kind AND sizeMl = :sizeMl AND side = :side")
+    suspend fun setPrice(sessionId: Long, kind: DrinkKind, sizeMl: Int, side: Side, priceMinor: Long?)
+
+    @Query("SELECT * FROM beer_event WHERE sessionId = :sessionId AND side = :side AND kind = :kind AND sizeMl = :sizeMl ORDER BY at DESC, id DESC LIMIT 1")
+    suspend fun latestMatching(sessionId: Long, side: Side, kind: DrinkKind, sizeMl: Int): BeerEvent?
+
     /** P28: drinks on the Tab. */
     @Query("SELECT COALESCE(SUM(priceMinor), 0) FROM beer_event WHERE sessionId = :sessionId")
     suspend fun totalPriceMinor(sessionId: Long): Long

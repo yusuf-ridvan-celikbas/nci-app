@@ -109,7 +109,7 @@ fun CounterScreen(
                 .heightIn(min = maxHeight)
                 .padding(horizontal = 24.dp, vertical = 16.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.spacedBy(16.dp, Alignment.CenterVertically),
+            verticalArrangement = Arrangement.spacedBy(10.dp, Alignment.CenterVertically),
         ) {
             promilleCard()
             Text(
@@ -124,7 +124,8 @@ fun CounterScreen(
             AddButton(onClick = { viewModel.add() }, onLongClick = { pickingSize = true })
             Text(
                 text = stringResource(R.string.counter_prompt),
-                style = MaterialTheme.typography.bodyLarge,
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
                 textAlign = TextAlign.Center,
             )
             // Same row style as water: count · −1 · +1 (the big circle stays the main +).
@@ -185,7 +186,7 @@ private fun AddButton(onClick: () -> Unit, onLongClick: () -> Unit) {
     Box(
         contentAlignment = Alignment.Center,
         modifier = Modifier
-            .size(200.dp)
+            .size(168.dp)
             .clip(CircleShape)
             .background(MaterialTheme.colorScheme.primary)
             .combinedClickable(
@@ -197,6 +198,6 @@ private fun AddButton(onClick: () -> Unit, onLongClick: () -> Unit) {
             )
             .semantics { contentDescription = addDescription },
     ) {
-        Text(stringResource(R.string.plus_one), fontSize = 64.sp, color = MaterialTheme.colorScheme.onPrimary)
+        Text(stringResource(R.string.plus_one), fontSize = 56.sp, color = MaterialTheme.colorScheme.onPrimary)
     }
 }

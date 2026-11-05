@@ -22,7 +22,7 @@ data class ExportData(
     val customQuestions: List<CustomQuestion> = emptyList(),
     val currency: Currency = Currency.NONE,
     /** P28 price per drink kind (minor units). */
-    val prices: Map<DrinkKind, Long> = emptyMap(),
+    val prices: Map<PriceSlot, Long> = emptyMap(),
 )
 
 object ExportJson {

@@ -28,6 +28,12 @@ private const val CUSTOM = -1
 @Composable
 internal fun rememberDecimalSeparator(): Char = remember { DecimalFormatSymbols.getInstance().decimalSeparator }
 
+/** "33 cl", "50 cl", "1 L". */
+@Composable
+fun sizeText(sizeMl: Int): String =
+    if (sizeMl % 1_000 == 0) stringResource(R.string.size_liter, sizeMl / 1_000)
+    else stringResource(R.string.size_cl, BeerRules.formatCl(sizeMl, rememberDecimalSeparator()))
+
 @Composable
 fun beerSizeLabel(size: BeerSize): String {
     val separator = rememberDecimalSeparator()
@@ -62,8 +68,7 @@ fun BeerSizeDialog(
             Column {
                 Column(Modifier.selectableGroup()) {
                     (BeerRules.PRESETS_ML + CUSTOM).forEach { option ->
-                        val text = if (option == CUSTOM) stringResource(R.string.size_custom)
-                        else stringResource(R.string.size_cl, BeerRules.formatCl(option, separator))
+                        val text = if (option == CUSTOM) stringResource(R.string.size_custom) else sizeText(option)
                         RadioRow(text, option == preset) { preset = option }
                     }
                 }

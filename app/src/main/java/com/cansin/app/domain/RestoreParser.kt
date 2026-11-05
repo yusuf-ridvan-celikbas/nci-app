@@ -33,7 +33,7 @@ data class RestoreData(
     val profile: BodyProfile?,
     val customQuestions: List<CustomQuestion> = emptyList(),
     /** P28: null = not in the file (keep current prices). */
-    val prices: Map<DrinkKind, Long>? = null,
+    val prices: Map<PriceSlot, Long>? = null,
 ) {
     val beerCount get() = sessions.sumOf { it.beers.size }
 }
@@ -88,8 +88,7 @@ object RestoreParser {
             val questions = list(root["customQuestions"], CustomQuestion.MAX_COUNT, optional = true).map { question(obj(it)) }
             val prices = root["drinkPrices"]?.let { v ->
                 obj(v).entries.associate { (k, p) ->
-                    val kind = enum<DrinkKind>(k).also { if (it !in Drinks.DEFAULT_KINDS) throw Bad() }
-                    kind to long(p).also { if (it <= 0 || !NoteRules.isValidAmount(it)) throw Bad() }
+                    enum<PriceSlot>(k) to long(p).also { if (it <= 0 || !NoteRules.isValidAmount(it)) throw Bad() }
                 }
             }
             return RestoreData(sessions, friends, results, currency, profile, questions, prices)

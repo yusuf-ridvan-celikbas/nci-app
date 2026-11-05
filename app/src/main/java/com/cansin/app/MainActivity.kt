@@ -497,7 +497,7 @@ class MainActivity : ComponentActivity() {
         storage = app.storage,
         onKeepHistory = { app.settingsStore.setKeepHistory(it) },
         onCompressAfter = { app.settingsStore.setCompressAfter(it) },
-        onPrice = { kind, minor -> update { setPrice(kind, minor) } },
+        onPrice = { slot, minor -> update { setPrice(slot, minor) } },
     )
 
     private fun update(block: suspend SettingsStore.() -> Unit) {

@@ -88,7 +88,7 @@ class SettingsActions(
     val storage: com.cansin.app.system.StorageMaintenance,
     val onKeepHistory: suspend (com.cansin.app.domain.KeepHistory) -> Unit,
     val onCompressAfter: suspend (com.cansin.app.domain.CompressAfter) -> Unit,
-    val onPrice: (com.cansin.app.data.DrinkKind, Long?) -> Unit,
+    val onPrice: (com.cansin.app.domain.PriceSlot, Long?) -> Unit,
 )
 
 /** Settings is a short list of groups; each opens its own page. */

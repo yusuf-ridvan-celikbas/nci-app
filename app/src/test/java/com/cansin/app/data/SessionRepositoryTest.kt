@@ -270,7 +270,7 @@ class SessionRepositoryTest {
     @Test
     fun priceIsSavedOnTheDrinkAndLeavesWithIt() = runBlocking {
         val prices = mapOf(DrinkKind.BEER to 15_000L)
-        val priced = SessionRepository(sessions, beers, notes, water, clock = { now }, price = { prices[it] })
+        val priced = SessionRepository(sessions, beers, notes, water, clock = { now }, price = { kind, _ -> prices[kind] })
         val first = priced.addBeer()!!
         priced.addBeer()
         priced.addBeer(drink = DrinkChoice(DrinkKind.WINE, BeerSize(150, 12.0)))
@@ -282,5 +282,24 @@ class SessionRepositoryTest {
         assertEquals(15_000L, priced.snapshot().tabMinor)
         priced.undo(first)
         assertEquals(0L, beers.rows.value.sumOf { it.priceMinor ?: 0 })
+    }
+
+    @Test
+    fun tonightsPriceFromTheTabSticksAndCountsCanChangeThere() = runBlocking {
+        val priced = SessionRepository(sessions, beers, notes, water, clock = { now }, price = { _, _ -> 15_000L })
+        priced.addBeer()
+        priced.addBeer()
+        priced.setDrinkPrice(DrinkKind.BEER, 500, Side.SOLO, 18_000)
+        assertEquals(listOf(18_000L, 18_000L), beers.rows.value.map { it.priceMinor })
+        now += 1_000
+        priced.addBeer() // pub price edited tonight wins over Settings
+        assertEquals(18_000L, beers.rows.value.last().priceMinor)
+        priced.addBeer(drink = DrinkChoice(DrinkKind.BEER, BeerSize(330, 5.0))) // other size: Settings price
+        assertEquals(15_000L, beers.rows.value.last().priceMinor)
+        priced.removeLatestDrink(DrinkKind.BEER, 500, Side.SOLO)
+        assertEquals(listOf(500, 500, 330), beers.rows.value.map { it.sizeMl })
+        priced.setDrinkPrice(DrinkKind.BEER, 500, Side.SOLO, null) // off the Tab, still counted
+        assertEquals(15_000L, priced.snapshot().tabMinor)
+        assertEquals(3, priced.snapshot().count)
     }
 }

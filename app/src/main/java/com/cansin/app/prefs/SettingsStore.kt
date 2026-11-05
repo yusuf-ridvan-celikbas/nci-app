@@ -23,6 +23,7 @@ import com.cansin.app.domain.CompressAfter
 import com.cansin.app.domain.Currency
 import com.cansin.app.domain.KeepHistory
 import com.cansin.app.domain.NoteRules
+import com.cansin.app.domain.PriceSlot
 import com.cansin.app.domain.License
 import com.cansin.app.domain.Sex
 import com.cansin.app.domain.TimerState
@@ -61,7 +62,8 @@ private val WATER_EVERY = intPreferencesKey("water_every")
 private val TIMER_ENABLED = booleanPreferencesKey("timer_enabled")
 private val GROUP_LAYOUT = stringPreferencesKey("group_layout")
 private val KEEP_HISTORY = stringPreferencesKey("keep_history")
-private fun priceKey(kind: DrinkKind) = longPreferencesKey("price_" + kind.name)
+/** "price_BEER" = beer 50 cl (P28 key kept), "price_BEER_33", "price_BEER_1L", "price_WINE", … */
+private fun priceKey(slot: PriceSlot) = longPreferencesKey("price_" + slot.name)
 private val COMPRESS_AFTER = stringPreferencesKey("compress_after")
 private val MAINTENANCE_AT = longPreferencesKey("storage_maintenance_at")
 private val SHARE_NAME = stringPreferencesKey("share_name")
@@ -109,7 +111,7 @@ class SettingsStore(private val context: Context) {
             groupLayout = enumOr(p[GROUP_LAYOUT], GroupLayout.ROWS),
             keepHistory = enumOr(p[KEEP_HISTORY], KeepHistory.FOREVER),
             compressAfter = enumOr(p[COMPRESS_AFTER], CompressAfter.NEVER),
-            prices = DrinkKind.entries.mapNotNull { k -> p[priceKey(k)]?.takeIf { it > 0 && NoteRules.isValidAmount(it) }?.let { k to it } }.toMap(),
+            prices = PriceSlot.entries.mapNotNull { k -> p[priceKey(k)]?.takeIf { it > 0 && NoteRules.isValidAmount(it) }?.let { k to it } }.toMap(),
             shareName = ResultCards.cleanName(p[SHARE_NAME]),
             currency = enumOr(p[CURRENCY], Currency.NONE),
             careEnabled = p[CARE_ENABLED] ?: true,
@@ -239,7 +241,7 @@ class SettingsStore(private val context: Context) {
 
     suspend fun setGroupLayout(value: GroupLayout) = edit { it[GROUP_LAYOUT] = value.name }
 
-    suspend fun setPrice(kind: DrinkKind, minor: Long?) = edit { it.putOrRemove(priceKey(kind), minor?.takeIf { m -> m > 0 && NoteRules.isValidAmount(m) }) }
+    suspend fun setPrice(slot: PriceSlot, minor: Long?) = edit { it.putOrRemove(priceKey(slot), minor?.takeIf { m -> m > 0 && NoteRules.isValidAmount(m) }) }
 
     suspend fun setKeepHistory(value: KeepHistory) = edit { it[KEEP_HISTORY] = value.name }
     suspend fun setCompressAfter(value: CompressAfter) = edit { it[COMPRESS_AFTER] = value.name }
