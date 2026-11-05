@@ -330,6 +330,9 @@ class MainActivity : ComponentActivity() {
             }
             }
             val shared = versusState.session != null || groupState.session != null
+            LaunchedEffect(shared, versusState.loaded, groupState.loaded) {
+                if (versusState.loaded && groupState.loaded && !shared) game.sessionClosed()
+            }
             LaunchedEffect(shared, pinned, versusState.loaded, groupState.loaded) {
                 if (versusState.loaded && groupState.loaded && PinScreenRules.shouldAutoUnpin(pinned, shared)) {
                     ScreenPin.unpin(this@MainActivity)

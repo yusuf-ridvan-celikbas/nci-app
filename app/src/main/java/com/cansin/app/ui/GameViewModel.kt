@@ -103,6 +103,13 @@ class GameViewModel(
 
     fun setShownInSession(on: Boolean) = ui.update { it.copy(shownInSession = on) }
 
+    /** No Versus/Together open any more: a game with that session's people goes back to setup; a hand-typed game keeps going. */
+    fun sessionClosed() = ui.update {
+        val linked = it.players.any { p -> p.side != null }
+        if (linked) it.copy(playing = false, spinning = false, card = null, turn = null, asker = null, shownInSession = false)
+        else it.copy(shownInSession = false)
+    }
+
     fun backToSetup() = ui.update { it.copy(playing = false, spinning = false, card = null, turn = null, asker = null) }
 
     fun spin() {
