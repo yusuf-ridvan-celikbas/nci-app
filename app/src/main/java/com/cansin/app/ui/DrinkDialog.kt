@@ -19,6 +19,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.ui.semantics.role
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.focus.focusRequester
 import com.cansin.app.R
 import com.cansin.app.data.BeerEvent
 import com.cansin.app.data.DrinkKind
@@ -128,29 +129,39 @@ val LocalRecentBrands = androidx.compose.runtime.staticCompositionLocalOf { empt
 @Composable
 @OptIn(androidx.compose.material3.ExperimentalMaterial3Api::class)
 fun BrandPicker(value: String, onChange: (String) -> Unit, choices: List<String>) {
-    // One dropdown field: tap to pick (None, recent, suggestions) or type to filter / enter another brand.
+    // Tap = menu only (no keyboard): None, recent, suggestions, "Type another brand…".
+    // Only that last item makes the field editable and opens the keyboard.
     var expanded by androidx.compose.runtime.remember { mutableStateOf(false) }
-    val typed = value.trim()
-    val shown = if (typed.isEmpty() || choices.any { it.equals(typed, ignoreCase = true) }) choices
-    else choices.filter { it.contains(typed, ignoreCase = true) }
+    var typing by androidx.compose.runtime.remember { mutableStateOf(false) }
+    val focus = androidx.compose.runtime.remember { androidx.compose.ui.focus.FocusRequester() }
+    val keyboard = androidx.compose.ui.platform.LocalSoftwareKeyboardController.current
+    androidx.compose.runtime.LaunchedEffect(typing) { if (typing) focus.requestFocus() }
     androidx.compose.material3.ExposedDropdownMenuBox(
         expanded = expanded,
-        onExpandedChange = { expanded = it },
+        onExpandedChange = {
+            expanded = it
+            if (it) {
+                typing = false
+                keyboard?.hide()
+            }
+        },
         modifier = Modifier.padding(top = 12.dp),
     ) {
         androidx.compose.material3.OutlinedTextField(
             value = value,
-            onValueChange = {
-                onChange(it.take(BrandRules.MAX_LENGTH))
-                expanded = true
-            },
+            onValueChange = { onChange(it.take(BrandRules.MAX_LENGTH)) },
+            readOnly = !typing,
             label = { Text(stringResource(R.string.brand_optional)) },
             placeholder = { Text(stringResource(R.string.brand_none)) },
             singleLine = true,
             trailingIcon = { androidx.compose.material3.ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) },
             modifier = Modifier
                 .fillMaxWidth()
-                .menuAnchor(androidx.compose.material3.ExposedDropdownMenuAnchorType.PrimaryEditable),
+                .focusRequester(focus)
+                .menuAnchor(
+                    if (typing) androidx.compose.material3.ExposedDropdownMenuAnchorType.PrimaryEditable
+                    else androidx.compose.material3.ExposedDropdownMenuAnchorType.PrimaryNotEditable,
+                ),
         )
         ExposedDropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
             androidx.compose.material3.DropdownMenuItem(
@@ -160,7 +171,14 @@ fun BrandPicker(value: String, onChange: (String) -> Unit, choices: List<String>
                     expanded = false
                 },
             )
-            shown.forEach { option ->
+            androidx.compose.material3.DropdownMenuItem(
+                text = { Text(stringResource(R.string.brand_type_other)) },
+                onClick = {
+                    expanded = false
+                    typing = true
+                },
+            )
+            choices.forEach { option ->
                 androidx.compose.material3.DropdownMenuItem(
                     text = { Text(option) },
                     onClick = {

@@ -539,4 +539,5 @@
     <string name="qty_down">Fewer</string>
     <string name="amount_each_hint">Each</string>
     <string name="select_short">Select</string>
+    <string name="brand_type_other">Type another brand…</string>
 </resources>

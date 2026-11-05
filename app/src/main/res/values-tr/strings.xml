@@ -527,4 +527,5 @@
     <string name="qty_down">Azalt</string>
     <string name="amount_each_hint">Tanesi</string>
     <string name="select_short">Seç</string>
+    <string name="brand_type_other">Başka marka yaz…</string>
 </resources>
