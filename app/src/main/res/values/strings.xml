@@ -418,4 +418,10 @@
     <string name="game_csv_example_truth">What is your favourite memory with us?</string>
     <string name="game_csv_example_dare">Sing the chorus of your favourite song.</string>
     <string name="game_import_example">Column A: %1$s · Column B: %2$s</string>
+    <string name="group_water">Water: %1$d · +1</string>
+    <string name="group_layout_rows">Rows</string>
+    <string name="group_layout_grid">Grid</string>
+    <string name="setting_group_layout">People layout</string>
+    <string name="group_show_grid">Show as grid</string>
+    <string name="group_show_rows">Show as rows</string>
 </resources>

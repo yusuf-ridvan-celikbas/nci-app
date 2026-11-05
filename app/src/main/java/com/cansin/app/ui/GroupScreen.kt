@@ -18,9 +18,11 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ElevatedCard
@@ -33,6 +35,8 @@ import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
+import androidx.compose.material3.TextButton
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
@@ -64,11 +68,12 @@ import com.cansin.app.domain.BeerSize
 import com.cansin.app.domain.DrinkChoice
 import com.cansin.app.domain.SeatTimeRules
 import com.cansin.app.domain.SeatTimes
+import com.cansin.app.prefs.GroupLayout
 import kotlinx.coroutines.delay
 
 private const val SLOW_TICK_MS = 30_000L
 
-/** "Drinking together": one full-width row per person, in seat order. Plain numbers and times; no leader, no ranking. */
+/** "Drinking together": one full-width row per person (or the 2-column grid), in seat order. Plain numbers and times; no leader, no ranking. */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun GroupScreen(
@@ -81,6 +86,8 @@ fun GroupScreen(
     resumed: Boolean,
     defaultDrink: DrinkChoice,
     beerSize: BeerSize,
+    layout: GroupLayout,
+    onLayout: (GroupLayout) -> Unit,
     promilleCard: @Composable () -> Unit,
 ) {
     val state by viewModel.state.collectAsState()
@@ -115,6 +122,15 @@ fun GroupScreen(
                         }
                     },
                     actions = {
+                        if (!gameOn) {
+                            val grid = layout == GroupLayout.GRID
+                            IconButton(onClick = { onLayout(if (grid) GroupLayout.ROWS else GroupLayout.GRID) }) {
+                                Icon(
+                                    painterResource(if (grid) R.drawable.ic_rows else R.drawable.ic_grid),
+                                    stringResource(if (grid) R.string.group_show_rows else R.string.group_show_grid),
+                                )
+                            }
+                        }
                         GameToggle(gameOn, game::setShownInSession)
                         IconButton(onClick = onTogglePin) {
                             Icon(
@@ -162,7 +178,23 @@ fun GroupScreen(
                     }
                     item { GamePanel(game, gameState, showPacks = true) }
                 }
-                if (!gameOn) items(state.times, key = { it.side.name }) { t ->
+                if (!gameOn && layout == GroupLayout.GRID) items(state.times.chunked(2), key = { "g" + it.first().side.name }) { pair ->
+                    Row(Modifier.height(IntrinsicSize.Min), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                        pair.forEach { t ->
+                            SeatCell(
+                                session = session,
+                                times = t,
+                                onEdit = onEditSeats,
+                                onAdd = { viewModel.add(t.side) },
+                                onPick = { picking = t.side },
+                                onRemove = { viewModel.removeLatest(t.side) },
+                                onWater = { viewModel.addWater(t.side) },
+                            )
+                        }
+                        if (pair.size == 1) Box(Modifier.weight(1f))
+                    }
+                }
+                if (!gameOn && layout == GroupLayout.ROWS) items(state.times, key = { it.side.name }) { t ->
                     SeatRow(
                         session = session,
                         times = t,
@@ -291,6 +323,68 @@ private fun SeatRow(
                 }
             }
         }
+    }
+}
+
+/** Grid layout (the first P23 design): seat-coloured card, name, big count, −1 / +1, water. Tap +1 = default drink, long-press = picker. */
+@OptIn(ExperimentalFoundationApi::class)
+@Composable
+private fun RowScope.SeatCell(
+    session: Session,
+    times: SeatTimes,
+    onEdit: () -> Unit,
+    onAdd: () -> Unit,
+    onPick: () -> Unit,
+    onRemove: () -> Unit,
+    onWater: () -> Unit,
+) {
+    val (bg, fg) = sideColor(times.side) ?: (MaterialTheme.colorScheme.primary to MaterialTheme.colorScheme.onPrimary)
+    val name = sideName(session, times.side)
+    val addDescription = stringResource(R.string.versus_add, name)
+    val removeDescription = stringResource(R.string.versus_remove, name)
+    val waterDescription = stringResource(R.string.group_water_add, name)
+    Column(
+        Modifier.weight(1f).fillMaxHeight().background(bg, RoundedCornerShape(16.dp)).padding(12.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.spacedBy(4.dp),
+    ) {
+        Text(
+            if (session.meSide == times.side) stringResource(R.string.versus_name_me, name) else name,
+            color = fg,
+            style = MaterialTheme.typography.titleMedium,
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis,
+            modifier = Modifier.clickable(onClick = onEdit),
+        )
+        Text(times.drinks.toString(), color = fg, style = MaterialTheme.typography.displaySmall)
+        Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            TextButton(
+                onClick = onRemove,
+                enabled = times.drinks > 0,
+                colors = ButtonDefaults.textButtonColors(contentColor = fg, disabledContentColor = fg.copy(alpha = 0.5f)),
+                modifier = Modifier.semantics { contentDescription = removeDescription },
+            ) { Text(stringResource(R.string.minus_one), fontSize = 20.sp) }
+            Box(
+                Modifier
+                    .size(64.dp)
+                    .clip(CircleShape)
+                    .background(fg)
+                    .combinedClickable(
+                        role = Role.Button,
+                        onClickLabel = addDescription,
+                        onLongClickLabel = stringResource(R.string.pick_size),
+                        onLongClick = onPick,
+                        onClick = onAdd,
+                    )
+                    .semantics { contentDescription = addDescription },
+                contentAlignment = Alignment.Center,
+            ) { Text(stringResource(R.string.plus_one), color = bg, fontSize = 22.sp) }
+        }
+        TextButton(
+            onClick = onWater,
+            colors = ButtonDefaults.textButtonColors(contentColor = fg),
+            modifier = Modifier.semantics { contentDescription = waterDescription },
+        ) { Text(stringResource(R.string.group_water, times.water)) }
     }
 }
 

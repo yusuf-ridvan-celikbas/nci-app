@@ -304,6 +304,8 @@ class MainActivity : ComponentActivity() {
                     resumed = resumed,
                     defaultDrink = com.cansin.app.domain.Drinks.default(settings.defaultDrink, settings.beerSize),
                     beerSize = settings.beerSize,
+                    layout = settings.groupLayout,
+                    onLayout = { layout -> update { setGroupLayout(layout) } },
                     promilleCard = { CareSlot(); PromilleSlot(onOpen = { screen = Screen.PROMILLE }) },
                 )
                 versusState.session != null -> VersusScreen(
@@ -463,6 +465,7 @@ class MainActivity : ComponentActivity() {
         onWaterEnabled = { on -> update { setWaterEnabled(on) } },
         onWaterEvery = { n -> update { setWaterEvery(n) } },
         onTimerEnabled = { on -> update { setTimerEnabled(on) } },
+        onGroupLayout = { layout -> update { setGroupLayout(layout) } },
         onCurrency = { c -> update { setCurrency(c) } },
         onDefaultDrink = { k -> update { setDefaultDrink(k) } },
         onCareEnabled = { on -> update { setCareEnabled(on) } },

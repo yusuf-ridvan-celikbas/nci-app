@@ -410,4 +410,10 @@
     <string name="game_csv_example_truth">Bizimle ilgili en sevdiğin anı ne?</string>
     <string name="game_csv_example_dare">En sevdiğin şarkının nakaratını söyle.</string>
     <string name="game_import_example">A sütunu: %1$s · B sütunu: %2$s</string>
+    <string name="group_water">Su: %1$d · +1</string>
+    <string name="group_layout_rows">Satırlar</string>
+    <string name="group_layout_grid">Izgara</string>
+    <string name="setting_group_layout">Kişi düzeni</string>
+    <string name="group_show_grid">Izgara olarak göster</string>
+    <string name="group_show_rows">Satır olarak göster</string>
 </resources>

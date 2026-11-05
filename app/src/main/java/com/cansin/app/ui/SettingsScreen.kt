@@ -68,6 +68,7 @@ class SettingsActions(
     val onWaterEnabled: (Boolean) -> Unit,
     val onWaterEvery: (Int) -> Unit,
     val onTimerEnabled: (Boolean) -> Unit,
+    val onGroupLayout: (com.cansin.app.prefs.GroupLayout) -> Unit,
     val onCurrency: (Currency) -> Unit,
     val onCareEnabled: (Boolean) -> Unit,
     val onCareLateHour: (Int) -> Unit,
@@ -129,6 +130,15 @@ fun SettingsScreen(
                 stringResource(R.string.setting_timer_note),
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+            HorizontalDivider(Modifier.padding(vertical = 16.dp))
+            SectionHeader(R.string.group_title)
+            ChoiceGroup(
+                R.string.setting_group_layout,
+                com.cansin.app.prefs.GroupLayout.entries,
+                settings.groupLayout,
+                { it.label },
+                actions.onGroupLayout,
             )
             HorizontalDivider(Modifier.padding(vertical = 16.dp))
             ProfileSection(settings.profile, actions.onProfile)

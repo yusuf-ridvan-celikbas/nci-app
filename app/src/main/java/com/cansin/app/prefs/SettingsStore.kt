@@ -56,6 +56,7 @@ private val GROUP_TIMERS = stringPreferencesKey("group_timers")
 private val WATER_ENABLED = booleanPreferencesKey("water_enabled")
 private val WATER_EVERY = intPreferencesKey("water_every")
 private val TIMER_ENABLED = booleanPreferencesKey("timer_enabled")
+private val GROUP_LAYOUT = stringPreferencesKey("group_layout")
 private val SHARE_NAME = stringPreferencesKey("share_name")
 private val CURRENCY = stringPreferencesKey("currency")
 private val CARE_ENABLED = booleanPreferencesKey("care_enabled")
@@ -98,6 +99,7 @@ class SettingsStore(private val context: Context) {
             waterEnabled = p[WATER_ENABLED] ?: true,
             waterEvery = WaterRules.clamp(p[WATER_EVERY] ?: WaterRules.DEFAULT_EVERY),
             timerEnabled = p[TIMER_ENABLED] ?: true,
+            groupLayout = enumOr(p[GROUP_LAYOUT], GroupLayout.ROWS),
             shareName = ResultCards.cleanName(p[SHARE_NAME]),
             currency = enumOr(p[CURRENCY], Currency.NONE),
             careEnabled = p[CARE_ENABLED] ?: true,
@@ -224,6 +226,8 @@ class SettingsStore(private val context: Context) {
         it.putOrRemove(BEER_LIMIT, CareRules.cleanBeerLimit(beers))
         it.putOrRemove(BUDGET_MINOR, CareRules.cleanBudget(budgetMinor))
     }
+
+    suspend fun setGroupLayout(value: GroupLayout) = edit { it[GROUP_LAYOUT] = value.name }
 
     suspend fun setCurrency(value: Currency) = edit { it[CURRENCY] = value.name }
 

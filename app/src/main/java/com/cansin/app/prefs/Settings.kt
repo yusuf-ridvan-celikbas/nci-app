@@ -37,6 +37,12 @@ enum class Accent(@StringRes val label: Int) {
     DYNAMIC(R.string.color_dynamic),
 }
 
+/** P23 Together layout: detailed full-width rows (default) or the original 2-column grid. */
+enum class GroupLayout(@StringRes val label: Int) {
+    ROWS(R.string.group_layout_rows),
+    GRID(R.string.group_layout_grid),
+}
+
 data class Settings(
     val ageConfirmed: Boolean = false,
     val language: Language = Language.SYSTEM,
@@ -56,6 +62,7 @@ data class Settings(
     val waterEnabled: Boolean = true,
     val waterEvery: Int = WaterRules.DEFAULT_EVERY,
     val timerEnabled: Boolean = true,
+    val groupLayout: GroupLayout = GroupLayout.ROWS,
     val shareName: String? = null,
     val currency: Currency = Currency.NONE,
     val careEnabled: Boolean = true,
