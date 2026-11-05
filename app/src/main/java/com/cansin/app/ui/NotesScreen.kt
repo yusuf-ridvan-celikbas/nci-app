@@ -50,6 +50,10 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.foundation.gestures.draggable
+import androidx.compose.foundation.layout.size
+import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableFloatStateOf
 import com.cansin.app.R
 import com.cansin.app.data.Note
 import com.cansin.app.data.Side
@@ -275,18 +279,56 @@ private fun DrinkLineRow(line: com.cansin.app.domain.DrinkLine, state: NotesStat
     }
 }
 
+/** ▲ n ▼ — tap the arrows or swipe up/down on the number (1–99). */
+@Composable
+private fun QuantityStepper(value: Int, onChange: (Int) -> Unit) {
+    val description = stringResource(R.string.qty_label, value)
+    var drag by remember { mutableFloatStateOf(0f) }
+    val current by androidx.compose.runtime.rememberUpdatedState(value)
+    val change by androidx.compose.runtime.rememberUpdatedState(onChange)
+    val step = with(androidx.compose.ui.platform.LocalDensity.current) { 24.dp.toPx() }
+    Column(
+        horizontalAlignment = Alignment.CenterHorizontally,
+        modifier = Modifier
+            .width(40.dp)
+            .draggable(
+                orientation = androidx.compose.foundation.gestures.Orientation.Vertical,
+                state = androidx.compose.foundation.gestures.rememberDraggableState { delta ->
+                    drag += delta
+                    var next = current
+                    while (drag <= -step) { drag += step; next = (next + 1).coerceAtMost(NoteRules.MAX_QUANTITY) }
+                    while (drag >= step) { drag -= step; next = (next - 1).coerceAtLeast(1) }
+                    if (next != current) change(next)
+                },
+                onDragStopped = { drag = 0f },
+            )
+            .semantics(mergeDescendants = true) { contentDescription = description },
+    ) {
+        IconButton(onClick = { onChange((value + 1).coerceAtMost(NoteRules.MAX_QUANTITY)) }, modifier = Modifier.size(32.dp)) {
+            Icon(painterResource(R.drawable.ic_expand_less), stringResource(R.string.qty_up))
+        }
+        Text(value.toString(), style = MaterialTheme.typography.titleMedium)
+        IconButton(onClick = { onChange((value - 1).coerceAtLeast(1)) }, enabled = value > 1, modifier = Modifier.size(32.dp)) {
+            Icon(painterResource(R.drawable.ic_expand_more), stringResource(R.string.qty_down))
+        }
+    }
+}
+
 @Composable
 private fun QuickAdd(state: NotesState, onAdd: (String, Long?, Side?) -> Unit) {
     var text by rememberSaveable { mutableStateOf("") }
     var side by rememberSaveable { mutableStateOf<Side?>(null) }
     var amount by rememberSaveable { mutableStateOf("") }
+    var quantity by rememberSaveable { mutableIntStateOf(1) }
     val parsed = NoteRules.parseAmount(amount)
+    val withCount = NoteRules.withQuantity(text, (parsed as? AmountInput.Valid)?.minor, quantity)
 
     fun submit() {
-        if (NoteRules.cleanText(text) == null || parsed == AmountInput.Invalid) return
-        onAdd(text, (parsed as? AmountInput.Valid)?.minor, side)
+        if (NoteRules.cleanText(text) == null || parsed == AmountInput.Invalid || withCount == null) return
+        onAdd(withCount.first, withCount.second, side)
         text = ""
         amount = ""
+        quantity = 1
     }
 
     Column(Modifier.fillMaxWidth().navigationBarsPadding().imePadding().padding(8.dp)) {
@@ -308,13 +350,14 @@ private fun QuickAdd(state: NotesState, onAdd: (String, Long?, Side?) -> Unit) {
             OutlinedTextField(
                 value = amount,
                 onValueChange = { amount = it.take(13) },
-                placeholder = { Text(stringResource(R.string.amount_hint)) },
+                placeholder = { Text(stringResource(if (quantity > 1) R.string.amount_each_hint else R.string.amount_hint)) },
                 singleLine = true,
-                isError = parsed == AmountInput.Invalid,
+                isError = parsed == AmountInput.Invalid || withCount == null,
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal, imeAction = ImeAction.Done),
                 keyboardActions = KeyboardActions(onDone = { submit() }),
                 modifier = Modifier.width(96.dp),
             )
+            QuantityStepper(quantity) { quantity = it }
             IconButton(onClick = ::submit) {
                 Icon(painterResource(R.drawable.ic_send), stringResource(R.string.add_note))
             }

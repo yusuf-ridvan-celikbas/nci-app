@@ -535,4 +535,8 @@
         <item quantity="one">Delete %d night?</item>
         <item quantity="other">Delete %d nights?</item>
     </plurals>
+    <string name="qty_label">Quantity: %1$d</string>
+    <string name="qty_up">More</string>
+    <string name="qty_down">Fewer</string>
+    <string name="amount_each_hint">Each</string>
 </resources>

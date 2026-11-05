@@ -56,4 +56,13 @@ class NoteRulesTest {
     fun pickTimeCrossesMidnightForwards() {
         assertEquals(at(31, 0, 10), NoteRules.pickTime(at(30, 23, 40), 0, 10, zone))
     }
+
+    @Test
+    fun quantityMultipliesAndLabels() {
+        assertEquals("Nuts ×3" to 24_000L, NoteRules.withQuantity("Nuts ", 8_000, 3))
+        assertEquals("Nuts" to 8_000L, NoteRules.withQuantity("Nuts", 8_000, 1))
+        assertEquals("Taxi ×2" to null, NoteRules.withQuantity("Taxi", null, 2))
+        assertEquals(null, NoteRules.withQuantity("Big", NoteRules.MAX_AMOUNT_MINOR, 2))
+        assertEquals("x ×99", NoteRules.withQuantity("x", 1, 500)?.first)
+    }
 }

@@ -41,4 +41,14 @@ object NoteRules {
             .map { it.toInstant().toEpochMilli() }
             .minBy { abs(it - createdAt) }
     }
+
+    const val MAX_QUANTITY = 99
+
+    /** Tab quick-add with a count: "Nuts" ×3 at 80 each → ("Nuts ×3", 240). Null if the total is too large. */
+    fun withQuantity(text: String, eachMinor: Long?, quantity: Int): Pair<String, Long?>? {
+        val q = quantity.coerceIn(1, MAX_QUANTITY)
+        val total = eachMinor?.let { if (it > MAX_AMOUNT_MINOR / q) return null else it * q }
+        val label = if (q > 1) "${text.trim()} ×$q" else text
+        return label to total
+    }
 }

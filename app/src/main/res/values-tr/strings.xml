@@ -523,4 +523,8 @@
         <item quantity="one">%d gece silinsin mi?</item>
         <item quantity="other">%d gece silinsin mi?</item>
     </plurals>
+    <string name="qty_label">Adet: %1$d</string>
+    <string name="qty_up">Artır</string>
+    <string name="qty_down">Azalt</string>
+    <string name="amount_each_hint">Tanesi</string>
 </resources>
