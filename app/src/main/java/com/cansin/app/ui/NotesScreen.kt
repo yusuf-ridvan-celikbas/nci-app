@@ -85,7 +85,19 @@ private fun NotesContent(viewModel: NotesViewModel, state: NotesState, onBack: (
         bottomBar = { QuickAdd(state, onAdd = viewModel::add) },
     ) { padding ->
         Column(Modifier.fillMaxSize().padding(padding)) {
-            if (state.notes.isEmpty() && state.drinkLines.isEmpty()) {
+            if (state.drinkLines.isEmpty()) {
+                // Count section placeholder: shows where tonight's drinks will appear.
+                Column(Modifier.padding(horizontal = 16.dp, vertical = 8.dp)) {
+                    Text(stringResource(R.string.tab_drinks_auto), style = MaterialTheme.typography.titleSmall)
+                    Text(
+                        stringResource(R.string.tab_drinks_empty),
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                }
+                HorizontalDivider()
+            }
+            if (state.notes.isEmpty()) {
                 Text(
                     stringResource(R.string.no_notes),
                     color = MaterialTheme.colorScheme.onSurfaceVariant,

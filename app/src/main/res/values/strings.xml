@@ -496,4 +496,5 @@
     <string name="price_title">Price: %1$s</string>
     <string name="price_clear">Clear</string>
     <string name="price_note">Drinks with a price go on the tab automatically. Changing a price doesn\'t change drinks already added.</string>
+    <string name="tab_drinks_empty">Drinks you add on Tonight show up here with −1 / +1. Tap one to set its price.</string>
 </resources>

@@ -485,4 +485,5 @@
     <string name="price_title">Fiyat: %1$s</string>
     <string name="price_clear">Temizle</string>
     <string name="price_note">Fiyatı girilen içkiler hesaba kendiliğinden eklenir. Fiyatı değiştirmek önceden eklenen içkileri değiştirmez.</string>
+    <string name="tab_drinks_empty">Bu gece ekranında eklediğin içkiler burada −1 / +1 ile görünür. Fiyat için birine dokun.</string>
 </resources>
