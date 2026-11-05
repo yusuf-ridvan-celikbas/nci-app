@@ -20,7 +20,8 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.ui.Modifier
 import com.cansin.app.ui.AppNavBar
 import com.cansin.app.ui.RootTab
-import com.cansin.app.ui.GameSheet
+import com.cansin.app.ui.GameMenu
+import com.cansin.app.ui.behindGameMenu
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
@@ -256,12 +257,13 @@ class MainActivity : ComponentActivity() {
             Scaffold(
                 bottomBar = {
                     if (showBar && tab != null) AppNavBar(tab, NAV_TABS) {
-                        if (it == RootTab.GAME) gameSheet = true else screen = it.screen()
+                        if (it == RootTab.GAME) gameSheet = !gameSheet else { gameSheet = false; screen = it.screen() }
                     }
                 },
                 contentWindowInsets = WindowInsets(0),
             ) { inner ->
             Box(Modifier.fillMaxSize().padding(inner).consumeWindowInsets(inner)) {
+            Box(Modifier.fillMaxSize().behindGameMenu(gameSheet)) {
             when {
                 showLock -> LockScreen(
                     title = stringResource(R.string.name_salgam),
@@ -336,6 +338,15 @@ class MainActivity : ComponentActivity() {
                 )
             }
             }
+            GameMenu(
+                open = gameSheet && settings.ageConfirmed && !showLock,
+                // An already open Versus/Together is shown on Tonight; otherwise its setup opens (then Tonight).
+                onTruthOrDare = { screen = Screen.GAME },
+                onVersus = { if (versusState.session != null) screen = Screen.COUNTER else editingSides = true },
+                onTogether = { if (groupState.session != null) screen = Screen.COUNTER else editingGroup = true },
+                onDismiss = { gameSheet = false },
+            )
+            }
             }
             val shared = versusState.session != null || groupState.session != null
             LaunchedEffect(shared, versusState.loaded, groupState.loaded) {
@@ -367,15 +378,6 @@ class MainActivity : ComponentActivity() {
                     onVersus = { choosingMode = false; editingSides = true },
                     onGroup = { choosingMode = false; editingGroup = true },
                     onDismiss = { choosingMode = false },
-                )
-            }
-            if (gameSheet && settings.ageConfirmed && !showLock) {
-                // An already open Versus/Together is shown on Tonight; otherwise its setup opens (then Tonight).
-                GameSheet(
-                    onTruthOrDare = { screen = Screen.GAME },
-                    onVersus = { if (versusState.session != null) screen = Screen.COUNTER else editingSides = true },
-                    onTogether = { if (groupState.session != null) screen = Screen.COUNTER else editingGroup = true },
-                    onDismiss = { gameSheet = false },
                 )
             }
             if (editingGroup && settings.ageConfirmed) {
