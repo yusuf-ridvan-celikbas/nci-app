@@ -569,5 +569,5 @@
     <string name="setting_timer_auto">Start the timer with +1</string>
     <string name="setting_water_size">Water glass size</string>
     <string name="water_size_title">Glass size</string>
-    <string name="price_water_label">Water (50 cl; 25 cl and 1 L follow)</string>
+    <string name="price_water_label">Water (500 ml)</string>
 </resources>
