@@ -25,8 +25,11 @@ object PriceRules {
      * Price for a new drink. Beer: the exact size's price, else the 50 cl price (or another beer size) scaled by size,
      * rounded to a whole unit. Other kinds: their one price. Null = not on the Tab.
      */
-    /** P33 water price for a glass: exact size, else scaled from 500 ml (or another size), whole units. */
-    fun water(prices: Map<PriceSlot, Long>, sizeMl: Int): Long? = sized(prices, PriceSlot.entries.filter { it.kind == null }, PriceSlot.WATER, sizeMl)
+    /** Settings show one water price (500 ml); 250 ml / 1 L are worked out from it. */
+    val VISIBLE = PriceSlot.entries - PriceSlot.WATER_250 - PriceSlot.WATER_1L
+
+    /** P33 water price for a glass: the one water price (500 ml) scaled by size, whole units. */
+    fun water(prices: Map<PriceSlot, Long>, sizeMl: Int): Long? = sized(prices, listOf(PriceSlot.WATER), PriceSlot.WATER, sizeMl)
 
     private fun sized(prices: Map<PriceSlot, Long>, slots: List<PriceSlot>, main: PriceSlot, sizeMl: Int): Long? {
         slots.firstOrNull { it.sizeMl == sizeMl }?.let { slot -> prices[slot]?.let { return it } }

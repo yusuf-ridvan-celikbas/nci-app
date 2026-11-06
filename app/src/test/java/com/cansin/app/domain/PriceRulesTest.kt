@@ -32,7 +32,7 @@ class PriceRulesTest {
         assertEquals(2_000L, PriceRules.water(prices, 500))
         assertEquals(1_000L, PriceRules.water(prices, 250))
         assertEquals(4_000L, PriceRules.water(prices, 1_000))
-        assertEquals(3_500L, PriceRules.water(prices + (PriceSlot.WATER_1L to 3_500L), 1_000))
+        assertEquals(4_000L, PriceRules.water(prices + (PriceSlot.WATER_1L to 3_500L), 1_000)) // only the one water price counts
         assertNull(PriceRules.water(emptyMap(), 500))
         // Beer lookup ignores water slots.
         assertNull(PriceRules.lookup(prices, DrinkKind.BEER, 500))

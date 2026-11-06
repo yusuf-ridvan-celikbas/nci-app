@@ -34,7 +34,7 @@ fun PriceSection(prices: Map<PriceSlot, Long>, onPrice: (PriceSlot, Long?) -> Un
     var editing by rememberSaveable { mutableStateOf<PriceSlot?>(null) }
     val format = rememberAmountFormat()
     SectionHeader(R.string.section_prices)
-    PriceSlot.entries.forEach { slot ->
+    com.cansin.app.domain.PriceRules.VISIBLE.forEach { slot ->
         Row(
             Modifier.fillMaxWidth().heightIn(min = 48.dp).clickable(role = Role.Button) { editing = slot }.padding(vertical = 8.dp),
             verticalAlignment = Alignment.CenterVertically,
@@ -59,7 +59,7 @@ fun PriceSection(prices: Map<PriceSlot, Long>, onPrice: (PriceSlot, Long?) -> Un
 
 @Composable
 private fun slotLabel(slot: PriceSlot): String {
-    val kind = slot.kind ?: return stringResource(R.string.widget_page_water)
+    val kind = slot.kind ?: return stringResource(R.string.price_water_label)
     val name = stringResource(drinkName(kind))
     return slot.sizeMl?.let { name + " · " + sizeText(it) } ?: name
 }
