@@ -27,6 +27,19 @@ class DrinkTimer(
         repository().finishBeer(beerId, sessionId)
     }
 
+    /** P32: called for each of my new drinks; starts its timer (and finishes the previous timed drink). */
+    suspend fun autoStart(beer: com.cansin.app.data.BeerEvent) {
+        val settings = store.settings.first()
+        val plan = TimerRules.autoStart(settings.timerEnabled, settings.timerAuto, store.timerState.first(), beer, clock()) ?: return
+        plan.finishPrevious?.let { repository().finishBeer(it, beer.sessionId) }
+        store.setTimer(plan.next)
+    }
+
+    /** P32: the timed drink was undone / removed. */
+    suspend fun clearIfBeer(beerId: Long) {
+        if (TimerRules.clearsFor(store.timerState.first(), beerId)) store.setTimer(TimerState())
+    }
+
     suspend fun clearIf(sessionId: Long) {
         if (store.timerState.first().sessionId == sessionId) store.setTimer(TimerState())
     }

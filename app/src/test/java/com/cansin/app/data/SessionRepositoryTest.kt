@@ -139,6 +139,7 @@ class SessionRepositoryTest {
         override suspend fun onChanged() { log += "changed" }
         override suspend fun onBeerAdded(event: BeerEvent, mine: Boolean) { log += "added:${event.sessionId}" }
         override suspend fun onSessionClosed(sessionId: Long) { log += "closed:$sessionId" }
+        override suspend fun onBeerRemoved(beerId: Long) { log += "removed:$beerId" }
     }
 
     private val listener = RecordingListener()
@@ -164,7 +165,7 @@ class SessionRepositoryTest {
         val beer = observed.add()
         listener.log.clear()
         observed.undo(beer)
-        assertEquals(listOf("closed:${beer.sessionId}", "changed"), listener.log)
+        assertEquals(listOf("removed:${beer.id}", "closed:${beer.sessionId}", "changed"), listener.log)
     }
 
     @Test
@@ -319,5 +320,15 @@ class SessionRepositoryTest {
         priced.removeLatestDrink(DrinkKind.BEER, 500, Side.SOLO, "Guinness")
         assertEquals(listOf("Efes", "Guinness", "Efes"), beers.rows.value.map { it.brand })
         assertEquals(listOf("Efes", "Guinness"), priced.recentBrands.first())
+    }
+
+    @Test
+    fun removalsAreReportedForTheTimer() = runBlocking {
+        val first = observed.add()
+        observed.add()
+        observed.undo(first)
+        observed.removeLatest()
+        assertEquals(true, "removed:${first.id}" in listener.log)
+        assertEquals(2, listener.log.count { it.startsWith("removed:") })
     }
 }

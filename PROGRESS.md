@@ -144,6 +144,11 @@ Current phase: **P13–P30 approved on the phone (2026-11-06), merged into maste
   6. Counts in widget/stats/result card now mean all drinks, not only beer.
 - Known limits: the Stats "water per drink" in a group counts everyone's water; in a group, the counter's water bar duplicates my seat's water button.
 
+## P32 report (2026-11-06) — timer starts with +1 (user request, as a preference)
+- Settings → Drinks → "Start the timer with +1" (`timer_auto`, default on; shown when the timer is on). My +1 (Tonight, widget, tile, Versus my side, Together my seat, Tab line +1) starts that drink's timer via `SessionListener.onBeerAdded` → `DrinkTimer.autoStart`; a timer still running for the previous drink finishes that drink first (`TimerRules.autoStart`, unit-tested).
+- New `SessionListener.onBeerRemoved` (undo / −1 / widget −1 / Tab −1) clears a timer that pointed at the removed drink.
+- Tonight prompt now "Tap +1 when your drink arrives." (was "Ordered from the bartender? Tap now."); timer note updated. Decided – confirm: default ON.
+
 ## P31 report (2026-11-06) — widget: one look per size (user request)
 - Sizes (`widget/WidgetLayout.sizeClass`; API 31+ RemoteViews size map 40×40 / 110×110 / 180×40 / 250×110): TINY 1×1 (one number, tap = +1), SMALL 2×2 (pages Drinks/Tab/Water + optional Estimate page), STRIP 4×1 (drinks · water · tab with +1, or red · blue · tab in Versus), BIG 4×2+ (dashboard: drinks −1/+1 with "+1: Efes · 50 cl", water −1/+1, timer, tab total + top 2 drink lines, ‰ line; Versus red/blue rows; Together "N at the table").
 - `widget/WidgetContent.kt` (pure): blocks per size × mode × focus × PIN; pages; promille needs switch + profile.

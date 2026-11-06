@@ -60,6 +60,7 @@ private val GROUP_TIMERS = stringPreferencesKey("group_timers")
 private val WATER_ENABLED = booleanPreferencesKey("water_enabled")
 private val WATER_EVERY = intPreferencesKey("water_every")
 private val TIMER_ENABLED = booleanPreferencesKey("timer_enabled")
+private val TIMER_AUTO = booleanPreferencesKey("timer_auto")
 private val GROUP_LAYOUT = stringPreferencesKey("group_layout")
 private val KEEP_HISTORY = stringPreferencesKey("keep_history")
 private val DEFAULT_BRAND = stringPreferencesKey("default_brand")
@@ -111,6 +112,7 @@ class SettingsStore(private val context: Context) {
             waterEnabled = p[WATER_ENABLED] ?: true,
             waterEvery = WaterRules.clamp(p[WATER_EVERY] ?: WaterRules.DEFAULT_EVERY),
             timerEnabled = p[TIMER_ENABLED] ?: true,
+            timerAuto = p[TIMER_AUTO] ?: true,
             groupLayout = enumOr(p[GROUP_LAYOUT], GroupLayout.ROWS),
             defaultBrand = com.cansin.app.domain.BrandRules.clean(p[DEFAULT_BRAND]),
             widgetPromille = p[WIDGET_PROMILLE] == true,
@@ -154,6 +156,8 @@ class SettingsStore(private val context: Context) {
         it.putOrRemove(TIMER_SESSION, state.sessionId)
         it.putOrRemove(TIMER_STARTED, state.startedAt)
     }
+
+    suspend fun setTimerAuto(value: Boolean) = edit { it[TIMER_AUTO] = value }
 
     suspend fun setTimerEnabled(value: Boolean) = edit {
         it[TIMER_ENABLED] = value

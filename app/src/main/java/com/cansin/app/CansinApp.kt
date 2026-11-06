@@ -55,8 +55,12 @@ class CansinApp : Application() {
             listener = object : SessionListener {
                 override suspend fun onChanged() = CounterWidget.refreshAll(this@CansinApp)
                 override suspend fun onBeerAdded(event: BeerEvent, mine: Boolean) {
-                    if (mine) reminders.onBeerAdded(event.sessionId)
+                    if (mine) {
+                        reminders.onBeerAdded(event.sessionId)
+                        drinkTimer.autoStart(event)
+                    }
                 }
+                override suspend fun onBeerRemoved(beerId: Long) = drinkTimer.clearIfBeer(beerId)
                 override suspend fun onSessionClosed(sessionId: Long) {
                     reminders.onSessionClosed(sessionId)
                     drinkTimer.clearIf(sessionId)

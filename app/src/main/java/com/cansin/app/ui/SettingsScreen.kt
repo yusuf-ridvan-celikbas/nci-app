@@ -71,6 +71,7 @@ class SettingsActions(
     val onWaterEnabled: (Boolean) -> Unit,
     val onWaterEvery: (Int) -> Unit,
     val onTimerEnabled: (Boolean) -> Unit,
+    val onTimerAuto: (Boolean) -> Unit,
     val onGroupLayout: (com.cansin.app.prefs.GroupLayout) -> Unit,
     val onCurrency: (Currency) -> Unit,
     val onCareEnabled: (Boolean) -> Unit,
@@ -163,6 +164,9 @@ fun SettingsScreen(
                     HorizontalDivider(Modifier.padding(vertical = 16.dp))
                     SectionHeader(R.string.setting_timer)
                     SwitchRow(R.string.setting_timer, settings.timerEnabled, actions.onTimerEnabled)
+                    if (settings.timerEnabled) {
+                        SwitchRow(R.string.setting_timer_auto, settings.timerAuto, actions.onTimerAuto)
+                    }
                     Text(
                         stringResource(R.string.setting_timer_note),
                         style = MaterialTheme.typography.bodySmall,

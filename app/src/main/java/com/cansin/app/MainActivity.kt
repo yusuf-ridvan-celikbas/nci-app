@@ -482,6 +482,7 @@ class MainActivity : ComponentActivity() {
         onWaterEnabled = { on -> update { setWaterEnabled(on) } },
         onWaterEvery = { n -> update { setWaterEvery(n) } },
         onTimerEnabled = { on -> update { setTimerEnabled(on) } },
+        onTimerAuto = { on -> update { setTimerAuto(on) } },
         onGroupLayout = { layout -> update { setGroupLayout(layout) } },
         onCurrency = { c -> update { setCurrency(c) } },
         onDefaultDrink = { k -> update { setDefaultDrink(k) } },

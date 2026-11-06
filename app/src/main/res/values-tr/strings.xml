@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="counter_prompt">Barmenden sipariş verdin mi? Hemen dokun.</string>
+    <string name="counter_prompt">İçkin gelince +1\'e dokun.</string>
     <string name="counter_label">Bu oturumdaki içkiler</string>
     <string name="add_beer">Bir içki ekle</string>
     <string name="remove_beer">Son içkiyi çıkar</string>
@@ -205,7 +205,7 @@
     <string name="timer_running">İçiliyor</string>
     <string name="timer_idle">Zamanlayıcı</string>
     <string name="setting_timer">İçme zamanlayıcısı</string>
-    <string name="setting_timer_note">İçkini gerçekten içmeye başladığında başlat; durdurmak bitiş saatini tahmin için kaydeder. Tüm zamanlayıcıları gizlemek için kapat.</string>
+    <string name="setting_timer_note">"+1 ile zamanlayıcıyı başlat" açıkken içki gelince +1\'e dokunmak zamanlayıcısını başlatır (önceki içki bitmiş sayılır). Zamanlayıcıyı durdurmak bitiş saatini tahmin için kaydeder. Tüm zamanlayıcıları gizlemek için kapat.</string>
     <string name="history_friends">Arkadaşlar</string>
     <string name="friends_empty">Henüz arkadaş sonucu yok. Bir arkadaşından oturum sonucunu paylaşmasını iste, sonra buraya yapıştır.</string>
     <string name="friends_import">Sonuç içe aktar</string>
@@ -555,4 +555,5 @@
         <item quantity="one">+%d daha · Hesabı aç</item>
         <item quantity="other">+%d daha · Hesabı aç</item>
     </plurals>
+    <string name="setting_timer_auto">+1 ile zamanlayıcıyı başlat</string>
 </resources>

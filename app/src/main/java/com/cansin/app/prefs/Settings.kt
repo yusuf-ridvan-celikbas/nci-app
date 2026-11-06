@@ -62,6 +62,8 @@ data class Settings(
     val waterEnabled: Boolean = true,
     val waterEvery: Int = WaterRules.DEFAULT_EVERY,
     val timerEnabled: Boolean = true,
+    /** P32: +1 (when the drink arrives) starts its timer. */
+    val timerAuto: Boolean = true,
     val groupLayout: GroupLayout = GroupLayout.ROWS,
     val keepHistory: com.cansin.app.domain.KeepHistory = com.cansin.app.domain.KeepHistory.FOREVER,
     val compressAfter: com.cansin.app.domain.CompressAfter = com.cansin.app.domain.CompressAfter.NEVER,

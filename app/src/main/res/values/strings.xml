@@ -3,7 +3,7 @@
     <string name="name_salgam" translatable="false">Salgam</string>
     <string name="plus_one" translatable="false">+1</string>
     <string name="minus_one" translatable="false">−1</string>
-    <string name="counter_prompt">Ordered from the bartender? Tap now.</string>
+    <string name="counter_prompt">Tap +1 when your drink arrives.</string>
     <string name="counter_label">Drinks this session</string>
     <string name="add_beer">Add one drink</string>
     <string name="remove_beer">Remove the last drink</string>
@@ -213,7 +213,7 @@
     <string name="timer_running">Drinking</string>
     <string name="timer_idle">Start timer</string>
     <string name="setting_timer">Drinking timer</string>
-    <string name="setting_timer_note">Start the timer when you actually begin a drink; stopping it saves the finish time for the estimate. Turn off to hide all timers.</string>
+    <string name="setting_timer_note">With "Start the timer with +1" on, tapping +1 when the drink arrives starts its timer (and marks the previous drink finished). Stopping the timer saves the finish time for the estimate. Turn the timer off to hide all timers.</string>
     <string name="history_friends">Friends</string>
     <string name="friends_empty">No friend results yet. Ask a friend to share a session result, then paste it here.</string>
     <string name="friends_import">Import result</string>
@@ -567,4 +567,5 @@
         <item quantity="one">+%d more · open Tab</item>
         <item quantity="other">+%d more · open Tab</item>
     </plurals>
+    <string name="setting_timer_auto">Start the timer with +1</string>
 </resources>

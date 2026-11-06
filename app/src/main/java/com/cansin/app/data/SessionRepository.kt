@@ -45,6 +45,8 @@ interface SessionListener {
     suspend fun onChanged() {}
     suspend fun onBeerAdded(event: BeerEvent, mine: Boolean) {}
     suspend fun onSessionClosed(sessionId: Long) {}
+    /** P32: a drink was undone / removed (−1). */
+    suspend fun onBeerRemoved(beerId: Long) {}
 }
 
 /** For callers (tests, old wiring) without group support: no seats, so group adds are refused. */
@@ -74,6 +76,7 @@ class SessionRepository(
     private sealed interface Event {
         data class BeerAdded(val event: BeerEvent, val mine: Boolean) : Event
         data class SessionClosed(val sessionId: Long) : Event
+        data class BeerRemoved(val beerId: Long) : Event
     }
 
     private val writeLock = Mutex()
@@ -194,7 +197,10 @@ class SessionRepository(
     }
 
     suspend fun undo(event: BeerEvent) = write {
-        if (beers.delete(event.id) > 0) deleteIfEmpty(event.sessionId)
+        if (beers.delete(event.id) > 0) {
+            pending += Event.BeerRemoved(event.id)
+            deleteIfEmpty(event.sessionId)
+        }
     }
 
     /** Tab: set the price of every drink of this kind + size + side tonight (null = take them off the Tab). */
@@ -208,6 +214,7 @@ class SessionRepository(
         val session = activeSession(clock()) ?: return@write
         val latest = beers.latestMatching(session.id, side, kind, sizeMl, BrandRules.clean(brand)) ?: return@write
         beers.delete(latest.id)
+        pending += Event.BeerRemoved(latest.id)
         deleteIfEmpty(session.id)
     }
 
@@ -215,6 +222,7 @@ class SessionRepository(
         val session = activeSession(clock()) ?: return@write
         val latest = beers.latestOnSide(session.id, side) ?: return@write
         beers.delete(latest.id)
+        pending += Event.BeerRemoved(latest.id)
         deleteIfEmpty(session.id)
     }
 
@@ -285,6 +293,7 @@ class SessionRepository(
         val me = VersusRules.meSide(session) ?: return@write
         val latest = beers.latestOnSide(session.id, me) ?: return@write
         beers.delete(latest.id)
+        pending += Event.BeerRemoved(latest.id)
         deleteIfEmpty(session.id)
     }
 
@@ -320,6 +329,7 @@ class SessionRepository(
             when (e) {
                 is Event.BeerAdded -> listener.onBeerAdded(e.event, e.mine)
                 is Event.SessionClosed -> listener.onSessionClosed(e.sessionId)
+                is Event.BeerRemoved -> listener.onBeerRemoved(e.beerId)
             }
         }
         listener.onChanged()
