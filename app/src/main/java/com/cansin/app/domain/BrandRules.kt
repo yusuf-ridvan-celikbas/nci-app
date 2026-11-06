@@ -5,7 +5,6 @@ object BrandRules {
     const val MAX_LENGTH = 30
     const val MAX_RECENT = 8
 
-    /** Quick picks in the drink picker (beer); the user's recent brands come first. */
     /** Built-in names (user's choice 2026-11-06): creative names, not real brands. Users can still type any brand. */
     val SUGGESTED = listOf("Antika", "Türkorg")
 
