@@ -84,13 +84,4 @@ class WidgetContentTest {
         assertEquals(TabRows((0 until 8).toList(), emptyList(), 4), WidgetContent.tabRows(12, 0))
     }
 
-    @Test
-    fun columnStacksLikeTheStrip() {
-        assertEquals(
-            listOf(WidgetBlock.DRINKS, WidgetBlock.WATER, WidgetBlock.TAB),
-            WidgetContent.blocks(WidgetSize.COLUMN, WidgetFocus.AUTO, SessionMode.SOLO, promille = true, hidden = false),
-        )
-        assertEquals(listOf(WidgetBlock.VERSUS, WidgetBlock.TAB), WidgetContent.blocks(WidgetSize.COLUMN, WidgetFocus.AUTO, SessionMode.VERSUS, false, false))
-        assertEquals(listOf(WidgetBlock.WATER), WidgetContent.blocks(WidgetSize.COLUMN, WidgetFocus.WATER, SessionMode.SOLO, false, false))
-    }
 }

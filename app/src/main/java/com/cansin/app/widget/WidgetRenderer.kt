@@ -123,9 +123,8 @@ object WidgetRenderer {
             return RemoteViews(
                 mapOf(
                     SizeF(40f, 40f) to tiny(c),
-                    SizeF(40f, 110f) to small(c, pages, page, narrow = true),
-                    SizeF(40f, WidgetLayout.COLUMN_MIN_HEIGHT_DP.toFloat()) to strip(c, R.layout.widget_column),
-                    SizeF(WidgetLayout.SMALL_MIN_DP.toFloat(), WidgetLayout.TWO_ROW_MIN_HEIGHT_DP.toFloat()) to small(c, pages, page),
+                    SizeF(40f, WidgetLayout.TWO_ROW_MIN_HEIGHT_DP.toFloat()) to small(c, pages, page, narrow = true),
+                    SizeF(WidgetLayout.STRIP_MIN_WIDTH_DP.toFloat(), WidgetLayout.TWO_ROW_MIN_HEIGHT_DP.toFloat()) to small(c, pages, page),
                     SizeF(WidgetLayout.STRIP_MIN_WIDTH_DP.toFloat(), 40f) to pager(c, pages, page, compact = false),
                     SizeF(WidgetLayout.BIG_MIN_WIDTH_DP.toFloat(), WidgetLayout.COLUMN_MIN_HEIGHT_DP.toFloat()) to big(c),
                     SizeF(WidgetLayout.BIG_MIN_WIDTH_DP.toFloat(), WidgetLayout.XL_MIN_HEIGHT_DP.toFloat()) to xl(c),
@@ -139,7 +138,6 @@ object WidgetRenderer {
         return when (size) {
             WidgetSize.TINY -> tiny(c)
             WidgetSize.TALL -> small(c, pages, page, narrow = true)
-            WidgetSize.COLUMN -> strip(c, R.layout.widget_column)
             WidgetSize.SMALL -> small(c, pages, page)
             WidgetSize.STRIP -> pager(c, pages, page, compact = false)
             WidgetSize.BIG -> big(c)
@@ -404,90 +402,6 @@ object WidgetRenderer {
         views.setTextViewText(R.id.widget_add_label, label)
         views.setContentDescription(R.id.widget_add, description)
         views.setOnClickPendingIntent(R.id.widget_add, intent)
-    }
-
-    // ---------- STRIP (4×1): up to three cells ----------
-
-    private class StripIds(val cell: Int, val label: Int, val value: Int, val btn: Int, val btnBg: Int, val btnLabel: Int, val text: Int)
-
-    private val STRIP_CELLS = listOf(
-        StripIds(R.id.strip_cell1, R.id.strip_label1, R.id.strip_value1, R.id.strip_btn1, R.id.strip_btn1_bg, R.id.strip_btn1_label, R.id.strip_text1),
-        StripIds(R.id.strip_cell2, R.id.strip_label2, R.id.strip_value2, R.id.strip_btn2, R.id.strip_btn2_bg, R.id.strip_btn2_label, R.id.strip_text2),
-        StripIds(R.id.strip_cell3, R.id.strip_label3, R.id.strip_value3, R.id.strip_btn3, R.id.strip_btn3_bg, R.id.strip_btn3_label, R.id.strip_text3),
-    )
-
-    private class Cell(val label: String, val value: String, val button: Triple<String, PendingIntent, String>?, val tap: PendingIntent, val side: Side? = null)
-
-    /** Three cells stacked for 1×3+ ([layout] = widget_column). */
-    private fun strip(c: Ctx, layout: Int): RemoteViews {
-        val context = c.context
-        val views = RemoteViews(context.packageName, layout)
-        views.setOnClickPendingIntent(R.id.widget_bg, openApp(context, tab = false))
-        val cells = if (c.hidden) {
-            listOf(Cell(context.getString(R.string.widget_open_app), context.getString(R.string.widget_hidden), null, openApp(context, false)))
-        } else {
-            WidgetContent.blocks(WidgetSize.STRIP, c.focus, c.s.mode, c.promille, false).flatMap { block -> stripCells(c, block) }.take(3)
-        }
-        val ids = STRIP_CELLS
-        ids.forEachIndexed { i, ids1 ->
-            val cell = ids1.cell; val label = ids1.label; val value = ids1.value; val btn = ids1.btn; val btnLabel = ids1.btnLabel; val text = ids1.text
-            val data = cells.getOrNull(i)
-            views.setViewVisibility(cell, if (data == null) View.GONE else View.VISIBLE)
-            if (data == null) return@forEachIndexed
-            views.setTextViewText(label, data.label)
-            views.setTextViewText(value, data.value)
-            views.setOnClickPendingIntent(text, data.tap)
-            views.setViewVisibility(btn, if (data.button == null) View.GONE else View.VISIBLE)
-            data.button?.let { (l, intent, description) ->
-                views.setTextViewText(btnLabel, l)
-                views.setContentDescription(btn, description)
-                views.setOnClickPendingIntent(btn, intent)
-            }
-        }
-        tint(c, views) { set ->
-            set(R.id.widget_bg, "setColorFilter") { it.surface }
-            ids.forEachIndexed { i, cell ->
-                set(cell.label, "setTextColor") { it.muted }
-                set(cell.value, "setTextColor") { it.onSurface }
-                if (cells.getOrNull(i)?.side == null) {
-                    set(cell.btnBg, "setColorFilter") { it.primary }
-                    set(cell.btnLabel, "setTextColor") { it.onPrimary }
-                }
-            }
-        }
-        cells.forEachIndexed { i, cell -> cell.side?.let { side -> versusTint(views, ids[i].btnBg, ids[i].btnLabel, side) } }
-        return views
-    }
-
-    private fun stripCells(c: Ctx, block: WidgetBlock): List<Cell> {
-        val context = c.context
-        return when (block) {
-            WidgetBlock.DRINKS -> listOf(
-                Cell(
-                    context.getString(R.string.widget_page_beer), c.s.count.toString(),
-                    if (c.canAdd) Triple(context.getString(R.string.plus_one), action(c, WidgetActionReceiver.ACTION_ADD), context.getString(R.string.add_beer)) else null,
-                    openApp(context, false),
-                ),
-            )
-            WidgetBlock.VERSUS -> listOf(Side.RED to c.s.red, Side.BLUE to c.s.blue).map { (side, n) ->
-                val name = sideName(c, side)
-                Cell(
-                    name, n.toString(),
-                    Triple(context.getString(R.string.plus_one), action(c, if (side == Side.RED) WidgetActionReceiver.ACTION_ADD_RED else WidgetActionReceiver.ACTION_ADD_BLUE), context.getString(R.string.versus_add, name)),
-                    openApp(context, false), side,
-                )
-            }
-            WidgetBlock.WATER -> listOf(
-                Cell(
-                    context.getString(R.string.widget_page_water), c.s.water.toString(),
-                    if (c.canWater) Triple(context.getString(R.string.plus_one), action(c, WidgetActionReceiver.ACTION_WATER), context.getString(R.string.water_add)) else null,
-                    openApp(context, false),
-                ),
-            )
-            WidgetBlock.TAB -> listOf(Cell(context.getString(R.string.widget_page_tab), money(c, c.s.tabMinor), null, openApp(context, true)))
-            WidgetBlock.PROMILLE -> listOf(Cell(context.getString(R.string.widget_promille_short), value(c, WidgetPage.PROMILLE), null, openApp(context, false)))
-            WidgetBlock.TIMER, WidgetBlock.HERO, WidgetBlock.TAB_LIST -> emptyList()
-        }
     }
 
     // ---------- BIG (4×2+): dashboard ----------
