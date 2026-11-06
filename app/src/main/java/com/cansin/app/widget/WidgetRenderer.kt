@@ -125,9 +125,9 @@ object WidgetRenderer {
                     SizeF(40f, 40f) to tiny(c),
                     SizeF(40f, 110f) to tall(c),
                     SizeF(40f, WidgetLayout.COLUMN_MIN_HEIGHT_DP.toFloat()) to strip(c, R.layout.widget_column),
-                    SizeF(110f, 110f) to small(c, pages, page),
+                    SizeF(WidgetLayout.SMALL_MIN_DP.toFloat(), WidgetLayout.TWO_ROW_MIN_HEIGHT_DP.toFloat()) to small(c, pages, page),
                     SizeF(WidgetLayout.STRIP_MIN_WIDTH_DP.toFloat(), 40f) to pager(c, pages, page, compact = false),
-                    SizeF(WidgetLayout.BIG_MIN_WIDTH_DP.toFloat(), 110f) to big(c),
+                    SizeF(WidgetLayout.BIG_MIN_WIDTH_DP.toFloat(), WidgetLayout.COLUMN_MIN_HEIGHT_DP.toFloat()) to big(c),
                     SizeF(WidgetLayout.BIG_MIN_WIDTH_DP.toFloat(), WidgetLayout.XL_MIN_HEIGHT_DP.toFloat()) to xl(c),
                 ),
             )
@@ -387,6 +387,18 @@ object WidgetRenderer {
             views.setContentDescription(R.id.widget_value, context.getString(R.string.widget_hidden_description))
             button(views, context.getString(R.string.widget_open), context.getString(R.string.widget_open_app), openApp(context, false))
         }
+        val minus = when {
+            c.hidden -> null
+            page == WidgetPage.BEER && c.canAdd -> action(c, WidgetActionReceiver.ACTION_REMOVE) to context.getString(R.string.remove_beer)
+            page == WidgetPage.WATER && c.canWater -> action(c, WidgetActionReceiver.ACTION_WATER_REMOVE) to context.getString(R.string.water_remove)
+            else -> null
+        }
+        views.setViewVisibility(R.id.widget_minus, if (minus == null) View.GONE else View.VISIBLE)
+        minus?.let { (intent, description) ->
+            views.setOnClickPendingIntent(R.id.widget_minus, intent)
+            views.setContentDescription(R.id.widget_minus, description)
+        }
+        views.setOnClickPendingIntent(R.id.widget_bg, openApp(context, tab = false))
         val current = pages.indexOf(page)
         tint(c, views) { set ->
             set(R.id.widget_bg, "setColorFilter") { it.surface }
@@ -396,6 +408,8 @@ object WidgetRenderer {
             set(R.id.widget_next, "setColorFilter") { it.muted }
             set(R.id.widget_add_bg, "setColorFilter") { it.primary }
             set(R.id.widget_add_label, "setTextColor") { it.onPrimary }
+            set(R.id.widget_minus_bg, "setColorFilter") { it.container }
+            set(R.id.widget_minus_label, "setTextColor") { it.onSurface }
             dots.forEachIndexed { i, id -> set(id, "setColorFilter") { if (i == current) it.onSurface else it.muted } }
         }
         dots.forEachIndexed { i, id -> views.setInt(id, "setImageAlpha", if (i == current) 255 else 110) }

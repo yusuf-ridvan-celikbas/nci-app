@@ -8,6 +8,7 @@ object WidgetLayout {
     const val SMALL_MIN_DP = 110
     const val STRIP_MIN_WIDTH_DP = 180
     const val STRIP_MAX_HEIGHT_DP = 100
+    const val TWO_ROW_MIN_HEIGHT_DP = 100
     const val BIG_MIN_WIDTH_DP = 250
     const val XL_MIN_HEIGHT_DP = 300
     const val COLUMN_MIN_HEIGHT_DP = 200
@@ -19,8 +20,9 @@ object WidgetLayout {
         widthDp < SMALL_MIN_DP -> WidgetSize.TINY
         heightDp < STRIP_MAX_HEIGHT_DP && widthDp >= STRIP_MIN_WIDTH_DP -> WidgetSize.STRIP
         heightDp < STRIP_MAX_HEIGHT_DP -> WidgetSize.TINY
+        heightDp < COLUMN_MIN_HEIGHT_DP -> WidgetSize.SMALL // every 2-row widget (2×2, 3×2, 4×2…): old pages look
         widthDp >= BIG_MIN_WIDTH_DP && heightDp >= XL_MIN_HEIGHT_DP -> WidgetSize.XL
-        widthDp >= BIG_MIN_WIDTH_DP -> WidgetSize.BIG
+        widthDp >= BIG_MIN_WIDTH_DP -> WidgetSize.BIG // 4×3
         else -> WidgetSize.SMALL
     }
 

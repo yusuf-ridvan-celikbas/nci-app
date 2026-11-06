@@ -112,12 +112,37 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:autoSizeMaxTextSize="32sp"
-                android:autoSizeMinTextSize="14sp"
-                android:autoSizeTextType="uniform"
+                android:ellipsize="end"
                 android:gravity="center"
                 android:maxLines="1"
+                android:textSize="30sp"
                 android:textStyle="bold" />
+
+            <FrameLayout
+                android:id="@+id/widget_minus"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:layout_marginEnd="6dp">
+
+                <ImageView
+                    android:id="@+id/widget_minus_bg"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:importantForAccessibility="no"
+                    android:src="@drawable/widget_circle" />
+
+                <TextView
+                    android:id="@+id/widget_minus_label"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:gravity="center"
+                    android:importantForAccessibility="no"
+                    android:maxLines="1"
+                    android:text="−1"
+                    android:textSize="15sp"
+                    android:textStyle="bold"
+                    tools:ignore="HardcodedText" />
+            </FrameLayout>
 
             <include
                 layout="@layout/widget_add_button"
