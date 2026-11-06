@@ -30,4 +30,11 @@ class WidgetLayoutTest {
     fun futureLastBeerIsClampedToNow() {
         assertEquals(100_000L, WidgetLayout.chronometerBase(nowWall = 1_000_000, nowElapsed = 100_000, lastBeerAt = 2_000_000))
     }
+
+    @Test
+    fun narrowButtonsGrowWithHeight() {
+        assertEquals(0, WidgetLayout.narrowScale(150)) // 2×2
+        assertEquals(1, WidgetLayout.narrowScale(240)) // 2×3
+        assertEquals(2, WidgetLayout.narrowScale(400)) // 2×5
+    }
 }

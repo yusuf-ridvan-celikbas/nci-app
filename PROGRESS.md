@@ -149,6 +149,13 @@ Current phase: **P13–P30 approved on the phone (2026-11-06), merged into maste
 - Lint clean, tests green; app starts on the phone. Not yet placed/resized by the user.
 - Phone feedback: widget numbers were tiny (autoSize + wrap_content picks the minimum) → fixed sizes. 1-row widgets (3×1/4×1) use the old pages look with −1/+1: `widget_pager.xml` ‹ label •∘∘ value (−1) (+1) › (Versus: red/blue +1). 2×1 keeps the round +1 (user preferred). Narrow widgets (1–2 columns, 2+ rows: 1×2, 2×2, 2×3, 1×4…) use the narrow pages look (`widget_small_narrow.xml`); 3×2/4×2 the regular pages look; both with −1 next to +1; the stacked Drinks/Water/Tab column was removed (user); the dashboard (BIG) is now 4×3, XL 4×4+. Narrow tall widgets: compact cells (label, then value + 36 dp +1) so 3 blocks fit; on this Samsung a 2-cell width counts as narrow.
 
+## P33 report (2026-11-06) — water price + glass sizes (user request)
+- DB v10 (AutoMigration 9→10): `WaterEvent.priceMinor` + `sizeMl` (default 500). Sizes 250 / 500 / 1000 ml (`WaterRules.SIZES_ML`); Settings → Health → Water glass size (default 500); Tonight water +1 long-press → size picker.
+- Prices: `PriceSlot.WATER_250 / WATER (500, key price_WATER) / WATER_1L`; `PriceRules.water` (exact size, else scaled from 500 ml). Tonight's water price per size sticks (set on the Tab).
+- Tab: water lines per seat + size ("Water · 50 cl ×2", price each, −1/+1, tap = tonight's price, Remove from tab). Water charges count in totals, Versus/Together split, Settle up, budget, widget tab, History spent, compression; backup `priceMinor`/`sizeMl` on water.
+- Widget: narrow pages look grows with height (2×2 / 2×3 / 2×4+: buttons 32-36 / 44-52 / 56-64 dp, number 24 / 34 / 44 sp; API 31+ via setViewLayoutWidth/Height).
+- Tests green, lint clean; phone: v9→v10 migration ran, app starts; XL widget shown with auto-started timer.
+
 ## P32 report (2026-11-06) — timer starts with +1 (user request, as a preference)
 - Settings → Drinks → "Start the timer with +1" (`timer_auto`, default on; shown when the timer is on). My +1 (Tonight, widget, tile, Versus my side, Together my seat, Tab line +1) starts that drink's timer via `SessionListener.onBeerAdded` → `DrinkTimer.autoStart`; a timer still running for the previous drink finishes that drink first (`TimerRules.autoStart`, unit-tested).
 - New `SessionListener.onBeerRemoved` (undo / −1 / widget −1 / Tab −1) clears a timer that pointed at the removed drink.

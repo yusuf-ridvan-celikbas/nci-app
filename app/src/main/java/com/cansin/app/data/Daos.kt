@@ -45,7 +45,8 @@ interface SessionDao {
             "CASE WHEN s.t_compressedAt IS NOT NULL THEN s.t_notes ELSE (SELECT COUNT(*) FROM note n WHERE n.sessionId = s.id) END AS notes, " +
             "CASE WHEN s.t_compressedAt IS NOT NULL THEN s.t_water ELSE (SELECT COUNT(*) FROM water_event w WHERE w.sessionId = s.id) END AS water, " +
             "CASE WHEN s.t_compressedAt IS NOT NULL THEN s.t_spentMinor ELSE (SELECT COALESCE(SUM(n2.amountMinor), 0) FROM note n2 WHERE n2.sessionId = s.id) + " +
-            "(SELECT COALESCE(SUM(b2.priceMinor), 0) FROM beer_event b2 WHERE b2.sessionId = s.id) END AS spentMinor " +
+            "(SELECT COALESCE(SUM(b2.priceMinor), 0) FROM beer_event b2 WHERE b2.sessionId = s.id) + " +
+            "(SELECT COALESCE(SUM(w2.priceMinor), 0) FROM water_event w2 WHERE w2.sessionId = s.id) END AS spentMinor " +
             "FROM session s WHERE s.endedAt IS NOT NULL ORDER BY s.startedAt DESC",
     )
     fun observeHistory(): Flow<List<SessionSummary>>
@@ -74,6 +75,19 @@ interface SessionDao {
 interface WaterDao {
     @Insert
     suspend fun insert(event: WaterEvent): Long
+
+    /** P33: tonight's water price (latest priced glass), so a price set on the Tab sticks. */
+    @Query("SELECT priceMinor FROM water_event WHERE sessionId = :sessionId AND sizeMl = :sizeMl AND priceMinor IS NOT NULL ORDER BY at DESC, id DESC LIMIT 1")
+    suspend fun latestPrice(sessionId: Long, sizeMl: Int): Long?
+
+    @Query("UPDATE water_event SET priceMinor = :priceMinor WHERE sessionId = :sessionId AND side IS :side AND sizeMl = :sizeMl")
+    suspend fun setPrice(sessionId: Long, side: Side?, sizeMl: Int, priceMinor: Long?)
+
+    @Query("SELECT * FROM water_event WHERE sessionId = :sessionId AND side IS :side AND sizeMl = :sizeMl ORDER BY at DESC, id DESC LIMIT 1")
+    suspend fun latestSized(sessionId: Long, side: Side?, sizeMl: Int): WaterEvent?
+
+    @Query("SELECT COALESCE(SUM(priceMinor), 0) FROM water_event WHERE sessionId = :sessionId")
+    suspend fun totalPriceMinor(sessionId: Long): Long
 
     @Query("DELETE FROM water_event WHERE id = :id")
     suspend fun delete(id: Long): Int

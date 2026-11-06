@@ -115,6 +115,14 @@ class FakeWaterDao : WaterDao {
     override suspend fun count(sessionId: Long) = rows.value.count { it.sessionId == sessionId }
     override suspend fun lastAt(sessionId: Long) = rows.value.filter { it.sessionId == sessionId }.maxOfOrNull { it.at }
     override suspend fun countOnSide(sessionId: Long, side: Side?) = rows.value.count { it.sessionId == sessionId && it.side == side }
+    override suspend fun latestPrice(sessionId: Long, sizeMl: Int) =
+        rows.value.filter { it.sessionId == sessionId && it.sizeMl == sizeMl && it.priceMinor != null }.maxWithOrNull(compareBy({ it.at }, { it.id }))?.priceMinor
+    override suspend fun setPrice(sessionId: Long, side: Side?, sizeMl: Int, priceMinor: Long?) {
+        rows.value = rows.value.map { if (it.sessionId == sessionId && it.side == side && it.sizeMl == sizeMl) it.copy(priceMinor = priceMinor) else it }
+    }
+    override suspend fun latestSized(sessionId: Long, side: Side?, sizeMl: Int) =
+        rows.value.filter { it.sessionId == sessionId && it.side == side && it.sizeMl == sizeMl }.maxWithOrNull(compareBy({ it.at }, { it.id }))
+    override suspend fun totalPriceMinor(sessionId: Long) = rows.value.filter { it.sessionId == sessionId }.sumOf { it.priceMinor ?: 0 }
     override suspend fun latest(sessionId: Long, side: Side?) =
         rows.value.filter { it.sessionId == sessionId && it.side == side }.maxWithOrNull(compareBy({ it.at }, { it.id }))
     override fun observe(sessionId: Long): Flow<List<WaterEvent>> = rows.map { list -> list.filter { it.sessionId == sessionId } }

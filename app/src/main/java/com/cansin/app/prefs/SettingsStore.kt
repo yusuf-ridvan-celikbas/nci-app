@@ -63,6 +63,7 @@ private val TIMER_ENABLED = booleanPreferencesKey("timer_enabled")
 private val TIMER_AUTO = booleanPreferencesKey("timer_auto")
 private val GROUP_LAYOUT = stringPreferencesKey("group_layout")
 private val KEEP_HISTORY = stringPreferencesKey("keep_history")
+private val WATER_SIZE = intPreferencesKey("water_size_ml")
 private val DEFAULT_BRAND = stringPreferencesKey("default_brand")
 /** "price_BEER" = beer 50 cl (P28 key kept), "price_BEER_33", "price_BEER_1L", "price_WINE", … */
 private fun priceKey(slot: PriceSlot) = longPreferencesKey("price_" + slot.name)
@@ -111,6 +112,7 @@ class SettingsStore(private val context: Context) {
             gameOwn = (p[GAME_OWN] ?: true) || p[GAME_BUILT_IN] == false,
             waterEnabled = p[WATER_ENABLED] ?: true,
             waterEvery = WaterRules.clamp(p[WATER_EVERY] ?: WaterRules.DEFAULT_EVERY),
+            waterSizeMl = WaterRules.cleanSize(p[WATER_SIZE]),
             timerEnabled = p[TIMER_ENABLED] ?: true,
             timerAuto = p[TIMER_AUTO] ?: true,
             groupLayout = enumOr(p[GROUP_LAYOUT], GroupLayout.ROWS),
@@ -225,6 +227,7 @@ class SettingsStore(private val context: Context) {
     }
 
     suspend fun setWaterEnabled(value: Boolean) = edit { it[WATER_ENABLED] = value }
+    suspend fun setWaterSize(ml: Int) = edit { it[WATER_SIZE] = WaterRules.cleanSize(ml) }
     suspend fun setWaterEvery(value: Int) = edit { it[WATER_EVERY] = WaterRules.clamp(value) }
 
     suspend fun clearUserData() = edit { p ->

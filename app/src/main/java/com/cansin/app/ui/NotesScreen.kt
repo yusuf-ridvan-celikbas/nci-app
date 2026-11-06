@@ -75,6 +75,7 @@ private fun NotesContent(viewModel: NotesViewModel, state: NotesState, onBack: (
     var editing by remember { mutableStateOf<Note?>(null) }
     var settling by remember { mutableStateOf(false) }
     var pricing by remember { mutableStateOf<com.cansin.app.domain.DrinkLine?>(null) }
+    var waterPricing by remember { mutableStateOf<com.cansin.app.domain.WaterLine?>(null) }
     val format = rememberAmountFormat()
 
     Scaffold(
@@ -89,7 +90,7 @@ private fun NotesContent(viewModel: NotesViewModel, state: NotesState, onBack: (
         bottomBar = { QuickAdd(state, onAdd = viewModel::add) },
     ) { padding ->
         Column(Modifier.fillMaxSize().padding(padding)) {
-            if (state.drinkLines.isEmpty()) {
+            if (state.drinkLines.isEmpty() && state.waterLines.isEmpty()) {
                 // Count section placeholder: shows where tonight's drinks will appear.
                 Column(Modifier.padding(horizontal = 16.dp, vertical = 8.dp)) {
                     Text(stringResource(R.string.tab_drinks_auto), style = MaterialTheme.typography.titleSmall)
@@ -109,7 +110,7 @@ private fun NotesContent(viewModel: NotesViewModel, state: NotesState, onBack: (
                 )
             }
             LazyColumn(Modifier.weight(1f)) {
-                if (state.drinkLines.isNotEmpty()) {
+                if (state.drinkLines.isNotEmpty() || state.waterLines.isNotEmpty()) {
                     item(key = "drinks_header") {
                         Column(Modifier.padding(horizontal = 16.dp, vertical = 8.dp)) {
                             Text(stringResource(R.string.tab_drinks_auto), style = MaterialTheme.typography.titleSmall)
@@ -126,6 +127,14 @@ private fun NotesContent(viewModel: NotesViewModel, state: NotesState, onBack: (
                             onTap = { pricing = line },
                             onRemove = { viewModel.removeDrink(line) },
                             onAdd = { viewModel.addDrink(line) },
+                        )
+                    }
+                    items(state.waterLines, key = { "w" + it.side + it.sizeMl }) { line ->
+                        WaterLineRow(
+                            line, state, format,
+                            onTap = { waterPricing = line },
+                            onRemove = { viewModel.removeWater(line) },
+                            onAdd = { viewModel.addWater(line) },
                         )
                     }
                     item(key = "drinks_divider") { HorizontalDivider() }
@@ -154,6 +163,16 @@ private fun NotesContent(viewModel: NotesViewModel, state: NotesState, onBack: (
     }
 
     if (settling) SettleDialog(state, onDismiss = { settling = false })
+    waterPricing?.let { line ->
+        PriceDialog(
+            title = stringResource(R.string.tab_price_title, stringResource(R.string.widget_page_water) + " · " + sizeText(line.sizeMl)),
+            current = line.unitMinor,
+            note = R.string.tab_price_note,
+            clearLabel = R.string.tab_price_remove,
+            onSave = { viewModel.setWaterPrice(line, it); waterPricing = null },
+            onDismiss = { waterPricing = null },
+        )
+    }
     pricing?.let { line ->
         PriceDialog(
             title = stringResource(R.string.tab_price_title, (line.brand ?: stringResource(drinkName(line.kind))) + " · " + sizeText(line.sizeMl)),
@@ -311,6 +330,49 @@ private fun QuantityStepper(value: Int, onChange: (Int) -> Unit) {
         IconButton(onClick = { onChange((value - 1).coerceAtLeast(1)) }, enabled = value > 1, modifier = Modifier.size(32.dp)) {
             Icon(painterResource(R.drawable.ic_expand_more), stringResource(R.string.qty_down))
         }
+    }
+}
+
+/** P33 Tab water line: "Water ×2", price each, sum, −1/+1. Tap = tonight's water price. */
+@Composable
+private fun WaterLineRow(line: com.cansin.app.domain.WaterLine, state: NotesState, format: (Long) -> String, onTap: () -> Unit, onRemove: () -> Unit, onAdd: () -> Unit) {
+    val name = stringResource(R.string.widget_page_water)
+    Row(
+        Modifier.fillMaxWidth().clickable(onClick = onTap).padding(start = 16.dp, end = 8.dp, top = 6.dp, bottom = 6.dp),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Column(Modifier.weight(1f)) {
+            Text(stringResource(R.string.tab_drink_line, name, sizeText(line.sizeMl), line.count), style = MaterialTheme.typography.bodyLarge)
+            Text(
+                line.unitMinor?.let { stringResource(R.string.tab_price_each, format(it)) + " · " + format(line.totalMinor) }
+                    ?: stringResource(R.string.tab_add_price),
+                style = MaterialTheme.typography.bodySmall,
+                color = if (line.unitMinor == null) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+            if (state.group) {
+                val colors = sideColor(line.side)
+                Text(
+                    sideName(state.session, line.side),
+                    style = MaterialTheme.typography.labelSmall,
+                    color = colors?.second ?: MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier
+                        .padding(top = 2.dp)
+                        .background(colors?.first ?: Color.Transparent, RoundedCornerShape(4.dp))
+                        .padding(horizontal = 6.dp, vertical = 2.dp),
+                )
+            }
+        }
+        val removeDescription = stringResource(R.string.water_remove)
+        val addDescription = stringResource(R.string.water_add)
+        androidx.compose.material3.OutlinedButton(
+            onClick = onRemove,
+            modifier = Modifier.semantics { contentDescription = removeDescription },
+        ) { Text(stringResource(R.string.minus_one)) }
+        androidx.compose.foundation.layout.Spacer(Modifier.width(6.dp))
+        androidx.compose.material3.FilledTonalButton(
+            onClick = onAdd,
+            modifier = Modifier.semantics { contentDescription = addDescription },
+        ) { Text(stringResource(R.string.plus_one)) }
     }
 }
 

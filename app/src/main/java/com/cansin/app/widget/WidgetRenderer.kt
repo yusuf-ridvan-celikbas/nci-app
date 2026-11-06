@@ -64,6 +64,13 @@ object WidgetRenderer {
         val canAdd get() = !s.versus && (!s.group || s.hasMe)
     }
 
+    // Narrow pages look, by height: 0 = 2×2, 1 = 2×3, 2 = 2×4+.
+    private val NARROW_MINUS_DP = floatArrayOf(32f, 44f, 56f)
+    private val NARROW_ADD_DP = floatArrayOf(36f, 52f, 64f)
+    private val NARROW_MINUS_SP = floatArrayOf(13f, 16f, 19f)
+    private val NARROW_ADD_SP = floatArrayOf(13f, 18f, 22f)
+    private val NARROW_VALUE_SP = floatArrayOf(24f, 34f, 44f)
+
     private val dots = intArrayOf(R.id.widget_dot0, R.id.widget_dot1, R.id.widget_dot2, R.id.widget_dot3)
 
     /** View ids of one BIG count row (direct R.id refs so resource shrinking keeps them). */
@@ -123,7 +130,9 @@ object WidgetRenderer {
             return RemoteViews(
                 mapOf(
                     SizeF(40f, 40f) to tiny(c),
-                    SizeF(40f, WidgetLayout.TWO_ROW_MIN_HEIGHT_DP.toFloat()) to small(c, pages, page, narrow = true),
+                    SizeF(40f, WidgetLayout.TWO_ROW_MIN_HEIGHT_DP.toFloat()) to small(c, pages, page, narrow = true, scale = 0),
+                    SizeF(40f, WidgetLayout.COLUMN_MIN_HEIGHT_DP.toFloat()) to small(c, pages, page, narrow = true, scale = 1),
+                    SizeF(40f, WidgetLayout.XL_MIN_HEIGHT_DP.toFloat()) to small(c, pages, page, narrow = true, scale = 2),
                     SizeF(WidgetLayout.STRIP_MIN_WIDTH_DP.toFloat(), WidgetLayout.TWO_ROW_MIN_HEIGHT_DP.toFloat()) to small(c, pages, page),
                     SizeF(WidgetLayout.STRIP_MIN_WIDTH_DP.toFloat(), 40f) to pager(c, pages, page, compact = false),
                     SizeF(WidgetLayout.BIG_MIN_WIDTH_DP.toFloat(), WidgetLayout.COLUMN_MIN_HEIGHT_DP.toFloat()) to big(c),
@@ -137,7 +146,7 @@ object WidgetRenderer {
         )
         return when (size) {
             WidgetSize.TINY -> tiny(c)
-            WidgetSize.TALL -> small(c, pages, page, narrow = true)
+            WidgetSize.TALL -> small(c, pages, page, narrow = true, scale = WidgetLayout.narrowScale(options.getInt(AppWidgetManager.OPTION_APPWIDGET_MAX_HEIGHT)))
             WidgetSize.SMALL -> small(c, pages, page)
             WidgetSize.STRIP -> pager(c, pages, page, compact = false)
             WidgetSize.BIG -> big(c)
@@ -322,7 +331,7 @@ object WidgetRenderer {
     // ---------- SMALL (2×2): pages ----------
 
     /** 2-row widgets: the pages look; [narrow] = 1×2 / skinny version (same ids). */
-    private fun small(c: Ctx, pages: List<WidgetPage>, page: WidgetPage, narrow: Boolean = false): RemoteViews {
+    private fun small(c: Ctx, pages: List<WidgetPage>, page: WidgetPage, narrow: Boolean = false, scale: Int = 0): RemoteViews {
         val context = c.context
         val views = RemoteViews(context.packageName, if (narrow) R.layout.widget_small_narrow else R.layout.widget_small)
         views.setOnClickPendingIntent(R.id.widget_bg, openApp(context, tab = false))
@@ -338,7 +347,18 @@ object WidgetRenderer {
         views.setOnClickPendingIntent(R.id.widget_prev, action(c, WidgetActionReceiver.ACTION_PREV))
         views.setOnClickPendingIntent(R.id.widget_next, action(c, WidgetActionReceiver.ACTION_NEXT))
         views.setOnClickPendingIntent(R.id.widget_value, openApp(context, tab = page == WidgetPage.TAB))
-        views.setTextViewTextSize(R.id.widget_add_label, TypedValue.COMPLEX_UNIT_SP, if (narrow) 13f else 16f)
+        views.setTextViewTextSize(R.id.widget_add_label, TypedValue.COMPLEX_UNIT_SP, if (narrow) NARROW_ADD_SP[scale] else 16f)
+        if (narrow) {
+            // Taller narrow widgets (2×3, 2×5…) get bigger buttons and number.
+            views.setTextViewTextSize(R.id.widget_value, TypedValue.COMPLEX_UNIT_SP, NARROW_VALUE_SP[scale])
+            views.setTextViewTextSize(R.id.widget_minus_label, TypedValue.COMPLEX_UNIT_SP, NARROW_MINUS_SP[scale])
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                views.setViewLayoutWidth(R.id.widget_minus, NARROW_MINUS_DP[scale], TypedValue.COMPLEX_UNIT_DIP)
+                views.setViewLayoutHeight(R.id.widget_minus, NARROW_MINUS_DP[scale], TypedValue.COMPLEX_UNIT_DIP)
+                views.setViewLayoutWidth(R.id.widget_add, NARROW_ADD_DP[scale], TypedValue.COMPLEX_UNIT_DIP)
+                views.setViewLayoutHeight(R.id.widget_add, NARROW_ADD_DP[scale], TypedValue.COMPLEX_UNIT_DIP)
+            }
+        }
         views.setTextViewText(R.id.widget_value, value(c, page))
         views.setContentDescription(R.id.widget_value, null)
         when (page) {

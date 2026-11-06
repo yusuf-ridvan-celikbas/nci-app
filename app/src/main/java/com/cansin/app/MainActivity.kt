@@ -435,7 +435,7 @@ class MainActivity : ComponentActivity() {
             )
         }
         UndoEffect(water.waterAdded, snackbar, water::undo, R.string.water_added)
-        WaterBar(state, onAdd = water::add, onRemove = water::removeLatest, onDismiss = water::dismiss)
+        WaterBar(state, onAdd = { water.add() }, onRemove = water::removeLatest, onDismiss = water::dismiss, onAddSize = { water.add(it) })
     }
 
     @Composable
@@ -480,6 +480,7 @@ class MainActivity : ComponentActivity() {
         onProfile = { profile -> update { setProfile(profile) } },
         onDeleteFriend = { id -> versus.deleteFriend(id) },
         onWaterEnabled = { on -> update { setWaterEnabled(on) } },
+        onWaterSize = { ml -> update { setWaterSize(ml) } },
         onWaterEvery = { n -> update { setWaterEvery(n) } },
         onTimerEnabled = { on -> update { setTimerEnabled(on) } },
         onTimerAuto = { on -> update { setTimerAuto(on) } },

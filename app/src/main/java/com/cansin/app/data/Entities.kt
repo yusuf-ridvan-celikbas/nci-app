@@ -84,6 +84,10 @@ data class WaterEvent(
     val at: Long,
     /** Seat in a group session; null = me (solo/versus, and all rows before DB v5). */
     @ColumnInfo(defaultValue = "NULL") val side: Side? = null,
+    /** P33: price saved when the glass was added (minor units); null = not on the Tab. */
+    val priceMinor: Long? = null,
+    /** P33: glass size (250 / 500 / 1000 ml; old rows = 500). */
+    @ColumnInfo(defaultValue = "500") val sizeMl: Int = 500,
 )
 
 @Entity(

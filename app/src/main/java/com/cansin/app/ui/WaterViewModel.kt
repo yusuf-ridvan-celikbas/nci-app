@@ -48,8 +48,8 @@ class WaterViewModel(private val repository: SessionRepository, settingsStore: S
     private val added = Channel<WaterEvent>(Channel.CONFLATED)
     val waterAdded: Flow<WaterEvent> = added.receiveAsFlow()
 
-    fun add() = viewModelScope.launch {
-        repository.addWater()?.let {
+    fun add(sizeMl: Int? = null) = viewModelScope.launch {
+        repository.addWater(sizeMl = sizeMl)?.let {
             dismissedAt.value = null
             added.send(it)
         }

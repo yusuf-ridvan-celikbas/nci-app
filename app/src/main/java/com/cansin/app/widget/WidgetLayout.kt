@@ -23,6 +23,13 @@ object WidgetLayout {
         else -> WidgetSize.SMALL // 3×2, 4×2, 3×3: pages
     }
 
+    /** Narrow pages look: 0 = 2 rows, 1 = 3 rows, 2 = 4+ rows (bigger buttons as it grows). */
+    fun narrowScale(heightDp: Int): Int = when {
+        heightDp >= XL_MIN_HEIGHT_DP -> 2
+        heightDp >= COLUMN_MIN_HEIGHT_DP -> 1
+        else -> 0
+    }
+
     fun chronometerBase(nowWall: Long, nowElapsed: Long, lastBeerAt: Long): Long =
         nowElapsed - (nowWall - lastBeerAt).coerceAtLeast(0)
 }

@@ -5,6 +5,8 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNull
+import com.cansin.app.domain.PriceRules
+import com.cansin.app.domain.PriceSlot
 import org.junit.Test
 
 class WaterRepositoryTest {
@@ -60,5 +62,23 @@ class WaterRepositoryTest {
         repo.undo(beer)
         assertNull(repo.openSession.first())
         repo.removeLatestWater() // nothing open: no-op
+    }
+
+    @Test
+    fun waterPriceAndSizesGoOnTheTab() = runBlocking {
+        val prices = mapOf(PriceSlot.WATER to 2_000L)
+        val priced = SessionRepository(sessions, beers, notes, water, clock = { now }, waterPrice = { PriceRules.water(prices, it) }, defaultWaterMl = { 500 })
+        priced.add()
+        priced.addWater()
+        priced.addWater(sizeMl = 1_000)
+        priced.addWater(sizeMl = 333) // not a size → default 500
+        assertEquals(listOf(500, 1_000, 500), water.rows.value.map { it.sizeMl })
+        assertEquals(listOf(2_000L, 4_000L, 2_000L), water.rows.value.map { it.priceMinor })
+        priced.setWaterPrice(null, 500, 1_500)
+        now += 1_000
+        priced.addWater()
+        assertEquals(1_500L, water.rows.value.last().priceMinor) // tonight's price sticks
+        priced.removeLatestWater(null, 1_000)
+        assertEquals(1_500L * 3, priced.snapshot().tabMinor)
     }
 }

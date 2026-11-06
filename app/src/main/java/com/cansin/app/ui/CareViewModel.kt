@@ -37,8 +37,8 @@ class CareViewModel(repository: SessionRepository, settingsStore: SettingsStore)
         if (s == null) {
             flowOf(OpenSession())
         } else {
-            combine(repository.beers(s.id), repository.notes(s.id)) { beers, notes ->
-                OpenSession(true, beers.count { VersusRules.isMine(it, s) }, CareRules.mySpend(s, com.cansin.app.domain.TabRules.withDrinks(notes, beers, s.mode)))
+            combine(repository.beers(s.id), repository.notes(s.id), repository.water(s.id)) { beers, notes, water ->
+                OpenSession(true, beers.count { VersusRules.isMine(it, s) }, CareRules.mySpend(s, com.cansin.app.domain.TabRules.withDrinksAndWater(notes, beers, water, s.mode)))
             }
         }
     }.stateIn(viewModelScope, SharingStarted.Eagerly, OpenSession())

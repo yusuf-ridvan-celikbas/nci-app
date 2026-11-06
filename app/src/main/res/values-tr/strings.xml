@@ -555,4 +555,6 @@
         <item quantity="other">+%d daha · Hesabı aç</item>
     </plurals>
     <string name="setting_timer_auto">+1 ile zamanlayıcıyı başlat</string>
+    <string name="setting_water_size">Su bardağı boyutu</string>
+    <string name="water_size_title">Bardak boyutu</string>
 </resources>

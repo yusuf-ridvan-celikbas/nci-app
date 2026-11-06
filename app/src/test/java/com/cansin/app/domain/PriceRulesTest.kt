@@ -25,4 +25,16 @@ class PriceRulesTest {
         assertNull(PriceRules.lookup(prices, DrinkKind.WINE, 150))
         assertNull(PriceRules.lookup(prices, DrinkKind.CUSTOM, 100))
     }
+
+    @Test
+    fun waterPerSize() {
+        val prices = mapOf(PriceSlot.WATER to 2_000L)
+        assertEquals(2_000L, PriceRules.water(prices, 500))
+        assertEquals(1_000L, PriceRules.water(prices, 250))
+        assertEquals(4_000L, PriceRules.water(prices, 1_000))
+        assertEquals(3_500L, PriceRules.water(prices + (PriceSlot.WATER_1L to 3_500L), 1_000))
+        assertNull(PriceRules.water(emptyMap(), 500))
+        // Beer lookup ignores water slots.
+        assertNull(PriceRules.lookup(prices, DrinkKind.BEER, 500))
+    }
 }

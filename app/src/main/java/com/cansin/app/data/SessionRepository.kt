@@ -7,6 +7,7 @@ import com.cansin.app.domain.GroupRules
 import com.cansin.app.domain.GroupSetup
 import com.cansin.app.domain.BrandRules
 import com.cansin.app.domain.NoteRules
+import com.cansin.app.domain.WaterRules
 import com.cansin.app.domain.SessionRules
 import com.cansin.app.domain.VersusRules
 import com.cansin.app.domain.VersusSetup
@@ -72,6 +73,10 @@ class SessionRepository(
     private val seats: GroupSeatDao = NoSeats,
     /** P28: price from Settings for kind + size (null = not on the Tab); saved on the drink when added. */
     private val price: suspend (DrinkKind, Int) -> Long? = { _, _ -> null },
+    /** P33: water price for a glass size from Settings (null = water not on the Tab). */
+    private val waterPrice: suspend (Int) -> Long? = { null },
+    /** P33: default glass size from Settings. */
+    private val defaultWaterMl: suspend () -> Int = { WaterRules.DEFAULT_ML },
 ) {
     private sealed interface Event {
         data class BeerAdded(val event: BeerEvent, val mine: Boolean) : Event
@@ -108,7 +113,7 @@ class SessionRepository(
             red = if (versus) beers.countOnSide(session.id, Side.RED) else 0,
             blue = if (versus) beers.countOnSide(session.id, Side.BLUE) else 0,
             notes = notes.count(session.id),
-            tabMinor = notes.totalMinor(session.id) + beers.totalPriceMinor(session.id),
+            tabMinor = notes.totalMinor(session.id) + beers.totalPriceMinor(session.id) + water.totalPriceMinor(session.id),
             water = if (group) me?.let { water.countOnSide(session.id, it) } ?: 0 else water.count(session.id),
             hasMe = me != null,
             myLatestBeer = me?.let { beers.latestOnSide(session.id, it) },
@@ -276,14 +281,16 @@ class SessionRepository(
     }
 
     /** In a group, water goes to [side] (or my seat); elsewhere [side] is ignored. */
-    suspend fun addWater(side: Side? = null): WaterEvent? = write {
+    suspend fun addWater(side: Side? = null, sizeMl: Int? = null): WaterEvent? = write {
         val session = activeSession(clock()) ?: return@write null
         val seat = if (session.mode == SessionMode.GROUP) {
             (side ?: session.meSide)?.takeIf { s -> seats.seats(session.id).any { it.side == s } } ?: return@write null
         } else {
             null
         }
-        val event = WaterEvent(sessionId = session.id, at = clock(), side = seat)
+        val size = WaterRules.cleanSize(sizeMl ?: defaultWaterMl())
+        val priced = (water.latestPrice(session.id, size) ?: waterPrice(size))?.takeIf { it > 0 && NoteRules.isValidAmount(it) }
+        val event = WaterEvent(sessionId = session.id, at = clock(), side = seat, priceMinor = priced, sizeMl = size)
         event.copy(id = water.insert(event))
     }
 
@@ -294,6 +301,20 @@ class SessionRepository(
         val latest = beers.latestOnSide(session.id, me) ?: return@write
         beers.delete(latest.id)
         pending += Event.BeerRemoved(latest.id)
+        deleteIfEmpty(session.id)
+    }
+
+    /** Tab: tonight's water price for this seat (null side = solo/Versus); null price = off the Tab. */
+    suspend fun setWaterPrice(side: Side?, sizeMl: Int, priceMinor: Long?) = write {
+        val session = activeSession(clock()) ?: return@write
+        water.setPrice(session.id, side, sizeMl, priceMinor?.takeIf { it > 0 && NoteRules.isValidAmount(it) })
+    }
+
+    /** Tab −1 on one water line (seat + size). */
+    suspend fun removeLatestWater(side: Side?, sizeMl: Int) = write {
+        val session = activeSession(clock()) ?: return@write
+        val latest = water.latestSized(session.id, side, sizeMl) ?: return@write
+        water.delete(latest.id)
         deleteIfEmpty(session.id)
     }
 

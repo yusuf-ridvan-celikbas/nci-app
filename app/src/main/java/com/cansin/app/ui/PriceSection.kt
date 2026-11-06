@@ -59,7 +59,8 @@ fun PriceSection(prices: Map<PriceSlot, Long>, onPrice: (PriceSlot, Long?) -> Un
 
 @Composable
 private fun slotLabel(slot: PriceSlot): String {
-    val name = stringResource(drinkName(slot.kind))
+    val kind = slot.kind ?: return stringResource(R.string.widget_page_water)
+    val name = stringResource(drinkName(kind))
     return slot.sizeMl?.let { name + " · " + sizeText(it) } ?: name
 }
 

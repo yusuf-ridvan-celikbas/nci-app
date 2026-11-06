@@ -73,7 +73,11 @@ object ExportJson {
                             }
                     },
                     "water" to water[s.id].orEmpty().map { w ->
-                        linkedMapOf<String, Any?>("at" to w.at).apply { w.side?.let { put("side", it.name) } }
+                        linkedMapOf<String, Any?>("at" to w.at).apply {
+                            w.side?.let { put("side", it.name) }
+                            w.priceMinor?.let { put("priceMinor", it) }
+                            if (w.sizeMl != 500) put("sizeMl", w.sizeMl)
+                        }
                     },
                     "notes" to notes[s.id].orEmpty().map {
                         linkedMapOf(

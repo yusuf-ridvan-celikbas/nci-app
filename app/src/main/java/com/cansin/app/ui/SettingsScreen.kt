@@ -70,6 +70,7 @@ class SettingsActions(
     val onDeleteFriend: (Long) -> Unit,
     val onWaterEnabled: (Boolean) -> Unit,
     val onWaterEvery: (Int) -> Unit,
+    val onWaterSize: (Int) -> Unit,
     val onTimerEnabled: (Boolean) -> Unit,
     val onTimerAuto: (Boolean) -> Unit,
     val onGroupLayout: (com.cansin.app.prefs.GroupLayout) -> Unit,
@@ -312,6 +313,10 @@ private fun ProfileSection(profile: BodyProfile?, onChange: (BodyProfile?) -> Un
 @Composable
 private fun WaterSection(settings: Settings, actions: SettingsActions) {
     SectionHeader(R.string.section_water)
+    Text(stringResource(R.string.setting_water_size), style = MaterialTheme.typography.titleSmall, modifier = Modifier.padding(top = 8.dp))
+    Column(Modifier.selectableGroup()) {
+        WaterRules.SIZES_ML.forEach { ml -> RadioRow(sizeText(ml), ml == settings.waterSizeMl) { actions.onWaterSize(ml) } }
+    }
     SwitchRow(R.string.setting_water, settings.waterEnabled, actions.onWaterEnabled)
     if (settings.waterEnabled) {
         var every by remember(settings.waterEvery) { mutableFloatStateOf(settings.waterEvery.toFloat()) }

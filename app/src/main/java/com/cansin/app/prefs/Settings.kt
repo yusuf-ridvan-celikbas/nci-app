@@ -61,6 +61,8 @@ data class Settings(
     val gameOwn: Boolean = true,
     val waterEnabled: Boolean = true,
     val waterEvery: Int = WaterRules.DEFAULT_EVERY,
+    /** P33: glass size water +1 adds. */
+    val waterSizeMl: Int = WaterRules.DEFAULT_ML,
     val timerEnabled: Boolean = true,
     /** P32: +1 (when the drink arrives) starts its timer. */
     val timerAuto: Boolean = true,

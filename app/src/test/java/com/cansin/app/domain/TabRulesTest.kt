@@ -10,6 +10,7 @@ import com.cansin.app.data.Side
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
+import com.cansin.app.data.WaterEvent
 import org.junit.Test
 
 class TabRulesTest {
@@ -89,5 +90,22 @@ class TabRulesTest {
         val lines = TabRules.drinkLines(beers, SessionMode.SOLO)
         assertEquals(listOf("Efes" to 2, "Guinness" to 1, null to 1), lines.map { it.brand to it.count })
         assertEquals(25_000L, lines[1].totalMinor)
+    }
+
+    @Test
+    fun waterLinesAndCharges() {
+        val water = listOf(
+            WaterEvent(id = 1, sessionId = 1, at = 1, priceMinor = 2_000),
+            WaterEvent(id = 2, sessionId = 1, at = 2, priceMinor = 4_000, sizeMl = 1_000),
+            WaterEvent(id = 3, sessionId = 1, at = 3, priceMinor = 2_000),
+            WaterEvent(id = 4, sessionId = 1, at = 4),
+        )
+        val lines = TabRules.waterLines(water)
+        assertEquals(listOf(500 to 3, 1_000 to 1), lines.map { it.sizeMl to it.count })
+        assertEquals(4_000L, lines[0].totalMinor)
+        assertEquals(8_000L, TabRules.waterTotal(water))
+        val all = TabRules.withDrinksAndWater(emptyList(), listOf(beer(1)), water, SessionMode.SOLO)
+        assertEquals(23_000L, all.sumOf { it.amountMinor ?: 0 })
+        assertEquals(all.size, all.map { it.id }.toSet().size) // ids never clash
     }
 }

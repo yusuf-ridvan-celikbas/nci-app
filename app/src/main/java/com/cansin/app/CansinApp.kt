@@ -70,6 +70,8 @@ class CansinApp : Application() {
             defaultDrink = { settingsStore.settings.first().let { Drinks.default(it.defaultDrink, it.beerSize, it.defaultBrand) } },
             seats = database.groupSeatDao(),
             price = { kind, sizeMl -> com.cansin.app.domain.PriceRules.lookup(settingsStore.settings.first().prices, kind, sizeMl) },
+            waterPrice = { ml -> com.cansin.app.domain.PriceRules.water(settingsStore.settings.first().prices, ml) },
+            defaultWaterMl = { settingsStore.settings.first().waterSizeMl },
         )
     }
 }

@@ -30,13 +30,15 @@ data class NotesState(
     val session: Session? = null,
     val seats: List<GroupSeat> = emptyList(),
     val beers: List<com.cansin.app.data.BeerEvent> = emptyList(),
+    val water: List<com.cansin.app.data.WaterEvent> = emptyList(),
 ) {
     val versus: Boolean get() = session?.mode == SessionMode.VERSUS
     val group: Boolean get() = session?.mode == SessionMode.GROUP
     /** Notes can be put on a side/seat. */
     val sided: Boolean get() = VersusRules.hasSides(session?.mode)
     /** P28: notes plus priced drinks; every total and Settle up use this. */
-    val tab: List<Note> get() = TabRules.withDrinks(notes, beers, session?.mode)
+    val tab: List<Note> get() = TabRules.withDrinksAndWater(notes, beers, water, session?.mode)
+    val waterLines: List<com.cansin.app.domain.WaterLine> get() = TabRules.waterLines(water)
     val totals: TabTotals get() = VersusRules.totals(tab)
     val drinkLines: List<DrinkLine> get() = TabRules.drinkLines(beers, session?.mode)
     /** Drinks tonight but none has a price: point to Settings → Drinks → Prices (or tap a line). */
@@ -50,10 +52,12 @@ class NotesViewModel(private val repository: SessionRepository) : ViewModel() {
             when {
                 session == null -> flowOf(NotesState())
                 session.mode == SessionMode.GROUP ->
-                    combine(repository.notes(session.id), repository.seats(session.id), repository.beers(session.id)) { notes, seats, beers ->
-                        NotesState(notes, session, seats, beers)
+                    combine(repository.notes(session.id), repository.seats(session.id), repository.beers(session.id), repository.water(session.id)) { notes, seats, beers, water ->
+                        NotesState(notes, session, seats, beers, water)
                     }
-                else -> combine(repository.notes(session.id), repository.beers(session.id)) { notes, beers -> NotesState(notes, session, beers = beers) }
+                else -> combine(repository.notes(session.id), repository.beers(session.id), repository.water(session.id)) { notes, beers, water ->
+                    NotesState(notes, session, beers = beers, water = water)
+                }
             }
         }
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), NotesState())
@@ -69,6 +73,12 @@ class NotesViewModel(private val repository: SessionRepository) : ViewModel() {
     }
 
     fun removeDrink(line: DrinkLine) = viewModelScope.launch { repository.removeLatestDrink(line.kind, line.sizeMl, line.beerSide, line.brand) }
+
+    fun addWater(line: com.cansin.app.domain.WaterLine) = viewModelScope.launch { repository.addWater(line.side, line.sizeMl) }
+
+    fun removeWater(line: com.cansin.app.domain.WaterLine) = viewModelScope.launch { repository.removeLatestWater(line.side, line.sizeMl) }
+
+    fun setWaterPrice(line: com.cansin.app.domain.WaterLine, minor: Long?) = viewModelScope.launch { repository.setWaterPrice(line.side, line.sizeMl, minor) }
 
     fun setPrice(line: DrinkLine, minor: Long?) = viewModelScope.launch { repository.setDrinkPrice(line.kind, line.sizeMl, line.beerSide, minor, line.brand) }
 

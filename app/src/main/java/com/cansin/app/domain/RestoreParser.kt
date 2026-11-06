@@ -131,7 +131,9 @@ object RestoreParser {
             val water = events(o["water"]).map { w ->
                 val side = w["side"]?.let { enum<Side>(it) }
                 if (group != (side != null) || (side != null && side !in seatSides)) throw Bad()
-                WaterEvent(sessionId = 0, at = time(w["at"]), side = side)
+                val price = w["priceMinor"]?.let { long(it) }?.also { if (it <= 0 || !NoteRules.isValidAmount(it)) throw Bad() }
+                val size = w["sizeMl"]?.let { int(it) }?.also { if (it !in WaterRules.SIZES_ML) throw Bad() } ?: WaterRules.DEFAULT_ML
+                WaterEvent(sessionId = 0, at = time(w["at"]), side = side, priceMinor = price, sizeMl = size)
             }
             val notes = events(o["notes"]).map { n ->
                 val raw = str(n["text"])

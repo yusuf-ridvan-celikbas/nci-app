@@ -5,6 +5,7 @@ import com.cansin.app.data.DrinkKind
 import com.cansin.app.data.Note
 import com.cansin.app.data.SessionMode
 import com.cansin.app.data.Side
+import com.cansin.app.data.WaterEvent
 
 /**
  * One Tab line: the same drink, size and person added [count] times tonight. [beerSide] is the drink's own side
@@ -22,6 +23,9 @@ data class DrinkLine(
     val abv: Double = 5.0,
     val brand: String? = null,
 )
+
+/** P33 Tab water line for one seat (null side = solo/Versus). */
+data class WaterLine(val side: Side?, val count: Int, val totalMinor: Long, val unitMinor: Long?, val sizeMl: Int = 500)
 
 /**
  * P28: drinks with a price go on the Tab by themselves. The price is saved on the drink when it's added,
@@ -43,6 +47,24 @@ object TabRules {
         }
 
     fun withDrinks(notes: List<Note>, beers: List<BeerEvent>, mode: SessionMode?): List<Note> = notes + charges(beers, mode)
+
+    /** P33: priced glasses of water as note-like items (seat side in Together, shared otherwise). */
+    fun waterCharges(water: List<WaterEvent>, mode: SessionMode?): List<Note> =
+        water.filter { (it.priceMinor ?: 0) > 0 }.map { w ->
+            Note(id = -1_000_000_000L - w.id, sessionId = w.sessionId, text = "", amountMinor = w.priceMinor, createdAt = w.at,
+                side = w.side?.let { s -> mode?.let { VersusRules.noteSide(s, it) } })
+        }
+
+    fun withDrinksAndWater(notes: List<Note>, beers: List<BeerEvent>, water: List<WaterEvent>, mode: SessionMode?): List<Note> =
+        withDrinks(notes, beers, mode) + waterCharges(water, mode)
+
+    fun waterTotal(water: List<WaterEvent>): Long = water.sumOf { it.priceMinor ?: 0 }
+
+    /** Water on the Tab, one line per seat and glass size, in first-added order. */
+    fun waterLines(water: List<WaterEvent>): List<WaterLine> =
+        water.sortedWith(compareBy({ it.at }, { it.id })).groupBy { it.side to it.sizeMl }.map { (key, glasses) ->
+            WaterLine(key.first, glasses.size, waterTotal(glasses), glasses.lastOrNull { (it.priceMinor ?: 0) > 0 }?.priceMinor, key.second)
+        }
 
     fun drinkTotal(beers: List<BeerEvent>): Long = beers.sumOf { it.priceMinor ?: 0 }
 
