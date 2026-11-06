@@ -1,6 +1,6 @@
 # Progress
 
-Current phase: **P37 tutorials = spotlight tours (installed for the user's test, not committed) on branch feature/p37-tutorials (from p36). Local chain not pushed: p27→…→p36 (feature/p31-widget … feature/p36-no-brands); master on GitHub = P13–P30. iOS: rules up to P26 only.**
+Current phase: **P37 tutorials = spotlight tours, done and committed (941211c); user liked the tours on branch feature/p37-tutorials (from p36). Local chain not pushed: p27→…→p36 (feature/p31-widget … feature/p36-no-brands); master on GitHub = P13–P30. iOS: rules up to P26 only.**
 
 ## Phases
 - [x] Setup (project, wrapper, git, CLAUDE.md)
@@ -164,7 +164,7 @@ Current phase: **P37 tutorials = spotlight tours (installed for the user's test,
 - Seen set: DataStore `tutorials_seen` → `Settings.tutorialsSeen`; closing a guide in any way marks it seen; "Delete all data" clears it. After GENERAL closes, the current screen's tour waits for its next visit (no two guides back to back).
 - Settings → General & look → Guides: a row per topic (Tonight / Versus & Together rows disabled with a hint when not possible right now) + "Show all guides again".
 - Strings: `tut_*` (cards, buttons, topics) + `tour_*` (32 stops) EN + TR. No new dependency, no permission change. Release APK 2.06 MB (+33 KB vs before P37).
-- Not committed; installed on the phone for the user's test.
+- Committed 941211c after the user tested it on the phone ("more like what I want").
 
 ## P36 (2026-11-06) — no brands at all (user decision after the legal-risk talk)
 - Brand feature removed: no brand field in the picker, Tab line dialog, Settings, widget or labels; no built-in names; DrinkChoice/DrinkLine/DAO queries without brand; `BrandRules` deleted. Column `beer_event.brand` kept for the schema but cleared on every start (`StorageDao.clearBrands`); `default_brand` / `hidden_brands` prefs removed. Backup no longer writes `brand` (restore ignores it).
