@@ -34,9 +34,8 @@
                 android:id="@+id/tall_value"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:autoSizeMaxTextSize="34sp"
-                android:autoSizeMinTextSize="12sp"
-                android:autoSizeTextType="uniform"
+                android:ellipsize="end"
+                android:textSize="30sp"
                 android:maxLines="1"
                 android:textStyle="bold" />
 

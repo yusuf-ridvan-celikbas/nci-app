@@ -27,16 +27,14 @@
             android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_weight="1"
-            android:gravity="center_vertical"
+            android:gravity="center"
             android:baselineAligned="false"
             android:orientation="horizontal"
             android:paddingHorizontal="4dp">
 
             <LinearLayout
                 android:id="@+id/strip_text1"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
+                android:layout_width="wrap_content"                android:layout_height="wrap_content"
                 android:orientation="vertical">
 
                 <TextView
@@ -44,15 +42,14 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:maxLines="1"
-                    android:textSize="11sp" />
+                    android:textSize="12sp" />
 
                 <TextView
                     android:id="@+id/strip_value1"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:autoSizeMaxTextSize="22sp"
-                    android:autoSizeMinTextSize="12sp"
-                    android:autoSizeTextType="uniform"
+                    android:ellipsize="end"
+                    android:textSize="24sp"
                     android:maxLines="1"
                     android:textStyle="bold" />
             </LinearLayout>
@@ -61,7 +58,7 @@
                 android:id="@+id/strip_btn1"
                 android:layout_width="40dp"
                 android:layout_height="40dp"
-                android:layout_marginStart="6dp">
+                android:layout_marginStart="10dp">
 
                 <ImageView
                     android:id="@+id/strip_btn1_bg"
@@ -87,16 +84,14 @@
             android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_weight="1"
-            android:gravity="center_vertical"
+            android:gravity="center"
             android:baselineAligned="false"
             android:orientation="horizontal"
             android:paddingHorizontal="4dp">
 
             <LinearLayout
                 android:id="@+id/strip_text2"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
+                android:layout_width="wrap_content"                android:layout_height="wrap_content"
                 android:orientation="vertical">
 
                 <TextView
@@ -104,15 +99,14 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:maxLines="1"
-                    android:textSize="11sp" />
+                    android:textSize="12sp" />
 
                 <TextView
                     android:id="@+id/strip_value2"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:autoSizeMaxTextSize="22sp"
-                    android:autoSizeMinTextSize="12sp"
-                    android:autoSizeTextType="uniform"
+                    android:ellipsize="end"
+                    android:textSize="24sp"
                     android:maxLines="1"
                     android:textStyle="bold" />
             </LinearLayout>
@@ -121,7 +115,7 @@
                 android:id="@+id/strip_btn2"
                 android:layout_width="40dp"
                 android:layout_height="40dp"
-                android:layout_marginStart="6dp">
+                android:layout_marginStart="10dp">
 
                 <ImageView
                     android:id="@+id/strip_btn2_bg"
@@ -147,16 +141,14 @@
             android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_weight="1"
-            android:gravity="center_vertical"
+            android:gravity="center"
             android:baselineAligned="false"
             android:orientation="horizontal"
             android:paddingHorizontal="4dp">
 
             <LinearLayout
                 android:id="@+id/strip_text3"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
+                android:layout_width="wrap_content"                android:layout_height="wrap_content"
                 android:orientation="vertical">
 
                 <TextView
@@ -164,15 +156,14 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:maxLines="1"
-                    android:textSize="11sp" />
+                    android:textSize="12sp" />
 
                 <TextView
                     android:id="@+id/strip_value3"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:autoSizeMaxTextSize="22sp"
-                    android:autoSizeMinTextSize="12sp"
-                    android:autoSizeTextType="uniform"
+                    android:ellipsize="end"
+                    android:textSize="24sp"
                     android:maxLines="1"
                     android:textStyle="bold" />
             </LinearLayout>
@@ -181,7 +172,7 @@
                 android:id="@+id/strip_btn3"
                 android:layout_width="40dp"
                 android:layout_height="40dp"
-                android:layout_marginStart="6dp">
+                android:layout_marginStart="10dp">
 
                 <ImageView
                     android:id="@+id/strip_btn3_bg"

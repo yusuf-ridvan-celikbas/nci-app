@@ -38,9 +38,8 @@
                 android:id="@+id/widget_value"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:autoSizeMaxTextSize="22sp"
-                android:autoSizeMinTextSize="10sp"
-                android:autoSizeTextType="uniform"
+                android:ellipsize="end"
+                android:textSize="20sp"
                 android:includeFontPadding="false"
                 android:maxLines="1"
                 android:textStyle="bold" />
