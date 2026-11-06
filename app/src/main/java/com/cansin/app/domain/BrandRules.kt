@@ -21,14 +21,17 @@ object BrandRules {
     fun choices(recent: List<String>, hidden: Set<String> = emptySet()): List<String> {
         val seen = HashSet<String>()
         val hide = hidden.map { it.lowercase() }.toSet()
-        return (recent + SUGGESTED).mapNotNull { clean(it) }.filter { it.lowercase() !in hide && seen.add(it.lowercase()) }
+        // Built-in suggestions can't be hidden; only the user's own brands can.
+        return (recent + SUGGESTED).mapNotNull { clean(it) }.filter { (isBuiltIn(it) || it.lowercase() !in hide) && seen.add(it.lowercase()) }
     }
+
+    fun isBuiltIn(brand: String): Boolean = SUGGESTED.any { it.equals(brand.trim(), ignoreCase = true) }
 
     /** P35: brands the user removed from the menu (case-insensitive), capped. */
     const val MAX_HIDDEN = 100
 
     fun hide(hidden: Set<String>, brand: String): Set<String> =
-        clean(brand)?.let { b -> (hidden.filterNot { it.equals(b, ignoreCase = true) } + b).takeLast(MAX_HIDDEN).toSet() } ?: hidden
+        clean(brand)?.takeUnless { isBuiltIn(it) }?.let { b -> (hidden.filterNot { it.equals(b, ignoreCase = true) } + b).takeLast(MAX_HIDDEN).toSet() } ?: hidden
 
     fun unhide(hidden: Set<String>, brand: String?): Set<String> = hidden.filterNot { it.equals(brand?.trim(), ignoreCase = true) }.toSet()
 }

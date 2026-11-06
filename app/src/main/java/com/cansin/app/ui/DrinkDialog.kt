@@ -218,9 +218,9 @@ fun BrandPicker(value: String, onChange: (String) -> Unit, choices: List<String>
                         onChange(option)
                         expanded = false
                     },
-                    trailingIcon = {
-                        // ✕ = remove this brand from the menu (drinks keep their brand).
-                        androidx.compose.material3.IconButton(onClick = {
+                    trailingIcon = if (BrandRules.isBuiltIn(option)) null else {
+                        // ✕ = remove this brand from the menu (drinks keep their brand); built-in brands stay.
+                        { androidx.compose.material3.IconButton(onClick = {
                             actions.hide(option)
                             if (value.trim().equals(option, ignoreCase = true)) onChange("")
                         }) {
@@ -228,7 +228,7 @@ fun BrandPicker(value: String, onChange: (String) -> Unit, choices: List<String>
                                 androidx.compose.ui.res.painterResource(R.drawable.ic_close),
                                 stringResource(R.string.brand_remove, option),
                             )
-                        }
+                        } }
                     },
                 )
             }
