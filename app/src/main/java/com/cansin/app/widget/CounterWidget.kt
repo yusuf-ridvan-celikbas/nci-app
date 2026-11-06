@@ -1,5 +1,9 @@
 package com.cansin.app.widget
 
+import kotlinx.coroutines.withContext
+import kotlinx.coroutines.Dispatchers
+import com.cansin.app.prefs.hideCounts
+import com.cansin.app.domain.PictureRules
 import android.appwidget.AppWidgetManager
 import android.appwidget.AppWidgetProvider
 import android.content.ComponentName
@@ -34,7 +38,13 @@ class CounterWidget : AppWidgetProvider() {
             val manager = AppWidgetManager.getInstance(app)
             val ids = manager.getAppWidgetIds(ComponentName(app, CounterWidget::class.java))
             if (ids.isEmpty()) return
-            val data = WidgetData(app.settingsStore.settings.first(), app.sessionRepository.snapshot(), app.settingsStore.timerState.first())
+            val settings = app.settingsStore.settings.first()
+            val picture = if (settings.widgetPicture && !settings.hideCounts) {
+                withContext(Dispatchers.IO) { app.pictures.loadRoundNow(PictureRules.ME, PictureRules.WIDGET_PX) }
+            } else {
+                null
+            }
+            val data = WidgetData(settings, app.sessionRepository.snapshot(), app.settingsStore.timerState.first(), picture = picture)
             for (id in ids) {
                 val config = WidgetConfig(app.settingsStore.widgetFocus(id), app.settingsStore.widgetPage(id))
                 manager.updateAppWidget(id, WidgetRenderer.render(app, data, config, id, manager.getAppWidgetOptions(id)))

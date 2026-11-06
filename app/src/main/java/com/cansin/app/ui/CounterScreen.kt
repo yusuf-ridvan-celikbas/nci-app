@@ -48,6 +48,8 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.layout.heightIn
 import com.cansin.app.R
+import com.cansin.app.ui.theme.PictureColors
+import com.cansin.app.domain.PictureRules
 import com.cansin.app.domain.TourStep
 import com.cansin.app.domain.TutorialTopic
 import com.cansin.app.domain.BeerSize
@@ -186,6 +188,7 @@ internal fun <T> UndoEffect(
 @Composable
 private fun AddButton(onClick: () -> Unit, onLongClick: () -> Unit) {
     val addDescription = stringResource(R.string.add_beer)
+    val picture = rememberPicture(PictureRules.ME)
     Box(
         contentAlignment = Alignment.Center,
         modifier = Modifier
@@ -201,6 +204,7 @@ private fun AddButton(onClick: () -> Unit, onLongClick: () -> Unit) {
             )
             .semantics { contentDescription = addDescription },
     ) {
-        Text(stringResource(R.string.plus_one), fontSize = 56.sp, color = MaterialTheme.colorScheme.onPrimary)
+        picture?.let { PictureFill(it) }
+        Text(stringResource(R.string.plus_one), fontSize = 56.sp, color = if (picture != null) PictureColors.onPicture else MaterialTheme.colorScheme.onPrimary)
     }
 }

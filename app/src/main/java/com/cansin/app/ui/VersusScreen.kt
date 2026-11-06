@@ -48,6 +48,10 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.cansin.app.R
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Box
+import com.cansin.app.ui.theme.PictureColors
+import com.cansin.app.domain.PictureRules
 import com.cansin.app.domain.TourStep
 import com.cansin.app.domain.TutorialTopic
 import com.cansin.app.data.Session
@@ -170,12 +174,20 @@ private fun ColumnScope.SideHalf(
                 modifier = Modifier.semantics { contentDescription = removeDescription },
             ) { Text(stringResource(R.string.minus_one), fontSize = 24.sp) }
             Text(count.toString(), color = fg, style = MaterialTheme.typography.displayLarge)
+            val friendId = if (side == Side.RED) session.redFriendId else session.blueFriendId
+            val picture = rememberPicture(PictureRules.keyFor(session.id, side, friendId))
             Button(
                 onClick = { onAdd(side) },
                 shape = CircleShape,
                 colors = ButtonDefaults.buttonColors(containerColor = fg, contentColor = bg),
+                contentPadding = PaddingValues(0.dp),
                 modifier = Modifier.size(88.dp).semantics { contentDescription = addDescription },
-            ) { Text(stringResource(R.string.plus_one), fontSize = 28.sp) }
+            ) {
+                Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                    picture?.let { PictureFill(it) }
+                    Text(stringResource(R.string.plus_one), fontSize = 28.sp, color = if (picture != null) PictureColors.onPicture else bg)
+                }
+            }
         }
     }
 }

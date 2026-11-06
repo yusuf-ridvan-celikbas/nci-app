@@ -43,6 +43,8 @@ class DataManager(
     private val refreshWidgets: suspend () -> Unit,
     /** P27: compacts the database file after a wipe or restore so the space really goes back. */
     private val compact: suspend () -> Unit = {},
+    /** P38: +1 pictures go with "Delete all data". */
+    private val clearPictures: suspend () -> Unit = {},
 ) {
     private val exportDir get() = File(context.cacheDir, EXPORT_DIR)
 
@@ -127,6 +129,7 @@ class DataManager(
         }
         compact()
         store.clearUserData()
+        clearPictures()
         refreshWidgets()
     }
 

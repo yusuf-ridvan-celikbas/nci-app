@@ -671,4 +671,15 @@
     <string name="tour_friends_end_body">Saves the night to History for everyone.</string>
     <string name="tut_needs_shared">Start Versus or Together first</string>
     <string name="tut_needs_solo">Available when Versus or Together isn\'t open</string>
+    <!-- P38 pictures -->
+    <string name="picture_crop_title">Move and zoom</string>
+    <string name="picture_note">Only use photos you\'re allowed to use, and check your friends are OK with theirs. Pictures stay on this phone: they\'re never shared, exported or backed up.</string>
+    <string name="picture_choose">Choose picture</string>
+    <string name="picture_change">Change</string>
+    <string name="picture_remove">Remove</string>
+    <string name="picture_for">Picture for %1$s</string>
+    <string name="setting_plus_picture">+1 picture</string>
+    <string name="setting_plus_picture_note">A photo behind your big +1, like your team or a friend.</string>
+    <string name="setting_widget_picture">Show it on the widget</string>
+    <string name="setting_widget_picture_note">Off by default, because others can see your home screen. Hidden when the PIN hides your counts.</string>
 </resources>

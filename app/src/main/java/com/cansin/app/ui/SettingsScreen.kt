@@ -44,6 +44,9 @@ import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
 import com.cansin.app.R
+import kotlinx.coroutines.launch
+import androidx.compose.runtime.rememberCoroutineScope
+import com.cansin.app.domain.PictureRules
 import com.cansin.app.data.FriendProfile
 import com.cansin.app.domain.BeerSize
 import com.cansin.app.domain.BodyProfile
@@ -95,6 +98,7 @@ class SettingsActions(
     val onDefaultServing: (com.cansin.app.data.Serving) -> Unit,
     val onWidgetPromille: (Boolean) -> Unit,
     val onResetTutorials: () -> Unit,
+    val onWidgetPicture: (Boolean) -> Unit,
 )
 
 /** Settings is a short list of groups; each opens its own page. */
@@ -166,6 +170,8 @@ fun SettingsScreen(
                     BeerSection(settings.beerSize, actions.onBeerSize, settings.defaultDrink, actions.onDefaultDrink)
                     Text(stringResource(R.string.setting_default_serving), style = MaterialTheme.typography.titleSmall, modifier = Modifier.padding(top = 8.dp))
                     ServingChips(settings.defaultServing, actions.onDefaultServing)
+                    HorizontalDivider(Modifier.padding(vertical = 16.dp))
+                    PictureSection(settings.widgetPicture, actions.onWidgetPicture)
                     HorizontalDivider(Modifier.padding(vertical = 16.dp))
                     PriceSection(settings.prices, actions.onPrice)
                     HorizontalDivider(Modifier.padding(vertical = 16.dp))
@@ -259,6 +265,31 @@ private fun BeerSection(
                 editing = false
             },
             onDismiss = { editing = false },
+        )
+    }
+}
+
+/** P38: your picture behind the Tonight +1, and whether the widget shows it (off by default). */
+@Composable
+private fun PictureSection(onWidget: Boolean, onWidgetChange: (Boolean) -> Unit) {
+    val store = LocalPictures.current ?: return
+    val scope = rememberCoroutineScope()
+    val picture = rememberPicture(PictureRules.ME)
+    val pick = rememberPicturePicker { store.save(PictureRules.ME, it) }
+    SectionHeader(R.string.setting_plus_picture)
+    Text(
+        stringResource(R.string.setting_plus_picture_note),
+        style = MaterialTheme.typography.bodySmall,
+        color = MaterialTheme.colorScheme.onSurfaceVariant,
+    )
+    Spacer(Modifier.heightIn(min = 8.dp))
+    PictureRow(picture, stringResource(R.string.setting_plus_picture), onPick = pick, onRemove = { scope.launch { store.delete(PictureRules.ME) } })
+    if (picture != null) {
+        SwitchRow(R.string.setting_widget_picture, onWidget, onWidgetChange)
+        Text(
+            stringResource(R.string.setting_widget_picture_note),
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
         )
     }
 }

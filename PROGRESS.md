@@ -1,6 +1,6 @@
 # Progress
 
-Current phase: **P37 tutorials = spotlight tours, done and committed (941211c); user liked the tours on branch feature/p37-tutorials (from p36). Local chain not pushed: p27→…→p36 (feature/p31-widget … feature/p36-no-brands); master on GitHub = P13–P30. iOS: rules up to P26 only.**
+Current phase: **P38 pictures on +1 done and committed on branch feature/p38-pictures (from p37); user checked Tonight +1 and widget on the phone. Local chain not pushed: p27→…→p38; master on GitHub = P13–P30. iOS: rules up to P26 only.**
 
 ## Phases
 - [x] Setup (project, wrapper, git, CLAUDE.md)
@@ -154,6 +154,16 @@ Current phase: **P37 tutorials = spotlight tours, done and committed (941211c); 
 - Game toggle removed from the Versus top bar (still in Together). `GameState.shownInSession` = "game page open": set from `settledPage`, used for the start page (back from Tab → still on the game) and for player sync. No compact side rows on the game page (user: page 1 only for the sides).
 - Together unchanged (user choice). iOS Versus: do the same 3 pages later.
 - Strings: `versus_page_sides`, `versus_page_water` (EN/TR); game tab reuses `nav_game`. Not yet tested on the phone (user to check).
+
+## P38 report (2026-11-06) — pictures behind +1 (scope re-confirmed by the user before building)
+- User choices: pictures on the Tonight +1, Versus/Together people and the widget +1 (no Game chips); safeguards only (no NSFW model, no new dependency); move & zoom; set in Settings → Drinks and in the setup dialogs.
+- `domain/PictureRules.kt`: keys `me`, `friend_<id>`, `s<session>_<SIDE>` (this night only), `draft_<SIDE>` (picked in an open dialog); `keyFor` (linked friend's picture follows them), `keep` (clean-up), `sampleSize`, crop maths (`coverScale`, `clampZoom` 1–5×, `clampOffset`, `crop` → source square). Tests: `PictureRulesTest` (7).
+- `system/PictureStore.kt` (`app.pictures`): files/pictures/<key>.jpg (384 px JPEG), `version` flow, small LRU cache, `save/delete/apply(side, change, key)`, `prune(openSession)`, `clearDrafts`, `keepOnlyMine` (after a restore: friend ids change), `deleteAll` (Delete all data), `loadRoundNow` (widget, 192 px). Decode: ImageDecoder on API 28+ (upright camera photos), BitmapFactory on 26–27 without EXIF rotation (framework ExifInterface has known security bugs; androidx one = new dependency).
+- `ui/Pictures.kt`: `LocalPictures`, `rememberPicture(key)`, `PictureFill` (crop + `PictureColors.scrim`, label `PictureColors.onPicture`; fixed theme tokens in Theme.kt), `rememberPicturePicker` (Photo Picker `PickVisualMedia`, no permission; falls back to the system picker) → `PictureCropDialog` (pinch/drag + zoom slider, circle frame, "only photos you're allowed to use" note) → 384 px square, `PictureRow` (avatar · Choose/Change · Remove).
+- Where: Tonight big +1 (`me`); Versus side +1 (friend or night key); Together grid +1 circle and a small round photo in the rows' "Add drink"; widget drinks +1 in every size (tiny, 2×2, strip, big, XL) only when Settings → Drinks → "Show it on the widget" is on (default off) and counts aren't hidden by the PIN; never on Versus widget buttons.
+- Setup dialogs: Versus `SidePicture` under each name, Together under each seat; picks are drafts until Save (`SideDraft.picture` / `Map<Side, PictureChange>`), Cancel clears drafts. `VersusViewModel` / `GroupViewModel` move drafts to the final key after start/update.
+- Clean-up: night pictures pruned when their Versus/Together isn't open; drafts cleared on app start and dialog cancel; friend picture deleted with the friend; all pictures with Delete all data. Not in exports/backups (allowBackup=false); never shared.
+- No new dependency, no permission change. Release APK 2.10 MB (+35 KB).
 
 ## P37 report (2026-11-06) — tutorials (scope re-confirmed by the user before building)
 - User tested the first version (swipe cards everywhere) and asked for something more interactive, "show the functions in app". Chosen: **spotlight tours** over the real screen (nothing is pressed, no fake drinks), cards only for GENERAL (intro) and WIDGET (no screen), stops whose button isn't on screen are skipped.

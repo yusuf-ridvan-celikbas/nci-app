@@ -28,6 +28,7 @@ class CansinApp : Application() {
             runCatching { storage.scrubBrands() }
             runCatching { settingsStore.removeBrandPrefs() }
             runCatching { storage.runIfDue() }
+            runCatching { pictures.clearDrafts() }
         }
     }
 
@@ -39,12 +40,13 @@ class CansinApp : Application() {
         HistoryRepository(database.sessionDao(), database.beerDao(), database.noteDao(), database.waterDao(), database.friendResultDao(), database.groupSeatDao())
     }
     val dataManager: DataManager by lazy {
-        DataManager(this, database, settingsStore, { reminders.cancel() }, { CounterWidget.refreshAll(this) }, { storage.compactNow() })
+        DataManager(this, database, settingsStore, { reminders.cancel() }, { CounterWidget.refreshAll(this) }, { storage.compactNow() }, { pictures.deleteAll() })
     }
     val storage: com.cansin.app.system.StorageMaintenance by lazy {
         com.cansin.app.system.StorageMaintenance(this, database, settingsStore, { block -> sessionRepository.exclusive { block() } })
     }
     val appLock: AppLock by lazy { AppLock(settingsStore) }
+    val pictures: com.cansin.app.system.PictureStore by lazy { com.cansin.app.system.PictureStore(this) }
     val drinkTimer: DrinkTimer by lazy { DrinkTimer(settingsStore, { sessionRepository }) }
     val gameRepository: com.cansin.app.data.GameRepository by lazy { com.cansin.app.data.GameRepository(database.customQuestionDao()) }
     val groupTimers: com.cansin.app.timer.GroupTimers by lazy { com.cansin.app.timer.GroupTimers(settingsStore, { sessionRepository }) }

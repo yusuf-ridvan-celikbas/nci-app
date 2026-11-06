@@ -62,6 +62,11 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.cansin.app.R
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.foundation.Image
+import androidx.compose.ui.graphics.ImageBitmap
+import com.cansin.app.ui.theme.PictureColors
+import com.cansin.app.domain.PictureRules
 import com.cansin.app.domain.TourStep
 import com.cansin.app.domain.TutorialTopic
 import com.cansin.app.data.Session
@@ -313,7 +318,7 @@ private fun SeatRow(
                         enabled = times.drinks > 0,
                         modifier = Modifier.semantics { contentDescription = removeDescription },
                     ) { Text(stringResource(R.string.minus_one), fontSize = 18.sp) }
-                    AddDrink(name, seatBg, seatFg, onAdd, onPick)
+                    AddDrink(name, seatBg, seatFg, rememberPicture(PictureRules.side(session.id, times.side)), onAdd, onPick)
                     val waterDescription = stringResource(R.string.group_water_add, name)
                     FilledTonalButton(onClick = onWater, modifier = Modifier.semantics { contentDescription = waterDescription }) {
                         Text(stringResource(R.string.group_add_water))
@@ -376,7 +381,11 @@ private fun RowScope.SeatCell(
                     )
                     .semantics { contentDescription = addDescription },
                 contentAlignment = Alignment.Center,
-            ) { Text(stringResource(R.string.plus_one), color = bg, fontSize = 22.sp) }
+            ) {
+                val picture = rememberPicture(PictureRules.side(session.id, times.side))
+                picture?.let { PictureFill(it) }
+                Text(stringResource(R.string.plus_one), color = if (picture != null) PictureColors.onPicture else bg, fontSize = 22.sp)
+            }
         }
         TextButton(
             onClick = onWater,
@@ -389,7 +398,7 @@ private fun RowScope.SeatCell(
 /** Tap = default drink, long-press = drink picker (same as the main counter). */
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
-private fun RowScope.AddDrink(name: String, bg: Color, fg: Color, onAdd: () -> Unit, onPick: () -> Unit) {
+private fun RowScope.AddDrink(name: String, bg: Color, fg: Color, picture: ImageBitmap?, onAdd: () -> Unit, onPick: () -> Unit) {
     val description = stringResource(R.string.versus_add, name)
     Box(
         Modifier
@@ -407,6 +416,11 @@ private fun RowScope.AddDrink(name: String, bg: Color, fg: Color, onAdd: () -> U
             .semantics { contentDescription = description },
         contentAlignment = Alignment.Center,
     ) {
-        Text(stringResource(R.string.group_add_drink), color = fg, style = MaterialTheme.typography.titleMedium)
+        Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            picture?.let {
+                Image(it, contentDescription = null, contentScale = ContentScale.Crop, modifier = Modifier.size(32.dp).clip(CircleShape))
+            }
+            Text(stringResource(R.string.group_add_drink), color = fg, style = MaterialTheme.typography.titleMedium)
+        }
     }
 }

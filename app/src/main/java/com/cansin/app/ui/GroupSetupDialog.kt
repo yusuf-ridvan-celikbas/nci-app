@@ -30,6 +30,8 @@ import androidx.compose.ui.semantics.role
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
 import com.cansin.app.R
+import com.cansin.app.domain.PictureRules
+import com.cansin.app.domain.PictureChange
 import com.cansin.app.data.FriendProfile
 import com.cansin.app.data.GroupSeat
 import com.cansin.app.data.Side
@@ -49,7 +51,8 @@ fun GroupSetupDialog(
     me: Side?,
     editing: Boolean,
     endsCurrentSession: Boolean,
-    onSave: (GroupSetup) -> Unit,
+    sessionId: Long?,
+    onSave: (GroupSetup, Map<Side, PictureChange>) -> Unit,
     onDismiss: () -> Unit,
 ) {
     val ordered = GroupRules.ordered(seats)
@@ -59,6 +62,9 @@ fun GroupSetupDialog(
         List(GroupRules.MAX_SEATS) { i -> ordered.getOrNull(i)?.name.orEmpty() }.toMutableStateList()
     }
     var meIndex by rememberSaveable { mutableIntStateOf(GroupRules.SIDES.indexOf(me)) }
+    val pictures = rememberSaveable(saver = namesSaver) {
+        List(GroupRules.MAX_SEATS) { PictureChange.KEEP.name }.toMutableStateList()
+    }
     val sides = GroupRules.sides(count)
 
     AlertDialog(
@@ -92,6 +98,12 @@ fun GroupSetupDialog(
                             androidx.compose.material3.OutlinedTextFieldDefaults.colors(focusedBorderColor = c, unfocusedBorderColor = c)
                         } ?: androidx.compose.material3.OutlinedTextFieldDefaults.colors(),
                     )
+                    SidePicture(
+                        side,
+                        sessionId?.let { PictureRules.side(it, side) },
+                        PictureChange.valueOf(pictures[i]),
+                        names[i].ifBlank { placeholder },
+                    ) { pictures[i] = it.name }
                 }
                 Text(stringResource(R.string.versus_me), style = MaterialTheme.typography.titleSmall)
                 FlowRow(Modifier.fillMaxWidth().selectableGroup(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
@@ -120,7 +132,8 @@ fun GroupSetupDialog(
         },
         confirmButton = {
             TextButton(onClick = {
-                onSave(GroupSetup(names.take(count).map { it.ifBlank { null } }, sides.getOrNull(meIndex)))
+                val changes = GroupRules.SIDES.take(GroupRules.MAX_SEATS).mapIndexed { i, side -> side to PictureChange.valueOf(pictures[i]) }.toMap()
+                onSave(GroupSetup(names.take(count).map { it.ifBlank { null } }, sides.getOrNull(meIndex)), changes)
             }) { Text(stringResource(if (editing) R.string.action_save else R.string.action_start)) }
         },
         dismissButton = { TextButton(onClick = onDismiss) { Text(stringResource(R.string.action_cancel)) } },

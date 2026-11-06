@@ -659,4 +659,15 @@
     <string name="tour_friends_end_body">Geceyi herkes için Geçmiş\'e kaydeder.</string>
     <string name="tut_needs_shared">Önce Kapışma veya Birlikte başlat</string>
     <string name="tut_needs_solo">Kapışma veya Birlikte açık değilken kullanılabilir</string>
+    <!-- P38 pictures -->
+    <string name="picture_crop_title">Taşı ve yakınlaştır</string>
+    <string name="picture_note">Sadece kullanma iznin olan fotoğrafları kullan ve arkadaşlarının kendi fotoğraflarına razı olduğundan emin ol. Resimler bu telefonda kalır: asla paylaşılmaz, dışa aktarılmaz ve yedeklenmez.</string>
+    <string name="picture_choose">Resim seç</string>
+    <string name="picture_change">Değiştir</string>
+    <string name="picture_remove">Kaldır</string>
+    <string name="picture_for">%1$s için resim</string>
+    <string name="setting_plus_picture">+1 resmi</string>
+    <string name="setting_plus_picture_note">Büyük +1\'in arkasında bir fotoğraf: takımın ya da bir arkadaşın gibi.</string>
+    <string name="setting_widget_picture">Widget\'ta da göster</string>
+    <string name="setting_widget_picture_note">Varsayılan olarak kapalı, çünkü ana ekranını başkaları görebilir. PIN sayıları gizlediğinde resim de gizlenir.</string>
 </resources>

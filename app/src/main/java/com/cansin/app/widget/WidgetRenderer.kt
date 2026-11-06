@@ -31,12 +31,20 @@ import com.cansin.app.prefs.Settings
 import com.cansin.app.prefs.ThemeMode
 import com.cansin.app.prefs.hideCounts
 import com.cansin.app.system.AppLocale
+import com.cansin.app.ui.theme.PictureColors
 import com.cansin.app.ui.theme.VersusColors
 import com.cansin.app.ui.theme.colorScheme
 import java.text.DecimalFormatSymbols
 import java.util.Date
 
-data class WidgetData(val settings: Settings, val snapshot: CounterSnapshot, val timer: TimerState, val now: Long = System.currentTimeMillis())
+data class WidgetData(
+    val settings: Settings,
+    val snapshot: CounterSnapshot,
+    val timer: TimerState,
+    val now: Long = System.currentTimeMillis(),
+    /** P38: round +1 picture, only when the user turned it on for widgets and counts aren't hidden. */
+    val picture: android.graphics.Bitmap? = null,
+)
 
 /** Per widget: its setting (Auto / one thing) and the SMALL page index. */
 data class WidgetConfig(val focus: WidgetFocus = WidgetFocus.AUTO, val pageIndex: Int = 0)
@@ -247,6 +255,7 @@ object WidgetRenderer {
             set(R.id.widget_value, "setTextColor") { it.onPrimary }
             set(R.id.tiny_hint, "setTextColor") { it.onPrimary }
         }
+        if (WidgetContent.tiny(c.focus) == WidgetPage.BEER) picture(c, views, R.id.tiny_circle, R.id.widget_value, R.id.tiny_hint)
         return views
     }
 
@@ -325,6 +334,7 @@ object WidgetRenderer {
             versusTint(views, R.id.pager_minus_bg, R.id.pager_minus_label, Side.RED)
             versusTint(views, R.id.pager_plus_bg, R.id.pager_plus_label, Side.BLUE)
         }
+        if (page == WidgetPage.BEER) picture(c, views, R.id.pager_plus_bg, R.id.pager_plus_label)
         return views
     }
 
@@ -408,6 +418,7 @@ object WidgetRenderer {
             dots.forEachIndexed { i, id -> set(id, "setColorFilter") { if (i == current) it.onSurface else it.muted } }
         }
         dots.forEachIndexed { i, id -> views.setInt(id, "setImageAlpha", if (i == current) 255 else 110) }
+        if (page == WidgetPage.BEER) picture(c, views, R.id.widget_add_bg, R.id.widget_add_label)
         return views
     }
 
@@ -524,6 +535,7 @@ object WidgetRenderer {
         }
         versusTint(views, R.id.big_red_plus_bg, R.id.big_red_plus_label, Side.RED)
         versusTint(views, R.id.big_blue_plus_bg, R.id.big_blue_plus_label, Side.BLUE)
+        if (WidgetBlock.DRINKS in blocks) picture(c, views, ROW_DRINKS.plusBg, ROW_DRINKS.plusLabel)
         return views
     }
 
@@ -631,6 +643,7 @@ object WidgetRenderer {
         }
         versusTint(views, R.id.xl_red_plus_bg, R.id.xl_red_plus_label, Side.RED)
         versusTint(views, R.id.xl_blue_plus_bg, R.id.xl_blue_plus_label, Side.BLUE)
+        if (WidgetBlock.HERO in blocks) picture(c, views, R.id.xl_plus_bg, R.id.xl_plus_label)
         return views
     }
 
@@ -710,6 +723,15 @@ object WidgetRenderer {
     }
 
     // ---------- colours ----------
+
+    /** P38: the +1 picture behind my drinks +1 (never in Versus or when hidden); darkened, label in white. */
+    private fun picture(c: Ctx, views: RemoteViews, bg: Int, vararg labels: Int) {
+        val bitmap = c.data.picture ?: return
+        if (c.hidden || !c.canAdd) return
+        views.setImageViewBitmap(bg, bitmap)
+        views.setInt(bg, "setColorFilter", PictureColors.scrim.toArgb())
+        labels.forEach { views.setTextColor(it, PictureColors.onPicture.toArgb()) }
+    }
 
     /** Fixed Versus RED/BLUE (same in every theme, like the app). */
     private fun versusTint(views: RemoteViews, bg: Int, label: Int, side: Side) {

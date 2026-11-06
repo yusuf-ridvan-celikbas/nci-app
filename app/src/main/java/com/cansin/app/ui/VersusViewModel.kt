@@ -1,5 +1,8 @@
 package com.cansin.app.ui
 
+import com.cansin.app.system.PictureStore
+import com.cansin.app.domain.PictureRules
+import com.cansin.app.domain.PictureChange
 import androidx.compose.ui.graphics.toArgb
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
@@ -29,10 +32,19 @@ import kotlinx.coroutines.launch
 
 data class VersusState(val loaded: Boolean = false, val session: Session? = null, val red: Int = 0, val blue: Int = 0)
 
-data class SideDraft(val name: String = "", val friendId: Long? = null, val saveAsFriend: Boolean = false)
+data class SideDraft(
+    val name: String = "",
+    val friendId: Long? = null,
+    val saveAsFriend: Boolean = false,
+    val picture: PictureChange = PictureChange.KEEP,
+)
 
 @OptIn(ExperimentalCoroutinesApi::class)
-class VersusViewModel(private val repository: SessionRepository, private val friendRepository: FriendRepository) : ViewModel() {
+class VersusViewModel(
+    private val repository: SessionRepository,
+    private val friendRepository: FriendRepository,
+    private val pictures: PictureStore,
+) : ViewModel() {
     val state: StateFlow<VersusState> = repository.openSession
         .flatMapLatest { session ->
             if (session?.mode != SessionMode.VERSUS) {
@@ -67,7 +79,9 @@ class VersusViewModel(private val repository: SessionRepository, private val fri
             blueFriendId = link(blue, VersusColors.blue.toArgb()),
             meSide = me,
         )
-        if (start) repository.startVersus(setup) else repository.updateVersus(setup)
+        val id = if (start) repository.startVersus(setup).id else state.value.session?.id.also { repository.updateVersus(setup) }
+        pictures.apply(Side.RED, red.picture, PictureRules.keyFor(id, Side.RED, setup.redFriendId))
+        pictures.apply(Side.BLUE, blue.picture, PictureRules.keyFor(id, Side.BLUE, setup.blueFriendId))
     }
 
     fun deleteFriend(id: Long) = viewModelScope.launch { friendRepository.delete(id) }
@@ -76,7 +90,7 @@ class VersusViewModel(private val repository: SessionRepository, private val fri
         draft.friendId ?: if (draft.saveAsFriend) friendRepository.save(draft.name, color)?.id else null
 
     companion object {
-        fun factory(repository: SessionRepository, friends: FriendRepository): ViewModelProvider.Factory =
-            viewModelFactory { initializer { VersusViewModel(repository, friends) } }
+        fun factory(repository: SessionRepository, friends: FriendRepository, pictures: PictureStore): ViewModelProvider.Factory =
+            viewModelFactory { initializer { VersusViewModel(repository, friends, pictures) } }
     }
 }

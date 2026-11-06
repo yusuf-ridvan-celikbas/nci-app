@@ -1,5 +1,8 @@
 package com.cansin.app.ui
 
+import com.cansin.app.system.PictureStore
+import com.cansin.app.domain.PictureRules
+import com.cansin.app.domain.PictureChange
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
@@ -52,6 +55,7 @@ class GroupViewModel(
     private val drinkTimer: DrinkTimer,
     private val groupTimers: GroupTimers,
     private val onTimerChanged: suspend () -> Unit,
+    private val pictures: PictureStore,
 ) : ViewModel() {
     private val enabled = store.settings.map { it.timerEnabled }
 
@@ -122,8 +126,12 @@ class GroupViewModel(
 
     fun endSession() = viewModelScope.launch { repository.endSession() }
 
-    fun save(setup: GroupSetup, start: Boolean) = viewModelScope.launch {
-        if (start) repository.startGroup(setup) else repository.updateGroup(setup)
+    fun save(setup: GroupSetup, changes: Map<Side, PictureChange>, start: Boolean) = viewModelScope.launch {
+        val id = if (start) repository.startGroup(setup).id else state.value.session?.id.also { repository.updateGroup(setup) }
+        val seated = GroupRules.sides(maxOf(setup.names.size, state.value.seats.size)).toSet()
+        changes.forEach { (side, change) ->
+            pictures.apply(side, change, id?.takeIf { side in seated }?.let { PictureRules.side(it, side) })
+        }
     }
 
     companion object {
@@ -133,7 +141,8 @@ class GroupViewModel(
             drinkTimer: DrinkTimer,
             groupTimers: GroupTimers,
             onTimerChanged: suspend () -> Unit,
+            pictures: PictureStore,
         ): ViewModelProvider.Factory =
-            viewModelFactory { initializer { GroupViewModel(repository, store, drinkTimer, groupTimers, onTimerChanged) } }
+            viewModelFactory { initializer { GroupViewModel(repository, store, drinkTimer, groupTimers, onTimerChanged, pictures) } }
     }
 }

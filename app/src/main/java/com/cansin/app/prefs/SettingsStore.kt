@@ -92,6 +92,7 @@ private val TIMER_STARTED = longPreferencesKey("timer_started_at")
 private const val WIDGET_PAGE_PREFIX = "widget_page_"
 private const val WIDGET_FOCUS_PREFIX = "widget_focus_"
 private val WIDGET_PROMILLE = booleanPreferencesKey("widget_promille")
+private val WIDGET_PICTURE = booleanPreferencesKey("widget_picture")
 private val REMINDER_NEXT_AT = longPreferencesKey("reminder_next_at")
 private val REMINDER_SESSION = longPreferencesKey("reminder_session")
 private val REMINDER_STOPPED_SESSION = longPreferencesKey("reminder_stopped_session")
@@ -123,6 +124,7 @@ class SettingsStore(private val context: Context) {
             groupLayout = enumOr(p[GROUP_LAYOUT], GroupLayout.ROWS),
             defaultServing = enumOr(p[DEFAULT_SERVING], com.cansin.app.data.Serving.DRAFT),
             widgetPromille = p[WIDGET_PROMILLE] == true,
+            widgetPicture = p[WIDGET_PICTURE] == true,
             keepHistory = enumOr(p[KEEP_HISTORY], KeepHistory.FOREVER),
             compressAfter = enumOr(p[COMPRESS_AFTER], CompressAfter.NEVER),
             prices = PriceSlot.entries.mapNotNull { k -> p[priceKey(k)]?.takeIf { it > 0 && NoteRules.isValidAmount(it) }?.let { k to it } }.toMap(),
@@ -197,6 +199,8 @@ class SettingsStore(private val context: Context) {
     }
 
     suspend fun setWidgetPromille(value: Boolean) = edit { it[WIDGET_PROMILLE] = value }
+
+    suspend fun setWidgetPicture(value: Boolean) = edit { it[WIDGET_PICTURE] = value }
 
     val reminderState: Flow<ReminderState> = context.dataStore.data.map { p ->
         ReminderState(p[REMINDER_NEXT_AT], p[REMINDER_SESSION], p[REMINDER_STOPPED_SESSION])

@@ -75,6 +75,8 @@ data class Settings(
     val defaultServing: com.cansin.app.data.Serving = com.cansin.app.data.Serving.DRAFT,
     /** P31: show the ‰ estimate on widgets (needs a body profile). Off by default. */
     val widgetPromille: Boolean = false,
+    /** P38: show the +1 picture on widgets. Off by default (home screens are public). */
+    val widgetPicture: Boolean = false,
     val shareName: String? = null,
     val currency: Currency = Currency.NONE,
     val careEnabled: Boolean = true,

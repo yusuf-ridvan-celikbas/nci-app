@@ -29,6 +29,10 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.unit.dp
 import com.cansin.app.R
+import kotlinx.coroutines.launch
+import androidx.compose.runtime.rememberCoroutineScope
+import com.cansin.app.domain.PictureRules
+import com.cansin.app.domain.PictureChange
 import com.cansin.app.data.FriendProfile
 import com.cansin.app.data.Session
 import com.cansin.app.data.Side
@@ -48,6 +52,8 @@ fun VersusSetupDialog(
     var blueFriend by rememberSaveable { mutableStateOf(session?.blueFriendId) }
     var blueSave by rememberSaveable { mutableStateOf(false) }
     var me by rememberSaveable { mutableStateOf(session?.meSide) }
+    var redPicture by rememberSaveable { mutableStateOf(PictureChange.KEEP) }
+    var bluePicture by rememberSaveable { mutableStateOf(PictureChange.KEEP) }
 
     AlertDialog(
         onDismissRequest = onDismiss,
@@ -58,7 +64,9 @@ fun VersusSetupDialog(
                     Text(stringResource(R.string.versus_ends_session), style = MaterialTheme.typography.bodySmall)
                 }
                 SideFields(Side.RED, redName, redFriend, redSave, friends, { name, id -> redName = name; redFriend = id }, { redSave = it })
+                SidePicture(Side.RED, PictureRules.keyFor(session?.id, Side.RED, redFriend), redPicture, redName) { redPicture = it }
                 SideFields(Side.BLUE, blueName, blueFriend, blueSave, friends, { name, id -> blueName = name; blueFriend = id }, { blueSave = it })
+                SidePicture(Side.BLUE, PictureRules.keyFor(session?.id, Side.BLUE, blueFriend), bluePicture, blueName) { bluePicture = it }
                 Text(stringResource(R.string.versus_me), style = MaterialTheme.typography.titleSmall)
                 Column(Modifier.selectableGroup()) {
                     listOf(Side.RED, Side.BLUE, null).forEach { side ->
@@ -75,11 +83,32 @@ fun VersusSetupDialog(
         },
         confirmButton = {
             TextButton(onClick = {
-                onSave(SideDraft(redName, redFriend, redSave), SideDraft(blueName, blueFriend, blueSave), me)
+                onSave(SideDraft(redName, redFriend, redSave, redPicture), SideDraft(blueName, blueFriend, blueSave, bluePicture), me)
             }) { Text(stringResource(if (session == null) R.string.action_start else R.string.action_save)) }
         },
         dismissButton = { TextButton(onClick = onDismiss) { Text(stringResource(R.string.action_cancel)) } },
     )
+}
+
+/** One side's +1 picture in the dialog: a new pick waits as a draft until Save. */
+@Composable
+internal fun SidePicture(side: Side, savedKey: String?, change: PictureChange, name: String, onChange: (PictureChange) -> Unit) {
+    val store = LocalPictures.current ?: return
+    val scope = rememberCoroutineScope()
+    val shown = when (change) {
+        PictureChange.NEW -> rememberPicture(PictureRules.draft(side))
+        PictureChange.REMOVE -> null
+        PictureChange.KEEP -> rememberPicture(savedKey)
+    }
+    val pick = rememberPicturePicker { bitmap ->
+        store.save(PictureRules.draft(side), bitmap)
+        onChange(PictureChange.NEW)
+    }
+    val label = stringResource(R.string.picture_for, name.trim().ifEmpty { sideName(null, side) })
+    PictureRow(shown, label, onPick = pick, onRemove = {
+        scope.launch { store.delete(PictureRules.draft(side)) }
+        onChange(PictureChange.REMOVE)
+    })
 }
 
 @Composable

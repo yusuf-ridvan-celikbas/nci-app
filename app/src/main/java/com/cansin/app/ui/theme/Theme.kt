@@ -39,6 +39,12 @@ val VersusColors = SideColors(
     Color(Palettes.versusBlue.onPrimary),
 )
 
+/** P38: a photo behind a +1 is darkened by [scrim] so the white "+1" stays readable on any picture (same in every theme). */
+object PictureColors {
+    val scrim = Color(0x73000000)
+    val onPicture = Color(0xFFFFFFFF)
+}
+
 /** Fixed seat colours for group mode (light tones, same in every theme like Versus RED/BLUE); AA-tested via Palettes. */
 fun seatColors(side: com.cansin.app.data.Side?): Pair<Color, Color>? =
     Palettes.seat(side)?.let { Color(it.primary) to Color(it.onPrimary) }

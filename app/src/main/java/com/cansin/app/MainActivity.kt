@@ -1,5 +1,6 @@
 package com.cansin.app
 
+import com.cansin.app.ui.LocalPictures
 import android.Manifest
 import android.app.NotificationManager
 import android.content.Context
@@ -130,9 +131,9 @@ class MainActivity : ComponentActivity() {
     private val counter: CounterViewModel by viewModels { CounterViewModel.factory(app.sessionRepository) }
     private val notes: NotesViewModel by viewModels { NotesViewModel.factory(app.sessionRepository) }
     private val promille: PromilleViewModel by viewModels { PromilleViewModel.factory(app.sessionRepository, app.settingsStore) }
-    private val versus: VersusViewModel by viewModels { VersusViewModel.factory(app.sessionRepository, app.friendRepository) }
+    private val versus: VersusViewModel by viewModels { VersusViewModel.factory(app.sessionRepository, app.friendRepository, app.pictures) }
     private val group: GroupViewModel by viewModels {
-        GroupViewModel.factory(app.sessionRepository, app.settingsStore, app.drinkTimer, app.groupTimers) { CounterWidget.refreshAll(app) }
+        GroupViewModel.factory(app.sessionRepository, app.settingsStore, app.drinkTimer, app.groupTimers, { CounterWidget.refreshAll(app) }, app.pictures)
     }
     private val game: GameViewModel by viewModels { GameViewModel.factory(app.gameRepository, app.settingsStore) }
     private val water: WaterViewModel by viewModels { WaterViewModel.factory(app.sessionRepository, app.settingsStore) }
@@ -271,6 +272,13 @@ class MainActivity : ComponentActivity() {
         }
         val seen by rememberUpdatedState(settings.tutorialsSeen)
         val tourTargets = remember { TourTargets() }
+        // P38: night pictures live only while their Versus/Together is open; widgets follow picture changes.
+        val openShared = versusState.session?.id ?: groupState.session?.id
+        LaunchedEffect(openShared, versusState.loaded, groupState.loaded) {
+            if (versusState.loaded && groupState.loaded) app.pictures.prune(openShared, keepDrafts = true)
+        }
+        val pictureVersion by app.pictures.version.collectAsState()
+        LaunchedEffect(pictureVersion) { if (pictureVersion > 0) CounterWidget.refreshAll(app) }
         val shared = versusState.session != null || groupState.session != null
         // Tours point at a real screen, so opening one (e.g. from Settings) goes there first.
         val openTutorial: (TutorialTopic) -> Unit = { topic ->
@@ -293,6 +301,7 @@ class MainActivity : ComponentActivity() {
             LocalCurrency provides settings.currency,
             LocalTutorial provides openTutorial,
             LocalTourTargets provides tourTargets,
+            LocalPictures provides app.pictures,
         ) {
             val tab = screen.tab()
             val showBar = settings.ageConfirmed && !showLock && tab != null
@@ -437,12 +446,13 @@ class MainActivity : ComponentActivity() {
                     me = session?.meSide,
                     editing = session != null,
                     endsCurrentSession = session == null && counter.state.collectAsState().value.sessionActive,
-                    onSave = { setup ->
-                        group.save(setup, start = session == null)
+                    sessionId = session?.id,
+                    onSave = { setup, pictures ->
+                        group.save(setup, pictures, start = session == null)
                         editingGroup = false
                         screen = Screen.COUNTER
                     },
-                    onDismiss = { editingGroup = false },
+                    onDismiss = { editingGroup = false; lifecycleScope.launch { app.pictures.clearDrafts() } },
                 )
             }
             if (editingSides && settings.ageConfirmed) {
@@ -456,7 +466,7 @@ class MainActivity : ComponentActivity() {
                         editingSides = false
                         screen = Screen.COUNTER
                     },
-                    onDismiss = { editingSides = false },
+                    onDismiss = { editingSides = false; lifecycleScope.launch { app.pictures.clearDrafts() } },
                 )
             }
         } }
@@ -544,7 +554,10 @@ class MainActivity : ComponentActivity() {
         },
         onBeerSize = { size -> update { setBeerSize(size) } },
         onProfile = { profile -> update { setProfile(profile) } },
-        onDeleteFriend = { id -> versus.deleteFriend(id) },
+        onDeleteFriend = { id ->
+            versus.deleteFriend(id)
+            lifecycleScope.launch { app.pictures.delete(com.cansin.app.domain.PictureRules.friend(id)) }
+        },
         onWaterEnabled = { on -> update { setWaterEnabled(on) } },
         onWaterSize = { ml -> update { setWaterSize(ml) } },
         onWaterEvery = { n -> update { setWaterEvery(n) } },
@@ -562,7 +575,11 @@ class MainActivity : ComponentActivity() {
         onPinChanged = { lifecycleScope.launch { CounterWidget.refreshAll(app) } },
         onExport = { includeProfile -> lifecycleScope.launch { startActivity(app.dataManager.export(includeProfile)) } },
         onReadBackup = { uri -> app.dataManager.readBackup(uri) },
-        onRestore = { data -> app.dataManager.restore(data) },
+        onRestore = { data ->
+            app.dataManager.restore(data)
+            // Friends come back with new ids: keep only my own +1 picture.
+            app.pictures.keepOnlyMine()
+        },
         onDeleteAll = { lifecycleScope.launch { app.dataManager.deleteAll() } },
         storage = app.storage,
         onKeepHistory = { app.settingsStore.setKeepHistory(it) },
@@ -571,6 +588,7 @@ class MainActivity : ComponentActivity() {
         onDefaultServing = { serving -> update { setDefaultServing(serving) } },
         onWidgetPromille = { on -> lifecycleScope.launch { app.settingsStore.setWidgetPromille(on); CounterWidget.refreshAll(app) } },
         onResetTutorials = { lifecycleScope.launch { store.resetTutorials() } },
+        onWidgetPicture = { on -> update { setWidgetPicture(on) } },
     )
 
     private fun update(block: suspend SettingsStore.() -> Unit) {
