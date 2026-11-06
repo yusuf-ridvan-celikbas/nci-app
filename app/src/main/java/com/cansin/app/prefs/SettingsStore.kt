@@ -118,8 +118,6 @@ class SettingsStore(private val context: Context) {
             timerEnabled = p[TIMER_ENABLED] ?: true,
             timerAuto = p[TIMER_AUTO] ?: true,
             groupLayout = enumOr(p[GROUP_LAYOUT], GroupLayout.ROWS),
-            defaultBrand = com.cansin.app.domain.BrandRules.clean(p[DEFAULT_BRAND]),
-            hiddenBrands = p[HIDDEN_BRANDS].orEmpty().mapNotNull { com.cansin.app.domain.BrandRules.clean(it) }.toSet(),
             defaultServing = enumOr(p[DEFAULT_SERVING], com.cansin.app.data.Serving.DRAFT),
             widgetPromille = p[WIDGET_PROMILLE] == true,
             keepHistory = enumOr(p[KEEP_HISTORY], KeepHistory.FOREVER),
@@ -277,10 +275,11 @@ class SettingsStore(private val context: Context) {
 
     suspend fun setDefaultServing(value: com.cansin.app.data.Serving) = edit { it[DEFAULT_SERVING] = value.name }
 
-    suspend fun hideBrand(brand: String) = edit { it[HIDDEN_BRANDS] = com.cansin.app.domain.BrandRules.hide(it[HIDDEN_BRANDS].orEmpty(), brand) }
-    suspend fun unhideBrand(brand: String?) = edit { it[HIDDEN_BRANDS] = com.cansin.app.domain.BrandRules.unhide(it[HIDDEN_BRANDS].orEmpty(), brand) }
-
-    suspend fun setDefaultBrand(value: String?) = edit { it.putOrRemove(DEFAULT_BRAND, com.cansin.app.domain.BrandRules.clean(value)) }
+    /** P36: brand settings are gone; drop any stored values. */
+    suspend fun removeBrandPrefs() = edit {
+        it.remove(DEFAULT_BRAND)
+        it.remove(HIDDEN_BRANDS)
+    }
 
     suspend fun setKeepHistory(value: KeepHistory) = edit { it[KEEP_HISTORY] = value.name }
     suspend fun setCompressAfter(value: CompressAfter) = edit { it[COMPRESS_AFTER] = value.name }

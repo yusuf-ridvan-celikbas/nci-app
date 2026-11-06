@@ -15,7 +15,8 @@ object NoteRules {
     const val MAX_AMOUNT_MINOR = 100_000_000L
     private val AMOUNT = Regex("""^(\d{1,9})(?:[.,](\d{1,2}))?$""")
 
-    fun cleanText(raw: String): String? = raw.trim().take(Note.MAX_TEXT).ifEmpty { null }
+    /** P36: brand names are removed ("Belfast Bira" → "Bira"); a note that was only a brand is refused. */
+    fun cleanText(raw: String): String? = BrandFilter.strip(raw.trim().take(Note.MAX_TEXT)).ifEmpty { null }
 
     fun cleanPerson(raw: String?): String? = raw?.trim()?.take(Note.MAX_PERSON)?.ifEmpty { null }
 

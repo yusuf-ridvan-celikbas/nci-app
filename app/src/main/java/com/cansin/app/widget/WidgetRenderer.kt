@@ -180,9 +180,9 @@ object WidgetRenderer {
 
     /** "+1: Efes · 50 cl" — what the widget's +1 adds. */
     private fun addsLabel(c: Ctx): String {
-        val d = Drinks.default(c.data.settings.defaultDrink, c.data.settings.beerSize, c.data.settings.defaultBrand, c.data.settings.defaultServing)
+        val d = Drinks.default(c.data.settings.defaultDrink, c.data.settings.beerSize, c.data.settings.defaultServing)
         val sep = DecimalFormatSymbols.getInstance(c.context.resources.configuration.locales[0]).decimalSeparator
-        val name = listOfNotNull(d.brand ?: c.context.getString(drinkName(d.kind)), d.serving?.let { c.context.getString(if (it == com.cansin.app.data.Serving.DRAFT) R.string.serving_draft else R.string.serving_bottle) }).joinToString(" · ")
+        val name = listOfNotNull(c.context.getString(drinkName(d.kind)), d.serving?.let { c.context.getString(if (it == com.cansin.app.data.Serving.DRAFT) R.string.serving_draft else R.string.serving_bottle) }).joinToString(" · ")
         return c.context.getString(R.string.widget_adds, name, BeerRules.formatCl(d.size.sizeMl, sep))
     }
 
@@ -487,7 +487,7 @@ object WidgetRenderer {
             views.setTextViewText(R.id.big_tab_label, context.getString(R.string.tab_total, money(c, s.tabMinor)))
             val sep = DecimalFormatSymbols.getInstance(context.resources.configuration.locales[0]).decimalSeparator
             val lines = s.lines.joinToString(" · ") { line ->
-                val name = line.brand ?: context.getString(drinkName(line.kind))
+                val name = context.getString(drinkName(line.kind))
                 context.getString(R.string.widget_tab_line, name, BeerRules.formatCl(line.sizeMl, sep), line.count)
             }
             views.setTextViewText(R.id.big_tab_sub, lines)
@@ -645,7 +645,7 @@ object WidgetRenderer {
         val rows = WidgetContent.tabRows(s.allLines.size, s.recentNotes.size)
         val items = rows.lines.map { i ->
             val line = s.allLines[i]
-            val name = line.brand ?: context.getString(drinkName(line.kind))
+            val name = context.getString(drinkName(line.kind))
             context.getString(R.string.widget_tab_line, name, BeerRules.formatCl(line.sizeMl, sep), line.count) to
                 (if (line.unitMinor == null) "–" else money(c, line.totalMinor))
         } + rows.notes.map { i ->

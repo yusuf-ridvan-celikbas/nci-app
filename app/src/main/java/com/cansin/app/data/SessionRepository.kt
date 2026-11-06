@@ -5,7 +5,6 @@ import com.cansin.app.domain.BeerSize
 import com.cansin.app.domain.DrinkChoice
 import com.cansin.app.domain.GroupRules
 import com.cansin.app.domain.GroupSetup
-import com.cansin.app.domain.BrandRules
 import com.cansin.app.domain.NoteRules
 import com.cansin.app.domain.WaterRules
 import com.cansin.app.domain.SessionRules
@@ -95,7 +94,6 @@ class SessionRepository(
 
     fun beers(sessionId: Long): Flow<List<BeerEvent>> = beers.observe(sessionId)
 
-    val recentBrands: Flow<List<String>> = beers.observeRecentBrands()
 
     fun water(sessionId: Long): Flow<List<WaterEvent>> = water.observe(sessionId)
 
@@ -160,11 +158,10 @@ class SessionRepository(
         if (finishPrevious && active != null) beers.latestOnSide(active.id, side)?.let { beers.finish(it.id, now) }
         val session = active ?: Session(startedAt = now).let { it.copy(id = sessions.insert(it)) }
         // Tonight's price wins (edited on the Tab for this pub), else the Settings price.
-        val brand = BrandRules.clean(drink.brand)
         val serving = drink.serving.takeIf { drink.kind == DrinkKind.BEER }
-        val tonight = active?.let { beers.latestPrice(it.id, drink.kind, size.sizeMl, brand, serving) }
+        val tonight = active?.let { beers.latestPrice(it.id, drink.kind, size.sizeMl, serving) }
         val priced = (tonight ?: price(drink.kind, size.sizeMl))?.takeIf { NoteRules.isValidAmount(it) && it > 0 }
-        val event = BeerEvent(sessionId = session.id, side = side, sizeMl = size.sizeMl, abv = size.abv, at = now, kind = drink.kind, priceMinor = priced, brand = brand, serving = serving)
+        val event = BeerEvent(sessionId = session.id, side = side, sizeMl = size.sizeMl, abv = size.abv, at = now, kind = drink.kind, priceMinor = priced, serving = serving)
         return event.copy(id = beers.insert(event)).also { pending += Event.BeerAdded(it, VersusRules.isMine(it, session)) }
     }
 
@@ -210,28 +207,22 @@ class SessionRepository(
     }
 
     /** Tab: set the price of every drink of this kind + size + side tonight (null = take them off the Tab). */
-    suspend fun setDrinkPrice(kind: DrinkKind, sizeMl: Int, side: Side, priceMinor: Long?, brand: String? = null, serving: Serving? = null) = write {
+    suspend fun setDrinkPrice(kind: DrinkKind, sizeMl: Int, side: Side, priceMinor: Long?, serving: Serving? = null) = write {
         val session = activeSession(clock()) ?: return@write
-        beers.setPrice(session.id, kind, sizeMl, side, BrandRules.clean(brand), serving, priceMinor?.takeIf { it > 0 && NoteRules.isValidAmount(it) })
-    }
-
-    /** Tab: change the brand of a drink line (wrong brand typed); null = no brand. */
-    suspend fun setBrand(kind: DrinkKind, sizeMl: Int, side: Side, serving: Serving?, from: String?, to: String?) = write {
-        val session = activeSession(clock()) ?: return@write
-        beers.setBrand(session.id, kind, sizeMl, side, serving, BrandRules.clean(from), BrandRules.clean(to))
+        beers.setPrice(session.id, kind, sizeMl, side, serving, priceMinor?.takeIf { it > 0 && NoteRules.isValidAmount(it) })
     }
 
     /** Tab: switch a drink line between draft and bottle (beer only). */
-    suspend fun setServing(kind: DrinkKind, sizeMl: Int, side: Side, brand: String?, from: Serving?, to: Serving?) = write {
+    suspend fun setServing(kind: DrinkKind, sizeMl: Int, side: Side, from: Serving?, to: Serving?) = write {
         if (kind != DrinkKind.BEER) return@write
         val session = activeSession(clock()) ?: return@write
-        beers.setServing(session.id, kind, sizeMl, side, BrandRules.clean(brand), from, to)
+        beers.setServing(session.id, kind, sizeMl, side, from, to)
     }
 
     /** Tab −1 on one drink line. */
-    suspend fun removeLatestDrink(kind: DrinkKind, sizeMl: Int, side: Side, brand: String? = null, serving: Serving? = null) = write {
+    suspend fun removeLatestDrink(kind: DrinkKind, sizeMl: Int, side: Side, serving: Serving? = null) = write {
         val session = activeSession(clock()) ?: return@write
-        val latest = beers.latestMatching(session.id, side, kind, sizeMl, BrandRules.clean(brand), serving) ?: return@write
+        val latest = beers.latestMatching(session.id, side, kind, sizeMl, serving) ?: return@write
         beers.delete(latest.id)
         pending += Event.BeerRemoved(latest.id)
         deleteIfEmpty(session.id)

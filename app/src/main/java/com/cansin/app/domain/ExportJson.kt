@@ -69,7 +69,6 @@ object ExportJson {
                             .apply {
                                 if (it.kind != DrinkKind.BEER) put("kind", it.kind.name)
                                 it.priceMinor?.let { p -> put("priceMinor", p) }
-                                it.brand?.let { b -> put("brand", b) }
                                 it.serving?.let { v -> put("serving", v.name) }
                             }
                     },

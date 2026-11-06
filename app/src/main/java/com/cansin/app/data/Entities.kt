@@ -67,7 +67,7 @@ data class BeerEvent(
     @ColumnInfo(defaultValue = "BEER") val kind: DrinkKind = DrinkKind.BEER,
     /** P28: price saved when the drink was added (minor units); null = not on the Tab. */
     val priceMinor: Long? = null,
-    /** P29: optional brand label, e.g. "Efes". */
+    /** P29 brand label; P36: no longer used, always cleared (column kept for the schema). */
     val brand: String? = null,
     /** P34: draft or bottle (beer only; null = not said / other kinds). */
     val serving: Serving? = null,

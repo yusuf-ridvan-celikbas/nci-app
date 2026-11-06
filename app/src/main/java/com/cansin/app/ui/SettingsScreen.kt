@@ -91,7 +91,6 @@ class SettingsActions(
     val onKeepHistory: suspend (com.cansin.app.domain.KeepHistory) -> Unit,
     val onCompressAfter: suspend (com.cansin.app.domain.CompressAfter) -> Unit,
     val onPrice: (com.cansin.app.domain.PriceSlot, Long?) -> Unit,
-    val onDefaultBrand: (String?) -> Unit,
     val onDefaultServing: (com.cansin.app.data.Serving) -> Unit,
     val onWidgetPromille: (Boolean) -> Unit,
 )
@@ -160,7 +159,6 @@ fun SettingsScreen(
                 }
                 SettingsPage.DRINKS -> {
                     BeerSection(settings.beerSize, actions.onBeerSize, settings.defaultDrink, actions.onDefaultDrink)
-                    DefaultBrandRow(settings.defaultBrand, actions.onDefaultBrand)
                     Text(stringResource(R.string.setting_default_serving), style = MaterialTheme.typography.titleSmall, modifier = Modifier.padding(top = 8.dp))
                     ServingChips(settings.defaultServing, actions.onDefaultServing)
                     HorizontalDivider(Modifier.padding(vertical = 16.dp))
@@ -213,34 +211,6 @@ fun SettingsScreen(
                 }
             }
         }
-    }
-}
-
-/** P29: optional brand the big +1 uses for beer (None = no brand). */
-@Composable
-private fun DefaultBrandRow(brand: String?, onChange: (String?) -> Unit) {
-    var editing by rememberSaveable { mutableStateOf(false) }
-    Column(
-        Modifier.fillMaxWidth().heightIn(min = 48.dp).clickable(role = Role.Button) { editing = true }.padding(vertical = 8.dp),
-    ) {
-        Text(stringResource(R.string.setting_default_brand), style = MaterialTheme.typography.titleSmall)
-        Text(brand ?: stringResource(R.string.brand_none), color = MaterialTheme.colorScheme.onSurfaceVariant)
-    }
-    if (editing) {
-        var value by rememberSaveable { mutableStateOf(brand.orEmpty()) }
-        val recent = LocalRecentBrands.current
-        androidx.compose.material3.AlertDialog(
-            onDismissRequest = { editing = false },
-            title = { Text(stringResource(R.string.setting_default_brand)) },
-            text = { Column(Modifier.verticalScroll(rememberScrollState())) { BrandPicker(value, { value = it }, com.cansin.app.domain.BrandRules.choices(recent, LocalBrandActions.current.hidden)) } },
-            confirmButton = {
-                TextButton(onClick = {
-                    onChange(com.cansin.app.domain.BrandRules.clean(value))
-                    editing = false
-                }) { Text(stringResource(R.string.action_save)) }
-            },
-            dismissButton = { TextButton(onClick = { editing = false }) { Text(stringResource(R.string.action_cancel)) } },
-        )
     }
 }
 

@@ -24,7 +24,11 @@ class CansinApp : Application() {
     override fun onCreate() {
         super.onCreate()
         // P27: quiet daily upkeep (retention, compression, compaction); never blocks start-up.
-        appScope.launch { runCatching { storage.runIfDue() } }
+        appScope.launch {
+            runCatching { storage.scrubBrands() }
+            runCatching { settingsStore.removeBrandPrefs() }
+            runCatching { storage.runIfDue() }
+        }
     }
 
     val appScope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
@@ -67,7 +71,7 @@ class CansinApp : Application() {
                     groupTimers.clear()
                 }
             },
-            defaultDrink = { settingsStore.settings.first().let { Drinks.default(it.defaultDrink, it.beerSize, it.defaultBrand, it.defaultServing) } },
+            defaultDrink = { settingsStore.settings.first().let { Drinks.default(it.defaultDrink, it.beerSize, it.defaultServing) } },
             seats = database.groupSeatDao(),
             price = { kind, sizeMl -> com.cansin.app.domain.PriceRules.lookup(settingsStore.settings.first().prices, kind, sizeMl) },
             waterPrice = { ml -> com.cansin.app.domain.PriceRules.water(settingsStore.settings.first().prices, ml) },

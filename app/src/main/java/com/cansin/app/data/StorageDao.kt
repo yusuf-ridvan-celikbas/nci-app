@@ -51,4 +51,23 @@ interface StorageDao {
 
     @Query("SELECT COUNT(*) FROM custom_question")
     suspend fun countQuestions(): Int
+
+    /** P36: brands are no longer kept. */
+    @Query("UPDATE beer_event SET brand = NULL WHERE brand IS NOT NULL")
+    suspend fun clearBrands(): Int
+
+    @Query("SELECT * FROM note")
+    suspend fun allNotes(): List<Note>
+
+    @Query("UPDATE note SET text = :text WHERE id = :id")
+    suspend fun setNoteText(id: Long, text: String)
+
+    @Query("SELECT * FROM custom_question")
+    suspend fun allQuestions(): List<CustomQuestion>
+
+    @Query("UPDATE custom_question SET text = :text WHERE id = :id")
+    suspend fun setQuestionText(id: Long, text: String)
+
+    @Query("DELETE FROM custom_question WHERE id = :id")
+    suspend fun deleteQuestion(id: Long)
 }

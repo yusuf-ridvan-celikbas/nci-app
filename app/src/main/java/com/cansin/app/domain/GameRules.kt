@@ -26,7 +26,7 @@ object GameRules {
 
     /** Trimmed, no control characters, 1..200 chars. */
     fun cleanQuestion(raw: String?): String? {
-        val t = raw?.filterNot { Character.isISOControl(it) }?.trim() ?: return null
+        val t = raw?.filterNot { Character.isISOControl(it) }?.let { BrandFilter.strip(it) }?.trim() ?: return null
         return t.takeIf { it.isNotEmpty() && it.length <= CustomQuestion.MAX_TEXT }
     }
 

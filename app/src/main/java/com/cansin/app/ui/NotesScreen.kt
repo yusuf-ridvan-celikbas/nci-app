@@ -123,7 +123,7 @@ private fun NotesContent(viewModel: NotesViewModel, state: NotesState, onBack: (
                             )
                         }
                     }
-                    items(state.drinkLines, key = { "d" + it.kind + it.sizeMl + it.beerSide + it.brand }) { line ->
+                    items(state.drinkLines, key = { "d" + it.kind + it.sizeMl + it.beerSide + it.serving }) { line ->
                         DrinkLineRow(
                             line, state, format,
                             onTap = { pricing = line },
@@ -178,8 +178,8 @@ private fun NotesContent(viewModel: NotesViewModel, state: NotesState, onBack: (
     pricing?.let { line ->
         DrinkLineDialog(
             line = line,
-            onSave = { price, priceChanged, serving, brand ->
-                viewModel.saveLine(line, price, priceChanged, serving, brand)
+            onSave = { price, priceChanged, serving ->
+                viewModel.saveLine(line, price, priceChanged, serving)
                 pricing = null
             },
             onDismiss = { pricing = null },
@@ -260,7 +260,7 @@ private fun NoteRow(note: Note, state: NotesState, format: (Long) -> String, onC
 /** Tab drink line: "Beer · 50 cl ×3", price each, sum, −1/+1. Tap = price for tonight (this pub). */
 @Composable
 private fun DrinkLineRow(line: com.cansin.app.domain.DrinkLine, state: NotesState, format: (Long) -> String, onTap: () -> Unit, onRemove: () -> Unit, onAdd: () -> Unit) {
-    val name = listOfNotNull(line.brand ?: stringResource(drinkName(line.kind)), line.serving?.let { stringResource(servingName(it)) }).joinToString(" · ")
+    val name = listOfNotNull(stringResource(drinkName(line.kind)), line.serving?.let { stringResource(servingName(it)) }).joinToString(" · ")
     Row(
         Modifier.fillMaxWidth().clickable(onClick = onTap).padding(start = 16.dp, end = 8.dp, top = 6.dp, bottom = 6.dp),
         verticalAlignment = Alignment.CenterVertically,
@@ -335,24 +335,21 @@ private fun QuantityStepper(value: Int, onChange: (Int) -> Unit) {
     }
 }
 
-/** Tab line: tonight's price, draft/bottle (beer) and brand, saved together. "Remove from tab" clears the price. */
+/** Tab line: tonight's price and draft/bottle (beer), saved together. "Remove from tab" clears the price. */
 @Composable
 private fun DrinkLineDialog(
     line: com.cansin.app.domain.DrinkLine,
-    onSave: (price: Long?, priceChanged: Boolean, serving: com.cansin.app.data.Serving?, brand: String?) -> Unit,
+    onSave: (price: Long?, priceChanged: Boolean, serving: com.cansin.app.data.Serving?) -> Unit,
     onDismiss: () -> Unit,
 ) {
     val plain = rememberPlainAmountFormat()
     var text by rememberSaveable { mutableStateOf(line.unitMinor?.let(plain).orEmpty()) }
     var serving by rememberSaveable { mutableStateOf(line.serving) }
-    var brand by rememberSaveable { mutableStateOf(line.brand.orEmpty()) }
     val parsed = NoteRules.parseAmount(text)
     val beer = line.kind == com.cansin.app.data.DrinkKind.BEER
-    val recent = LocalRecentBrands.current
-    val hidden = LocalBrandActions.current.hidden
     androidx.compose.material3.AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text(stringResource(R.string.tab_price_title, (line.brand ?: stringResource(drinkName(line.kind))) + " · " + sizeText(line.sizeMl))) },
+        title = { Text(stringResource(R.string.tab_price_title, stringResource(drinkName(line.kind)) + " · " + sizeText(line.sizeMl))) },
         text = {
             Column(Modifier.verticalScroll(rememberScrollState())) {
                 Text(stringResource(R.string.tab_price_note), style = MaterialTheme.typography.bodySmall, modifier = Modifier.padding(bottom = 8.dp))
@@ -365,7 +362,6 @@ private fun DrinkLineDialog(
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
                 )
                 if (beer) ServingChips(serving) { serving = it }
-                BrandPicker(brand, { brand = it }, com.cansin.app.domain.BrandRules.choices(recent, hidden).let { if (beer) it else recent })
             }
         },
         confirmButton = {
@@ -373,14 +369,14 @@ private fun DrinkLineDialog(
                 enabled = parsed != AmountInput.Invalid,
                 onClick = {
                     val price = (parsed as? AmountInput.Valid)?.minor?.takeIf { it > 0 }
-                    onSave(price, price != line.unitMinor, serving, brand)
+                    onSave(price, price != line.unitMinor, serving)
                 },
             ) { Text(stringResource(R.string.action_save)) }
         },
         dismissButton = {
             Row {
                 if (line.unitMinor != null) {
-                    TextButton(onClick = { onSave(null, true, line.serving, line.brand) }) { Text(stringResource(R.string.tab_price_remove)) }
+                    TextButton(onClick = { onSave(null, true, line.serving) }) { Text(stringResource(R.string.tab_price_remove)) }
                 }
                 TextButton(onClick = onDismiss) { Text(stringResource(R.string.action_cancel)) }
             }

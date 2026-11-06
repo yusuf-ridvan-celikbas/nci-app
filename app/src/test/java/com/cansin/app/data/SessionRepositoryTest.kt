@@ -305,24 +305,6 @@ class SessionRepositoryTest {
     }
 
     @Test
-    fun brandIsSavedAndHasItsOwnTonightPrice() = runBlocking {
-        val priced = SessionRepository(sessions, beers, notes, water, clock = { now }, price = { _, _ -> 15_000L })
-        val efes = DrinkChoice(DrinkKind.BEER, BeerSize(500, 5.0), "  Efes  ")
-        val guinness = DrinkChoice(DrinkKind.BEER, BeerSize(500, 4.2), "Guinness")
-        priced.addBeer(drink = efes)
-        priced.addBeer(drink = guinness)
-        assertEquals(listOf("Efes", "Guinness"), beers.rows.value.map { it.brand })
-        priced.setDrinkPrice(DrinkKind.BEER, 500, Side.SOLO, 25_000, "Guinness")
-        now += 1_000
-        priced.addBeer(drink = guinness)
-        priced.addBeer(drink = efes)
-        assertEquals(listOf(15_000L, 25_000L, 25_000L, 15_000L), beers.rows.value.map { it.priceMinor })
-        priced.removeLatestDrink(DrinkKind.BEER, 500, Side.SOLO, "Guinness")
-        assertEquals(listOf("Efes", "Guinness", "Efes"), beers.rows.value.map { it.brand })
-        assertEquals(listOf("Efes", "Guinness"), priced.recentBrands.first())
-    }
-
-    @Test
     fun removalsAreReportedForTheTimer() = runBlocking {
         val first = observed.add()
         observed.add()
@@ -335,29 +317,18 @@ class SessionRepositoryTest {
     @Test
     fun draftAndBottleAreSeparateAndSwitchable() = runBlocking {
         val priced = SessionRepository(sessions, beers, notes, water, clock = { now }, price = { _, _ -> 15_000L })
-        val draft = DrinkChoice(DrinkKind.BEER, BeerSize(500, 5.0), "Efes", Serving.DRAFT)
+        val draft = DrinkChoice(DrinkKind.BEER, BeerSize(500, 5.0), Serving.DRAFT)
         val bottle = draft.copy(serving = Serving.BOTTLE)
         priced.addBeer(drink = draft)
         priced.addBeer(drink = bottle)
         priced.addBeer(drink = DrinkChoice(DrinkKind.WINE, BeerSize(150, 12.0), serving = Serving.BOTTLE)) // not beer → no serving
         assertEquals(listOf(Serving.DRAFT, Serving.BOTTLE, null), beers.rows.value.map { it.serving })
-        priced.setDrinkPrice(DrinkKind.BEER, 500, Side.SOLO, 12_000, "Efes", Serving.BOTTLE)
+        priced.setDrinkPrice(DrinkKind.BEER, 500, Side.SOLO, 12_000, Serving.BOTTLE)
         assertEquals(listOf(15_000L, 12_000L), beers.rows.value.take(2).map { it.priceMinor })
-        priced.setServing(DrinkKind.BEER, 500, Side.SOLO, "Efes", Serving.DRAFT, Serving.BOTTLE)
+        priced.setServing(DrinkKind.BEER, 500, Side.SOLO, Serving.DRAFT, Serving.BOTTLE)
         assertEquals(listOf(Serving.BOTTLE, Serving.BOTTLE), beers.rows.value.take(2).map { it.serving })
-        priced.removeLatestDrink(DrinkKind.BEER, 500, Side.SOLO, "Efes", Serving.BOTTLE)
+        priced.removeLatestDrink(DrinkKind.BEER, 500, Side.SOLO, Serving.BOTTLE)
         assertEquals(2, beers.rows.value.size)
     }
 
-    @Test
-    fun wrongBrandCanBeChangedOnTheLine() = runBlocking {
-        val typo = DrinkChoice(DrinkKind.BEER, BeerSize(500, 5.0), "Efse", Serving.DRAFT)
-        repo.addBeer(drink = typo)
-        repo.addBeer(drink = typo)
-        repo.addBeer(drink = typo.copy(brand = "Tuborg"))
-        repo.setBrand(DrinkKind.BEER, 500, Side.SOLO, Serving.DRAFT, "Efse", " Efes ")
-        assertEquals(listOf("Efes", "Efes", "Tuborg"), beers.rows.value.map { it.brand })
-        repo.setBrand(DrinkKind.BEER, 500, Side.SOLO, Serving.DRAFT, "Tuborg", null)
-        assertEquals(listOf("Efes", "Efes", null), beers.rows.value.map { it.brand })
-    }
 }

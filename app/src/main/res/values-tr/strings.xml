@@ -486,9 +486,6 @@
     <string name="price_clear">Temizle</string>
     <string name="price_note">Fiyatı girilen içkiler hesaba kendiliğinden eklenir. Fiyatı değiştirmek önceden eklenen içkileri değiştirmez.</string>
     <string name="tab_drinks_empty">Bu gece ekranında eklediğin içkiler burada −1 / +1 ile görünür. Fiyat için birine dokun.</string>
-    <string name="brand_optional">Marka (isteğe bağlı)</string>
-    <string name="brand_none">Yok</string>
-    <string name="setting_default_brand">+1 için varsayılan bira markası</string>
     <string name="history_search">İsim, marka, not, tarih ara</string>
     <string name="search_clear">Aramayı temizle</string>
     <string name="period_all">Tüm zamanlar</string>
@@ -527,7 +524,6 @@
     <string name="qty_down">Azalt</string>
     <string name="amount_each_hint">Tanesi</string>
     <string name="select_short">Seç</string>
-    <string name="brand_type_other">Başka marka yaz…</string>
     <string name="widget_page_promille">Tahmin</string>
     <string name="widget_promille_value">≈%1$s‰</string>
     <string name="widget_promille_short">‰</string>
@@ -561,5 +557,4 @@
     <string name="serving_draft">Fıçı</string>
     <string name="serving_bottle">Şişe</string>
     <string name="setting_default_serving">+1 birası: fıçı mı şişe mi</string>
-    <string name="brand_remove">%1$s listeden kaldır</string>
 </resources>

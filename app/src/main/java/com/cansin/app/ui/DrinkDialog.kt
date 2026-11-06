@@ -24,7 +24,6 @@ import com.cansin.app.R
 import com.cansin.app.data.BeerEvent
 import com.cansin.app.data.DrinkKind
 import com.cansin.app.domain.BeerRules
-import com.cansin.app.domain.BrandRules
 import androidx.compose.foundation.layout.padding
 import com.cansin.app.domain.BeerSize
 import com.cansin.app.domain.DrinkChoice
@@ -69,7 +68,7 @@ fun drinkName(kind: DrinkKind): Int = when (kind) {
 fun drinkLabel(event: BeerEvent): String {
     val size = beerSizeLabel(BeerSize(event.sizeMl, event.abv))
     val serving = event.serving?.let { stringResource(servingName(it)) }
-    val name = event.brand ?: if (event.kind == DrinkKind.BEER) null else stringResource(drinkName(event.kind))
+    val name = if (event.kind == DrinkKind.BEER) null else stringResource(drinkName(event.kind))
     return listOfNotNull(name, serving, size).joinToString(" · ")
 }
 
@@ -84,10 +83,7 @@ fun drinkBreakdown(kinds: List<DrinkKind>): String? {
 /** Long-press +1: pick a kind (fills its usual size) and adjust size/alcohol if needed. */
 @Composable
 fun DrinkDialog(initial: DrinkChoice, beer: BeerSize, onConfirm: (DrinkChoice) -> Unit, onDismiss: () -> Unit) {
-    var brand by rememberSaveable { mutableStateOf(initial.brand.orEmpty()) }
     var serving by rememberSaveable { mutableStateOf(initial.serving ?: com.cansin.app.data.Serving.DRAFT) }
-    val recentBrands = LocalRecentBrands.current
-    val brandActions = LocalBrandActions.current
     val separator = rememberDecimalSeparator()
     var kind by rememberSaveable { mutableStateOf(initial.kind) }
     var clText by rememberSaveable { mutableStateOf(BeerRules.formatCl(initial.size.sizeMl, separator)) }
@@ -133,107 +129,18 @@ fun DrinkDialog(initial: DrinkChoice, beer: BeerSize, onConfirm: (DrinkChoice) -
                 NumberField(clText, { clText = it }, R.string.size_custom_cl, R.string.invalid_size, sizeMl == null)
                 NumberField(abvText, { abvText = it }, R.string.abv_label, R.string.invalid_abv, abv == null)
                 if (kind == DrinkKind.BEER) ServingChips(serving) { serving = it }
-                BrandPicker(brand, { brand = it }, if (kind == DrinkKind.BEER) BrandRules.choices(recentBrands, brandActions.hidden) else recentBrands.filterNot { r -> brandActions.hidden.any { it.equals(r, true) } })
             }
         },
         confirmButton = {
             TextButton(
                 enabled = sizeMl != null && abv != null,
                 onClick = { if (sizeMl != null && abv != null) {
-                    BrandRules.clean(brand)?.let { b -> if (brandActions.hidden.any { it.equals(b, true) }) brandActions.unhide(b) }
-                    onConfirm(DrinkChoice(kind, BeerSize(sizeMl, abv), BrandRules.clean(brand), serving.takeIf { kind == DrinkKind.BEER }))
+                    onConfirm(DrinkChoice(kind, BeerSize(sizeMl, abv), serving.takeIf { kind == DrinkKind.BEER }))
                 } },
             ) { Text(stringResource(R.string.action_add)) }
         },
         dismissButton = { TextButton(onClick = onDismiss) { Text(stringResource(R.string.action_cancel)) } },
     )
-}
-
-/** Brands used lately (newest first), provided by MainActivity for the pickers. */
-val LocalRecentBrands = androidx.compose.runtime.staticCompositionLocalOf { emptyList<String>() }
-
-/** P35: hidden brands + hide/unhide, provided by MainActivity. */
-class BrandActions(val hidden: Set<String> = emptySet(), val hide: (String) -> Unit = {}, val unhide: (String) -> Unit = {})
-
-val LocalBrandActions = androidx.compose.runtime.staticCompositionLocalOf { BrandActions() }
-
-/** "Brand (optional)": None + quick picks + free text. */
-@Composable
-@OptIn(androidx.compose.material3.ExperimentalMaterial3Api::class)
-fun BrandPicker(value: String, onChange: (String) -> Unit, choices: List<String>) {
-    // Tap = menu only (no keyboard): None, recent, suggestions, "Type another brand…".
-    // Only that last item makes the field editable and opens the keyboard.
-    var expanded by androidx.compose.runtime.remember { mutableStateOf(false) }
-    var typing by androidx.compose.runtime.remember { mutableStateOf(false) }
-    val focus = androidx.compose.runtime.remember { androidx.compose.ui.focus.FocusRequester() }
-    val keyboard = androidx.compose.ui.platform.LocalSoftwareKeyboardController.current
-    androidx.compose.runtime.LaunchedEffect(typing) { if (typing) focus.requestFocus() }
-    androidx.compose.material3.ExposedDropdownMenuBox(
-        expanded = expanded,
-        onExpandedChange = {
-            expanded = it
-            if (it) {
-                typing = false
-                keyboard?.hide()
-            }
-        },
-        modifier = Modifier.padding(top = 12.dp),
-    ) {
-        androidx.compose.material3.OutlinedTextField(
-            value = value,
-            onValueChange = { onChange(it.take(BrandRules.MAX_LENGTH)) },
-            readOnly = !typing,
-            label = { Text(stringResource(R.string.brand_optional)) },
-            placeholder = { Text(stringResource(R.string.brand_none)) },
-            singleLine = true,
-            trailingIcon = { androidx.compose.material3.ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) },
-            modifier = Modifier
-                .fillMaxWidth()
-                .focusRequester(focus)
-                .menuAnchor(
-                    if (typing) androidx.compose.material3.ExposedDropdownMenuAnchorType.PrimaryEditable
-                    else androidx.compose.material3.ExposedDropdownMenuAnchorType.PrimaryNotEditable,
-                ),
-        )
-        ExposedDropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
-            androidx.compose.material3.DropdownMenuItem(
-                text = { Text(stringResource(R.string.brand_none)) },
-                onClick = {
-                    onChange("")
-                    expanded = false
-                },
-            )
-            androidx.compose.material3.DropdownMenuItem(
-                text = { Text(stringResource(R.string.brand_type_other)) },
-                onClick = {
-                    expanded = false
-                    typing = true
-                },
-            )
-            val actions = LocalBrandActions.current
-            choices.forEach { option ->
-                androidx.compose.material3.DropdownMenuItem(
-                    text = { Text(option) },
-                    onClick = {
-                        onChange(option)
-                        expanded = false
-                    },
-                    trailingIcon = if (BrandRules.isBuiltIn(option)) null else {
-                        // ✕ = remove this brand from the menu (drinks keep their brand); built-in brands stay.
-                        { androidx.compose.material3.IconButton(onClick = {
-                            actions.hide(option)
-                            if (value.trim().equals(option, ignoreCase = true)) onChange("")
-                        }) {
-                            androidx.compose.material3.Icon(
-                                androidx.compose.ui.res.painterResource(R.drawable.ic_close),
-                                stringResource(R.string.brand_remove, option),
-                            )
-                        } }
-                    },
-                )
-            }
-        }
-    }
 }
 
 /** Settings: which kind the big +1 adds. */

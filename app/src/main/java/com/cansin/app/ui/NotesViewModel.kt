@@ -69,10 +69,10 @@ class NotesViewModel(private val repository: SessionRepository) : ViewModel() {
     fun delete(note: Note) = viewModelScope.launch { repository.deleteNote(note) }
 
     fun addDrink(line: DrinkLine) = viewModelScope.launch {
-        repository.addBeer(side = line.beerSide, drink = com.cansin.app.domain.DrinkChoice(line.kind, com.cansin.app.domain.BeerSize(line.sizeMl, line.abv), line.brand, line.serving))
+        repository.addBeer(side = line.beerSide, drink = com.cansin.app.domain.DrinkChoice(line.kind, com.cansin.app.domain.BeerSize(line.sizeMl, line.abv), line.serving))
     }
 
-    fun removeDrink(line: DrinkLine) = viewModelScope.launch { repository.removeLatestDrink(line.kind, line.sizeMl, line.beerSide, line.brand, line.serving) }
+    fun removeDrink(line: DrinkLine) = viewModelScope.launch { repository.removeLatestDrink(line.kind, line.sizeMl, line.beerSide, line.serving) }
 
     fun addWater(line: com.cansin.app.domain.WaterLine) = viewModelScope.launch { repository.addWater(line.side, line.sizeMl) }
 
@@ -80,20 +80,18 @@ class NotesViewModel(private val repository: SessionRepository) : ViewModel() {
 
     fun setWaterPrice(line: com.cansin.app.domain.WaterLine, minor: Long?) = viewModelScope.launch { repository.setWaterPrice(line.side, line.sizeMl, minor) }
 
-    /** One Save in the line dialog: price (old line), then draft/bottle, then brand. */
-    fun saveLine(line: DrinkLine, priceMinor: Long?, priceChanged: Boolean, serving: com.cansin.app.data.Serving?, brand: String?) = viewModelScope.launch {
-        if (priceChanged) repository.setDrinkPrice(line.kind, line.sizeMl, line.beerSide, priceMinor, line.brand, line.serving)
+    /** One Save in the line dialog: price (old line), then draft/bottle. */
+    fun saveLine(line: DrinkLine, priceMinor: Long?, priceChanged: Boolean, serving: com.cansin.app.data.Serving?) = viewModelScope.launch {
+        if (priceChanged) repository.setDrinkPrice(line.kind, line.sizeMl, line.beerSide, priceMinor, line.serving)
         if (serving != line.serving && line.kind == com.cansin.app.data.DrinkKind.BEER) {
-            repository.setServing(line.kind, line.sizeMl, line.beerSide, line.brand, line.serving, serving)
+            repository.setServing(line.kind, line.sizeMl, line.beerSide, line.serving, serving)
         }
-        val newBrand = com.cansin.app.domain.BrandRules.clean(brand)
-        if (newBrand != line.brand) repository.setBrand(line.kind, line.sizeMl, line.beerSide, serving, line.brand, newBrand)
     }
 
     fun setServing(line: DrinkLine, to: com.cansin.app.data.Serving) =
-        viewModelScope.launch { repository.setServing(line.kind, line.sizeMl, line.beerSide, line.brand, line.serving, to) }
+        viewModelScope.launch { repository.setServing(line.kind, line.sizeMl, line.beerSide, line.serving, to) }
 
-    fun setPrice(line: DrinkLine, minor: Long?) = viewModelScope.launch { repository.setDrinkPrice(line.kind, line.sizeMl, line.beerSide, minor, line.brand, line.serving) }
+    fun setPrice(line: DrinkLine, minor: Long?) = viewModelScope.launch { repository.setDrinkPrice(line.kind, line.sizeMl, line.beerSide, minor, line.serving) }
 
     companion object {
         fun factory(repository: SessionRepository): ViewModelProvider.Factory = viewModelFactory {

@@ -497,9 +497,6 @@
     <string name="price_clear">Clear</string>
     <string name="price_note">Drinks with a price go on the tab automatically. Changing a price doesn\'t change drinks already added.</string>
     <string name="tab_drinks_empty">Drinks you add on Tonight show up here with −1 / +1. Tap one to set its price.</string>
-    <string name="brand_optional">Brand (optional)</string>
-    <string name="brand_none">None</string>
-    <string name="setting_default_brand">Default beer brand for +1</string>
     <string name="history_search">Search names, brands, notes, dates</string>
     <string name="search_clear">Clear search</string>
     <string name="period_all">All time</string>
@@ -539,7 +536,6 @@
     <string name="qty_down">Fewer</string>
     <string name="amount_each_hint">Each</string>
     <string name="select_short">Select</string>
-    <string name="brand_type_other">Type another brand…</string>
     <string name="widget_page_promille">Estimate</string>
     <string name="widget_promille_value">≈%1$s‰</string>
     <string name="widget_promille_short">‰</string>
@@ -573,5 +569,4 @@
     <string name="serving_draft">Draft</string>
     <string name="serving_bottle">Bottle</string>
     <string name="setting_default_serving">Beer for +1: draft or bottle</string>
-    <string name="brand_remove">Remove %1$s from the list</string>
 </resources>

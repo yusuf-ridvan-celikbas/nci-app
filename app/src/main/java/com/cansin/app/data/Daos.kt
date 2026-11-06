@@ -61,11 +61,10 @@ interface SessionDao {
     @Query("DELETE FROM session WHERE endedAt IS NOT NULL AND id IN (:ids)")
     suspend fun deleteEnded(ids: List<Long>): Int
 
-    /** P30: searchable text per night: Versus names, seat names, brands, notes. */
+    /** P30: searchable text per night: Versus names, seat names, notes. */
     @Query(
         "SELECT id AS sessionId, COALESCE(redName, '') || ' ' || COALESCE(blueName, '') AS text FROM session WHERE endedAt IS NOT NULL " +
             "UNION ALL SELECT sessionId, COALESCE(name, '') FROM group_seat " +
-            "UNION ALL SELECT sessionId, brand FROM beer_event WHERE brand IS NOT NULL " +
             "UNION ALL SELECT sessionId, text || ' ' || COALESCE(person, '') FROM note",
     )
     fun observeSearchText(): Flow<List<SearchRow>>
@@ -229,26 +228,19 @@ interface BeerDao {
     suspend fun count(sessionId: Long): Int
 
     /** P28: tonight's price for this drink (latest priced one), so a price edited on the Tab sticks. */
-    @Query("SELECT priceMinor FROM beer_event WHERE sessionId = :sessionId AND kind = :kind AND sizeMl = :sizeMl AND brand IS :brand AND serving IS :serving AND priceMinor IS NOT NULL ORDER BY at DESC, id DESC LIMIT 1")
-    suspend fun latestPrice(sessionId: Long, kind: DrinkKind, sizeMl: Int, brand: String?, serving: Serving?): Long?
+    @Query("SELECT priceMinor FROM beer_event WHERE sessionId = :sessionId AND kind = :kind AND sizeMl = :sizeMl AND serving IS :serving AND priceMinor IS NOT NULL ORDER BY at DESC, id DESC LIMIT 1")
+    suspend fun latestPrice(sessionId: Long, kind: DrinkKind, sizeMl: Int, serving: Serving?): Long?
 
-    @Query("UPDATE beer_event SET priceMinor = :priceMinor WHERE sessionId = :sessionId AND kind = :kind AND sizeMl = :sizeMl AND side = :side AND brand IS :brand AND serving IS :serving")
-    suspend fun setPrice(sessionId: Long, kind: DrinkKind, sizeMl: Int, side: Side, brand: String?, serving: Serving?, priceMinor: Long?)
-
-    /** P35: change the brand of one Tab line (null = no brand). */
-    @Query("UPDATE beer_event SET brand = :to WHERE sessionId = :sessionId AND kind = :kind AND sizeMl = :sizeMl AND side = :side AND brand IS :from AND serving IS :serving")
-    suspend fun setBrand(sessionId: Long, kind: DrinkKind, sizeMl: Int, side: Side, serving: Serving?, from: String?, to: String?)
+    @Query("UPDATE beer_event SET priceMinor = :priceMinor WHERE sessionId = :sessionId AND kind = :kind AND sizeMl = :sizeMl AND side = :side AND serving IS :serving")
+    suspend fun setPrice(sessionId: Long, kind: DrinkKind, sizeMl: Int, side: Side, serving: Serving?, priceMinor: Long?)
 
     /** P34: switch one Tab line between draft and bottle. */
-    @Query("UPDATE beer_event SET serving = :to WHERE sessionId = :sessionId AND kind = :kind AND sizeMl = :sizeMl AND side = :side AND brand IS :brand AND serving IS :from")
-    suspend fun setServing(sessionId: Long, kind: DrinkKind, sizeMl: Int, side: Side, brand: String?, from: Serving?, to: Serving?)
+    @Query("UPDATE beer_event SET serving = :to WHERE sessionId = :sessionId AND kind = :kind AND sizeMl = :sizeMl AND side = :side AND serving IS :from")
+    suspend fun setServing(sessionId: Long, kind: DrinkKind, sizeMl: Int, side: Side, from: Serving?, to: Serving?)
 
-    @Query("SELECT * FROM beer_event WHERE sessionId = :sessionId AND side = :side AND kind = :kind AND sizeMl = :sizeMl AND brand IS :brand AND serving IS :serving ORDER BY at DESC, id DESC LIMIT 1")
-    suspend fun latestMatching(sessionId: Long, side: Side, kind: DrinkKind, sizeMl: Int, brand: String?, serving: Serving?): BeerEvent?
+    @Query("SELECT * FROM beer_event WHERE sessionId = :sessionId AND side = :side AND kind = :kind AND sizeMl = :sizeMl AND serving IS :serving ORDER BY at DESC, id DESC LIMIT 1")
+    suspend fun latestMatching(sessionId: Long, side: Side, kind: DrinkKind, sizeMl: Int, serving: Serving?): BeerEvent?
 
-    /** P29: brands used lately, newest first (for the picker). */
-    @Query("SELECT brand FROM beer_event WHERE brand IS NOT NULL GROUP BY brand ORDER BY MAX(at) DESC LIMIT 8")
-    fun observeRecentBrands(): Flow<List<String>>
 
     /** P28: drinks on the Tab. */
     @Query("SELECT COALESCE(SUM(priceMinor), 0) FROM beer_event WHERE sessionId = :sessionId")

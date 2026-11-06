@@ -47,7 +47,7 @@ object HistoryFilterRules {
     }
 
     /**
-     * [searchText] = names, seat names, brands and notes per night; [dateText] formats a night's date so "12.10" or
+     * [searchText] = names, seat names and notes per night; [dateText] formats a night's date so "12.10" or
      * "Ekim" also match.
      */
     fun apply(

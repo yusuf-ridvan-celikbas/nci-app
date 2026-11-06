@@ -43,6 +43,19 @@ class StorageMaintenance(
 ) {
     private val dao get() = database.storageDao()
 
+    /** P36: clear stored brands and remove brand names from notes / own questions written before. */
+    suspend fun scrubBrands() = withContext(Dispatchers.IO) {
+        dao.clearBrands()
+        dao.allNotes().forEach { n ->
+            val clean = com.cansin.app.domain.BrandFilter.strip(n.text)
+            if (clean != n.text) dao.setNoteText(n.id, clean.ifEmpty { "–" })
+        }
+        dao.allQuestions().forEach { q ->
+            val clean = com.cansin.app.domain.BrandFilter.strip(q.text)
+            if (clean.isEmpty()) dao.deleteQuestion(q.id) else if (clean != q.text) dao.setQuestionText(q.id, clean)
+        }
+    }
+
     suspend fun runIfDue() {
         if (StorageRules.isDue(store.maintenanceAt(), clock())) run()
     }
