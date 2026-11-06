@@ -155,6 +155,12 @@ Current phase: **P38 pictures on +1 done and committed on branch feature/p38-pic
 - Together unchanged (user choice). iOS Versus: do the same 3 pages later.
 - Strings: `versus_page_sides`, `versus_page_water` (EN/TR); game tab reuses `nav_game`. Not yet tested on the phone (user to check).
 
+## P39 (2026-11-06) — release signing (user request)
+- Release key: PKCS12 `C:/Users/ridvn/keys/salgambalgam-release.jks` (outside the repo), alias `salgambalgam`, RSA 4096, ~27 years, DN `CN=SalgamBalgam, O=SalgamBalgam`. Cert SHA-256 `ff55c77c…3657b68`.
+- Password + paths in repo-root `signing.properties` (gitignored, like `*.jks`); `app/build.gradle.kts` signs release only when that file exists (else unsigned, as before). Never print or commit the password.
+- `assembleRelease` → signed APK (v2 scheme) 2.11 MB; `bundleRelease` → AAB 5.3 MB. Release and debug builds have different signatures: switching the phone from debug to release needs an uninstall (data lost) → export a backup first. Pictures aren't in backups.
+- If published on Play: this key becomes the upload key (Play App Signing). Losing it = no updates under this key.
+
 ## P38 report (2026-11-06) — pictures behind +1 (scope re-confirmed by the user before building)
 - User choices: pictures on the Tonight +1, Versus/Together people and the widget +1 (no Game chips); safeguards only (no NSFW model, no new dependency); move & zoom; set in Settings → Drinks and in the setup dialogs.
 - `domain/PictureRules.kt`: keys `me`, `friend_<id>`, `s<session>_<SIDE>` (this night only), `draft_<SIDE>` (picked in an open dialog); `keyFor` (linked friend's picture follows them), `keep` (clean-up), `sampleSize`, crop maths (`coverScale`, `clampZoom` 1–5×, `clampOffset`, `crop` → source square). Tests: `PictureRulesTest` (7).
