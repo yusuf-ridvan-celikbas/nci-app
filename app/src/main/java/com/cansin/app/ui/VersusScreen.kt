@@ -27,11 +27,17 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
+import androidx.compose.foundation.pager.HorizontalPager
+import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.PrimaryTabRow
+import androidx.compose.material3.Tab
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import kotlinx.coroutines.launch
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -63,13 +69,15 @@ fun VersusScreen(
     val gameState by game.state.collectAsState()
     val gameOn = gameState.shownInSession
     SyncGamePlayers(game, session, gameOn)
+    val pager = rememberPagerState(initialPage = if (gameOn) PAGE_GAME else PAGE_SIDES) { 3 }
+    val scope = rememberCoroutineScope()
+    LaunchedEffect(pager.settledPage) { game.setShownInSession(pager.settledPage == PAGE_GAME) }
 
     Scaffold(
         topBar = {
             TopAppBar(
                 title = { Text(stringResource(R.string.versus_title)) },
                 actions = {
-                    GameToggle(gameOn, game::setShownInSession)
                     IconButton(onClick = onTogglePin) {
                         Icon(
                             painterResource(if (pinned) R.drawable.ic_lock else R.drawable.ic_lock_open),
@@ -90,45 +98,42 @@ fun VersusScreen(
             ) { Text(stringResource(R.string.end_session)) }
         },
     ) { padding ->
-        if (gameOn) {
-            // Versus stays the main view: both sides pinned on top, the game scrolls below.
-            Column(Modifier.fillMaxSize().padding(padding)) {
-                Column(Modifier.padding(horizontal = 12.dp, vertical = 8.dp)) {
-                    listOf(Side.RED to state.red, Side.BLUE to state.blue).forEach { (side, count) ->
-                        val name = sideName(session, side)
-                        CompactSideRow(
-                            name = if (session.meSide == side) stringResource(R.string.versus_name_me, name) else name,
-                            colors = sideColor(side) ?: (Color.Gray to Color.White),
-                            count = count,
-                            addDescription = stringResource(R.string.versus_add, name),
-                            removeDescription = stringResource(R.string.versus_remove, name),
-                            onAdd = { viewModel.add(side) },
-                            onRemove = { viewModel.removeLatest(side) },
-                        )
-                    }
-                }
-                HorizontalDivider()
-                Column(
-                    Modifier.weight(1f).verticalScroll(rememberScrollState()).padding(16.dp),
-                    verticalArrangement = Arrangement.spacedBy(8.dp),
-                ) {
-                    GamePanel(game, gameState, showPacks = true)
-                    waterBar(snackbar)
-                    promilleCard()
+        // Three pages: the sides alone, then water + ‰, then the game. The game page open = game "shown in session".
+        Column(Modifier.fillMaxSize().padding(padding)) {
+            PrimaryTabRow(selectedTabIndex = pager.currentPage) {
+                listOf(R.string.versus_page_sides, R.string.versus_page_water, R.string.nav_game).forEachIndexed { i, label ->
+                    Tab(
+                        selected = pager.currentPage == i,
+                        onClick = { scope.launch { pager.animateScrollToPage(i) } },
+                        text = { Text(stringResource(label), maxLines = 1) },
+                    )
                 }
             }
-            return@Scaffold
-        }
-        Column(Modifier.fillMaxSize().padding(padding)) {
-            SideHalf(session, Side.RED, state.red, onEditSides, viewModel::add, viewModel::removeLatest)
-            SideHalf(session, Side.BLUE, state.blue, onEditSides, viewModel::add, viewModel::removeLatest)
-            Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                waterBar(snackbar)
-                promilleCard()
+            HorizontalPager(pager, Modifier.weight(1f).fillMaxWidth()) { page ->
+                when (page) {
+                    PAGE_SIDES -> Column(Modifier.fillMaxSize()) {
+                        SideHalf(session, Side.RED, state.red, onEditSides, viewModel::add, viewModel::removeLatest)
+                        SideHalf(session, Side.BLUE, state.blue, onEditSides, viewModel::add, viewModel::removeLatest)
+                    }
+                    PAGE_WATER -> Column(
+                        Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(16.dp),
+                        verticalArrangement = Arrangement.spacedBy(8.dp),
+                    ) {
+                        waterBar(snackbar)
+                        promilleCard()
+                    }
+                    else -> Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(16.dp)) {
+                        GamePanel(game, gameState, showPacks = true)
+                    }
+                }
             }
         }
     }
 }
+
+private const val PAGE_SIDES = 0
+private const val PAGE_WATER = 1
+private const val PAGE_GAME = 2
 
 @Composable
 private fun ColumnScope.SideHalf(

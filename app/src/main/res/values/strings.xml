@@ -133,6 +133,8 @@
     <string name="beer_finished_unset">Finished: not set</string>
     <string name="action_not_finished">Not finished</string>
     <string name="versus_title">Versus</string>
+    <string name="versus_page_sides">Sides</string>
+    <string name="versus_page_water">Water &amp; ‰</string>
     <!-- used by iOS (gen_strings.py) -->
     <string name="versus_start" tools:ignore="UnusedResources">Start Versus</string>
     <string name="versus_edit">Edit sides</string>

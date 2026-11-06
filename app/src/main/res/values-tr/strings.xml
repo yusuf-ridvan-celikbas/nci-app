@@ -126,6 +126,8 @@
     <string name="beer_finished_unset">Bitiş: ayarlanmadı</string>
     <string name="action_not_finished">Bitmedi</string>
     <string name="versus_title">Kapışma</string>
+    <string name="versus_page_sides">Taraflar</string>
+    <string name="versus_page_water">Su &amp; ‰</string>
     <string name="versus_start">Kapışma başlat</string>
     <string name="versus_edit">Tarafları düzenle</string>
     <string name="side_red">Kırmızı</string>

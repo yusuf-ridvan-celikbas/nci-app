@@ -149,6 +149,12 @@ Current phase: **NEXT: P37 tutorials (planned, not started) on branch feature/p3
 - Lint clean, tests green; app starts on the phone. Not yet placed/resized by the user.
 - Phone feedback: widget numbers were tiny (autoSize + wrap_content picks the minimum) → fixed sizes. 1-row widgets (3×1/4×1) use the old pages look with −1/+1: `widget_pager.xml` ‹ label •∘∘ value (−1) (+1) › (Versus: red/blue +1). 2×1 keeps the round +1 (user preferred). Narrow widgets (1–2 columns, 2+ rows: 1×2, 2×2, 2×3, 1×4…) use the narrow pages look (`widget_small_narrow.xml`); 3×2/4×2 the regular pages look; both with −1 next to +1; the stacked Drinks/Water/Tab column was removed (user); the dashboard (BIG) is now 4×3, XL 4×4+. Narrow tall widgets: compact cells (label, then value + 36 dp +1) so 3 blocks fit; on this Samsung a 2-cell width counts as narrow.
 
+## Versus in 3 pages (2026-11-06, user request; on feature/p37-tutorials before P37 work)
+- Bug: the Versus halves were squeezed/cut off (sides + water + ‰ in one non-scrolling column). Fix: `VersusScreen` = `PrimaryTabRow` (Sides · Water & ‰ · Game) + `HorizontalPager` (foundation, no new dep). Page 1 = red/blue halves only; page 2 = water + care + ‰ (scrolls); page 3 = Truth or Dare (scrolls). End session + undo snackbar on every page.
+- Game toggle removed from the Versus top bar (still in Together). `GameState.shownInSession` = "game page open": set from `settledPage`, used for the start page (back from Tab → still on the game) and for player sync. No compact side rows on the game page (user: page 1 only for the sides).
+- Together unchanged (user choice). iOS Versus: do the same 3 pages later.
+- Strings: `versus_page_sides`, `versus_page_water` (EN/TR); game tab reuses `nav_game`. Not yet tested on the phone (user to check).
+
 ## P37 plan (2026-11-06, approved, NOT started) — tutorials
 - Swipe-card tutorials (full-screen Dialog + HorizontalPager: icon, title, 1–2 lines, dots, Skip/Next/Done; Back = Skip).
 - Topics: GENERAL (6 pages), TONIGHT (5), TAB (4), GAME (4), HISTORY (3), FRIENDS = Versus/Together (3), WIDGET (3); content outline in ~/.claude/plans/so-i-want-to-proud-fox.md.
