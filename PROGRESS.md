@@ -152,6 +152,9 @@ Current phase: **P13–P30 approved on the phone (2026-11-06), merged into maste
 - Settings → Health: "Show ‰ estimate on widgets" (default off; needs profile; hidden by PIN). ‰ on the widget is as of the shown time (no periodic updates).
 - Release APK 1.99 MB (+26 KB). Permissions unchanged, no INTERNET. New exported component: WidgetConfigActivity (id check). Lint 0 errors. Tests green.
 - Not yet tried on the phone (needs placing/resizing widgets by hand).
+- P31b XL (width ≥ 250, height ≥ 300 dp: 4×4, 4×5, 5×5): big counter hero (64 sp count, 96 dp +1, −1, "+1: Efes · 50 cl"), water row, timer, ‰ line, Tab list (drink lines then newest notes, up to 8 + "+N more · open Tab"; no scrolling list to avoid a RemoteViewsService). Versus: red/blue rows. 75 views (lint limit 80).
+- Tap on an empty spot of any widget size opens the app (user asked for double-tap; Android widgets can't detect double-tap reliably, so single tap on empty area/numbers).
+- Release APK 2.00 MB.
 
 ## P30 report (2026-11-06) — History filters + multi-select delete (user request)
 - `domain/HistoryFilter.kt`: period (All / this month / last 3 months / this year / custom range, ends included), type (Solo/Versus/Together), search (Turkish-aware, letters folded: "isik" finds "Işık"; names, seat names, brands, notes, date text), "with tab" (spent > 0 incl. drink prices), sort (newest/oldest/most spent/most drinks, ties newest). List only; Stats stay complete.

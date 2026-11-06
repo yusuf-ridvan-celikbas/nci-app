@@ -36,6 +36,9 @@ data class CounterSnapshot(
     val seatCount: Int = 0,
     val redName: String? = null,
     val blueName: String? = null,
+    /** XL widget: every Tab drink line and the newest notes (newest first). */
+    val allLines: List<com.cansin.app.domain.DrinkLine> = emptyList(),
+    val recentNotes: List<Note> = emptyList(),
 )
 
 interface SessionListener {
@@ -114,6 +117,8 @@ class SessionRepository(
                 .sortedByDescending { it.count }.take(WIDGET_LINES),
             seatCount = if (group) seats.seats(session.id).size else 0,
             redName = session.redName,
+            allLines = com.cansin.app.domain.TabRules.drinkLines(beers.observe(session.id).first(), session.mode),
+            recentNotes = notes.observe(session.id).first().sortedByDescending { it.editedTime ?: it.createdAt }.take(8),
             blueName = session.blueName,
         )
     }

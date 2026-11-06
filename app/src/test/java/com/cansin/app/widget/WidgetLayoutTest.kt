@@ -12,6 +12,9 @@ class WidgetLayoutTest {
         assertEquals(WidgetSize.STRIP, WidgetLayout.sizeClass(320, 60)) // 4×1
         assertEquals(WidgetSize.STRIP, WidgetLayout.sizeClass(200, 70)) // 3×1
         assertEquals(WidgetSize.BIG, WidgetLayout.sizeClass(320, 150)) // 4×2
+        assertEquals(WidgetSize.BIG, WidgetLayout.sizeClass(320, 250)) // 4×3
+        assertEquals(WidgetSize.XL, WidgetLayout.sizeClass(320, 340)) // 4×4
+        assertEquals(WidgetSize.XL, WidgetLayout.sizeClass(400, 430)) // 5×5
         assertEquals(WidgetSize.SMALL, WidgetLayout.sizeClass(200, 200)) // 3×3 narrow
     }
 

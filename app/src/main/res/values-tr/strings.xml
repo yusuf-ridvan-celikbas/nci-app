@@ -541,7 +541,7 @@
     <string name="widget_side_count">%1$s: %2$d</string>
     <string name="widget_tab_line">%1$s %2$s cl ×%3$d</string>
     <string name="widget_config_title">Widget ayarları</string>
-    <string name="widget_config_note">Otomatik: widget büyüdükçe daha fazlasını gösterir. 1×1 sayı, 2×2 sayfalar, 4×1 satır, 4×2 hepsi.</string>
+    <string name="widget_config_note">Otomatik: widget büyüdükçe daha fazlasını gösterir. 1×1 sayı, 2×2 sayfalar, 4×1 satır, 4×2 hepsi, 4×4 ve üstü büyük sayaç ve hesap listesi. Uygulamayı açmak için boş bir yere dokun.</string>
     <string name="widget_focus_auto">Otomatik (boyuta göre)</string>
     <string name="widget_focus_drinks">Sadece içkiler</string>
     <string name="widget_focus_water">Sadece su</string>
@@ -549,4 +549,10 @@
     <string name="widget_focus_promille">Sadece tahmin (‰)</string>
     <string name="setting_widget_promille">Widget\'larda ‰ tahminini göster</string>
     <string name="setting_widget_promille_note">Varsayılan olarak kapalı: ana ekranı başkaları görebilir. Vücut profili gerekir. PIN widget\'ı gizliyorsa görünmez.</string>
+    <string name="widget_tab_note">%1$s %2$s</string>
+    <string name="widget_tab_empty">Hesapta henüz bir şey yok</string>
+    <plurals name="widget_tab_more">
+        <item quantity="one">+%d daha · Hesabı aç</item>
+        <item quantity="other">+%d daha · Hesabı aç</item>
+    </plurals>
 </resources>

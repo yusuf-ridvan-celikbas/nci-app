@@ -85,6 +85,29 @@ object WidgetRenderer {
         R.id.big_blue_label, R.id.big_blue_sub, R.id.big_blue_minus, R.id.big_blue_minus_bg, R.id.big_blue_minus_label,
         R.id.big_blue_plus, R.id.big_blue_plus_bg, R.id.big_blue_plus_label,
     )
+    private const val NO_VIEW = 0
+
+    private val XL_RED = Row(
+        R.id.xl_red_label, NO_VIEW, R.id.xl_red_minus, R.id.xl_red_minus_bg, R.id.xl_red_minus_label,
+        R.id.xl_red_plus, R.id.xl_red_plus_bg, R.id.xl_red_plus_label,
+    )
+    private val XL_BLUE = Row(
+        R.id.xl_blue_label, NO_VIEW, R.id.xl_blue_minus, R.id.xl_blue_minus_bg, R.id.xl_blue_minus_label,
+        R.id.xl_blue_plus, R.id.xl_blue_plus_bg, R.id.xl_blue_plus_label,
+    )
+    private val XL_WATER = Row(
+        R.id.xl_water_label, NO_VIEW, R.id.xl_water_minus, R.id.xl_water_minus_bg, R.id.xl_water_minus_label,
+        R.id.xl_water_plus, R.id.xl_water_plus_bg, R.id.xl_water_plus_label,
+    )
+    private val XL_TAB_LABELS = intArrayOf(
+        R.id.xl_tab_label1, R.id.xl_tab_label2, R.id.xl_tab_label3, R.id.xl_tab_label4,
+        R.id.xl_tab_label5, R.id.xl_tab_label6, R.id.xl_tab_label7, R.id.xl_tab_label8,
+    )
+    private val XL_TAB_AMOUNTS = intArrayOf(
+        R.id.xl_tab_amount1, R.id.xl_tab_amount2, R.id.xl_tab_amount3, R.id.xl_tab_amount4,
+        R.id.xl_tab_amount5, R.id.xl_tab_amount6, R.id.xl_tab_amount7, R.id.xl_tab_amount8,
+    )
+
     private val ROW_WATER = Row(
         R.id.big_water_label, R.id.big_water_sub, R.id.big_water_minus, R.id.big_water_minus_bg, R.id.big_water_minus_label,
         R.id.big_water_plus, R.id.big_water_plus_bg, R.id.big_water_plus_label,
@@ -103,6 +126,7 @@ object WidgetRenderer {
                     SizeF(110f, 110f) to small(c, pages, page),
                     SizeF(WidgetLayout.STRIP_MIN_WIDTH_DP.toFloat(), 40f) to strip(c),
                     SizeF(WidgetLayout.BIG_MIN_WIDTH_DP.toFloat(), 110f) to big(c),
+                    SizeF(WidgetLayout.BIG_MIN_WIDTH_DP.toFloat(), WidgetLayout.XL_MIN_HEIGHT_DP.toFloat()) to xl(c),
                 ),
             )
         }
@@ -115,6 +139,7 @@ object WidgetRenderer {
             WidgetSize.SMALL -> small(c, pages, page)
             WidgetSize.STRIP -> strip(c)
             WidgetSize.BIG -> big(c)
+            WidgetSize.XL -> xl(c)
         }
     }
 
@@ -207,6 +232,7 @@ object WidgetRenderer {
     private fun small(c: Ctx, pages: List<WidgetPage>, page: WidgetPage): RemoteViews {
         val context = c.context
         val views = RemoteViews(context.packageName, R.layout.widget_small)
+        views.setOnClickPendingIntent(R.id.widget_bg, openApp(context, tab = false))
         val label = context.getString(pageLabel(page))
         val paged = pages.size > 1
         views.setTextViewText(R.id.widget_page_label, label)
@@ -286,6 +312,7 @@ object WidgetRenderer {
     private fun strip(c: Ctx): RemoteViews {
         val context = c.context
         val views = RemoteViews(context.packageName, R.layout.widget_strip)
+        views.setOnClickPendingIntent(R.id.widget_bg, openApp(context, tab = false))
         val cells = if (c.hidden) {
             listOf(Cell(context.getString(R.string.widget_open_app), context.getString(R.string.widget_hidden), null, openApp(context, false)))
         } else {
@@ -349,7 +376,7 @@ object WidgetRenderer {
             )
             WidgetBlock.TAB -> listOf(Cell(context.getString(R.string.widget_page_tab), money(c, c.s.tabMinor), null, openApp(context, true)))
             WidgetBlock.PROMILLE -> listOf(Cell(context.getString(R.string.widget_promille_short), value(c, WidgetPage.PROMILLE), null, openApp(context, false)))
-            WidgetBlock.TIMER -> emptyList()
+            WidgetBlock.TIMER, WidgetBlock.HERO, WidgetBlock.TAB_LIST -> emptyList()
         }
     }
 
@@ -358,6 +385,7 @@ object WidgetRenderer {
     private fun big(c: Ctx): RemoteViews {
         val context = c.context
         val views = RemoteViews(context.packageName, R.layout.widget_big)
+        views.setOnClickPendingIntent(R.id.widget_bg, openApp(context, tab = false))
         val s = c.s
         views.setTextViewText(R.id.big_title, context.getString(R.string.name_salgam))
         views.setTextViewText(
@@ -455,12 +483,158 @@ object WidgetRenderer {
         return views
     }
 
+    // ---------- XL (4×4 and up): big counter + Tab list ----------
+
+    private fun xl(c: Ctx): RemoteViews {
+        val context = c.context
+        val views = RemoteViews(context.packageName, R.layout.widget_xl)
+        val s = c.s
+        views.setOnClickPendingIntent(R.id.widget_bg, openApp(context, tab = false))
+        views.setTextViewText(R.id.xl_title, context.getString(R.string.name_salgam))
+        views.setTextViewText(
+            R.id.xl_since,
+            s.lastBeerAt?.let { context.getString(R.string.widget_last_drink, time(c, it)) } ?: context.getString(R.string.nav_tonight),
+        )
+        val blocks = WidgetContent.blocks(WidgetSize.XL, c.focus, s.mode, c.promille, c.hidden)
+        fun show(id: Int, on: Boolean) = views.setViewVisibility(id, if (on) View.VISIBLE else View.GONE)
+        show(R.id.xl_hidden, c.hidden)
+        if (c.hidden) {
+            views.setTextViewText(R.id.xl_hidden, context.getString(R.string.widget_hidden))
+            views.setContentDescription(R.id.xl_hidden, context.getString(R.string.widget_hidden_description))
+            views.setOnClickPendingIntent(R.id.xl_hidden, openApp(context, false))
+        }
+        show(R.id.xl_hero, WidgetBlock.HERO in blocks)
+        show(R.id.xl_red_row, WidgetBlock.VERSUS in blocks)
+        show(R.id.xl_blue_row, WidgetBlock.VERSUS in blocks)
+        show(R.id.xl_water_row, WidgetBlock.WATER in blocks)
+        show(R.id.xl_promille_row, WidgetBlock.PROMILLE in blocks)
+        show(R.id.xl_tab, WidgetBlock.TAB_LIST in blocks)
+
+        if (WidgetBlock.HERO in blocks) {
+            views.setTextViewText(R.id.xl_count, s.count.toString())
+            views.setOnClickPendingIntent(R.id.xl_hero_text, openApp(context, false))
+            views.setTextViewText(
+                R.id.xl_count_label,
+                listOfNotNull(
+                    context.getString(R.string.widget_page_beer),
+                    context.getString(R.string.widget_people, s.seatCount).takeIf { s.mode == SessionMode.GROUP },
+                ).joinToString(" · "),
+            )
+            show(R.id.xl_minus, c.canAdd)
+            views.setOnClickPendingIntent(R.id.xl_minus, action(c, WidgetActionReceiver.ACTION_REMOVE))
+            views.setContentDescription(R.id.xl_minus, context.getString(R.string.remove_beer))
+            views.setOnClickPendingIntent(R.id.xl_plus, if (c.canAdd) action(c, WidgetActionReceiver.ACTION_ADD) else openApp(context, false))
+            views.setContentDescription(R.id.xl_plus, context.getString(if (c.canAdd) R.string.add_beer else R.string.group_open))
+            views.setTextViewText(R.id.xl_adds, if (c.canAdd) addsLabel(c) else "")
+        }
+        if (WidgetBlock.VERSUS in blocks) {
+            listOf(Triple(Side.RED, s.red, XL_RED), Triple(Side.BLUE, s.blue, XL_BLUE)).forEach { (side, n, row) ->
+                val name = sideName(c, side)
+                val me = if (s.meSide == side) context.getString(R.string.versus_name_me, name) else name
+                countRow(
+                    c, views, row, context.getString(R.string.widget_side_count, me, n), "",
+                    minus = if (s.meSide == side) action(c, WidgetActionReceiver.ACTION_REMOVE) else null,
+                    plus = action(c, if (side == Side.RED) WidgetActionReceiver.ACTION_ADD_RED else WidgetActionReceiver.ACTION_ADD_BLUE),
+                    what = name,
+                )
+            }
+        }
+        if (WidgetBlock.WATER in blocks) {
+            countRow(
+                c, views, XL_WATER, context.getString(R.string.water_count, s.water), "",
+                minus = if (c.canWater) action(c, WidgetActionReceiver.ACTION_WATER_REMOVE) else null,
+                plus = if (c.canWater) action(c, WidgetActionReceiver.ACTION_WATER) else openApp(context, false),
+                what = context.getString(R.string.widget_page_water),
+            )
+        }
+        if (WidgetBlock.PROMILLE in blocks) {
+            views.setTextViewText(R.id.xl_promille_label, value(c, WidgetPage.PROMILLE))
+            views.setTextViewText(R.id.xl_promille_sub, context.getString(R.string.widget_promille_note, time(c, c.data.now)))
+            views.setOnClickPendingIntent(R.id.xl_promille_row, openApp(context, false))
+        }
+        timerRow(c, views, show = WidgetBlock.TIMER in blocks)
+        if (WidgetBlock.TAB_LIST in blocks) tabList(c, views)
+
+        tint(c, views) { set ->
+            set(R.id.widget_bg, "setColorFilter") { it.surface }
+            set(R.id.xl_title, "setTextColor") { it.onSurface }
+            set(R.id.xl_since, "setTextColor") { it.muted }
+            set(R.id.xl_hidden, "setTextColor") { it.onSurface }
+            set(R.id.xl_count, "setTextColor") { it.onSurface }
+            set(R.id.xl_count_label, "setTextColor") { it.muted }
+            set(R.id.xl_adds, "setTextColor") { it.muted }
+            set(R.id.xl_minus_bg, "setColorFilter") { it.container }
+            set(R.id.xl_minus_label, "setTextColor") { it.onSurface }
+            set(R.id.xl_plus_bg, "setColorFilter") { it.primary }
+            set(R.id.xl_plus_label, "setTextColor") { it.onPrimary }
+            listOf(XL_RED, XL_BLUE, XL_WATER).forEach { row ->
+                set(row.label, "setTextColor") { it.onSurface }
+                set(row.minusBg, "setColorFilter") { it.container }
+                set(row.minusLabel, "setTextColor") { it.onSurface }
+            }
+            set(XL_WATER.plusBg, "setColorFilter") { it.primary }
+            set(XL_WATER.plusLabel, "setTextColor") { it.onPrimary }
+            set(R.id.xl_promille_label, "setTextColor") { it.onSurface }
+            set(R.id.xl_promille_sub, "setTextColor") { it.muted }
+            set(R.id.xl_tab_title, "setTextColor") { it.onSurface }
+            set(R.id.xl_tab_total, "setTextColor") { it.onSurface }
+            set(R.id.xl_tab_more, "setTextColor") { it.primary }
+            XL_TAB_LABELS.forEach { id -> set(id, "setTextColor") { it.onSurface } }
+            XL_TAB_AMOUNTS.forEach { id -> set(id, "setTextColor") { it.muted } }
+            set(R.id.widget_timer_toggle, "setColorFilter") { it.primary }
+            set(R.id.widget_timer_label, "setTextColor") { it.muted }
+            set(R.id.widget_timer, "setTextColor") { it.onSurface }
+        }
+        versusTint(views, R.id.xl_red_plus_bg, R.id.xl_red_plus_label, Side.RED)
+        versusTint(views, R.id.xl_blue_plus_bg, R.id.xl_blue_plus_label, Side.BLUE)
+        return views
+    }
+
+    /** Up to 8 rows: drink lines, then the newest notes; "+N more · open Tab" for the rest. Tap = open the Tab. */
+    private fun tabList(c: Ctx, views: RemoteViews) {
+        val context = c.context
+        val s = c.s
+        val sep = DecimalFormatSymbols.getInstance(context.resources.configuration.locales[0]).decimalSeparator
+        views.setOnClickPendingIntent(R.id.xl_tab, openApp(context, tab = true))
+        views.setTextViewText(R.id.xl_tab_title, context.getString(R.string.widget_page_tab))
+        views.setTextViewText(R.id.xl_tab_total, money(c, s.tabMinor))
+        val rows = WidgetContent.tabRows(s.allLines.size, s.recentNotes.size)
+        val items = rows.lines.map { i ->
+            val line = s.allLines[i]
+            val name = line.brand ?: context.getString(drinkName(line.kind))
+            context.getString(R.string.widget_tab_line, name, BeerRules.formatCl(line.sizeMl, sep), line.count) to
+                (if (line.unitMinor == null) "–" else money(c, line.totalMinor))
+        } + rows.notes.map { i ->
+            val note = s.recentNotes[i]
+            context.getString(R.string.widget_tab_note, time(c, note.editedTime ?: note.createdAt), note.text) to
+                (note.amountMinor?.let { money(c, it) } ?: "")
+        }
+        XL_TAB_LABELS.indices.forEach { i ->
+            val item = items.getOrNull(i)
+            views.setViewVisibility(XL_TAB_LABELS[i], if (item == null) View.GONE else View.VISIBLE)
+            views.setViewVisibility(XL_TAB_AMOUNTS[i], if (item == null) View.GONE else View.VISIBLE)
+            if (item != null) {
+                views.setTextViewText(XL_TAB_LABELS[i], item.first)
+                views.setTextViewText(XL_TAB_AMOUNTS[i], item.second)
+            }
+        }
+        val more = when {
+            items.isEmpty() -> context.getString(R.string.widget_tab_empty)
+            rows.overflow > 0 -> context.resources.getQuantityString(R.plurals.widget_tab_more, rows.overflow, rows.overflow)
+            else -> ""
+        }
+        views.setTextViewText(R.id.xl_tab_more, more)
+        views.setViewVisibility(R.id.xl_tab_more, if (more.isEmpty()) View.GONE else View.VISIBLE)
+    }
+
     /** "Label · −1 · +1" row; a null [minus] hides −1. */
     private fun countRow(c: Ctx, views: RemoteViews, row: Row, label: String, sub: String, minus: PendingIntent?, plus: PendingIntent, what: String) {
         val context = c.context
         views.setTextViewText(row.label, label)
-        views.setTextViewText(row.sub, sub)
-        views.setViewVisibility(row.sub, if (sub.isEmpty()) View.GONE else View.VISIBLE)
+        if (row.sub != NO_VIEW) {
+            views.setTextViewText(row.sub, sub)
+            views.setViewVisibility(row.sub, if (sub.isEmpty()) View.GONE else View.VISIBLE)
+        }
         views.setViewVisibility(row.minus, if (minus == null) View.GONE else View.VISIBLE)
         minus?.let {
             views.setOnClickPendingIntent(row.minus, it)

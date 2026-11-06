@@ -553,7 +553,7 @@
     <string name="widget_side_count">%1$s: %2$d</string>
     <string name="widget_tab_line">%1$s %2$s cl ×%3$d</string>
     <string name="widget_config_title">Widget settings</string>
-    <string name="widget_config_note">Auto shows more as you make the widget bigger: 1×1 a number, 2×2 pages, 4×1 a row, 4×2 everything.</string>
+    <string name="widget_config_note">Auto shows more as you make the widget bigger: 1×1 a number, 2×2 pages, 4×1 a row, 4×2 everything, 4×4 and bigger a big counter and the Tab list. Tap an empty spot to open the app.</string>
     <string name="widget_focus_auto">Auto (by size)</string>
     <string name="widget_focus_drinks">Drinks only</string>
     <string name="widget_focus_water">Water only</string>
@@ -561,4 +561,10 @@
     <string name="widget_focus_promille">Estimate (‰) only</string>
     <string name="setting_widget_promille">Show ‰ estimate on widgets</string>
     <string name="setting_widget_promille_note">Off by default: the home screen can be seen by others. Needs a body profile. Hidden when the PIN hides the widget.</string>
+    <string name="widget_tab_note">%1$s %2$s</string>
+    <string name="widget_tab_empty">Nothing on the tab yet</string>
+    <plurals name="widget_tab_more">
+        <item quantity="one">+%d more · open Tab</item>
+        <item quantity="other">+%d more · open Tab</item>
+    </plurals>
 </resources>

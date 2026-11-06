@@ -58,4 +58,29 @@ class WidgetContentTest {
         assertEquals(WidgetPage.BEER, WidgetContent.tiny(WidgetFocus.AUTO))
         assertEquals(WidgetPage.TAB, WidgetContent.tiny(WidgetFocus.TAB))
     }
+
+    @Test
+    fun xlHasHeroAndTabList() {
+        assertEquals(
+            listOf(WidgetBlock.HERO, WidgetBlock.WATER, WidgetBlock.TIMER, WidgetBlock.TAB_LIST),
+            WidgetContent.blocks(WidgetSize.XL, WidgetFocus.AUTO, SessionMode.SOLO, promille = false, hidden = false),
+        )
+        assertEquals(
+            listOf(WidgetBlock.VERSUS, WidgetBlock.WATER, WidgetBlock.TIMER, WidgetBlock.PROMILLE, WidgetBlock.TAB_LIST),
+            WidgetContent.blocks(WidgetSize.XL, WidgetFocus.AUTO, SessionMode.VERSUS, promille = true, hidden = false),
+        )
+        assertEquals(listOf(WidgetBlock.TAB_LIST), WidgetContent.blocks(WidgetSize.XL, WidgetFocus.TAB, SessionMode.SOLO, true, false))
+        assertEquals(emptyList<WidgetBlock>(), WidgetContent.blocks(WidgetSize.XL, WidgetFocus.AUTO, SessionMode.SOLO, true, hidden = true))
+    }
+
+    @Test
+    fun tabRowsLinesFirstThenNotesWithOverflow() {
+        assertEquals(TabRows(listOf(0, 1), listOf(0, 1, 2), 0), WidgetContent.tabRows(2, 3))
+        val full = WidgetContent.tabRows(6, 5)
+        assertEquals(6, full.lines.size)
+        assertEquals(2, full.notes.size)
+        assertEquals(3, full.overflow)
+        assertEquals(TabRows(emptyList(), emptyList(), 0), WidgetContent.tabRows(0, 0))
+        assertEquals(TabRows((0 until 8).toList(), emptyList(), 4), WidgetContent.tabRows(12, 0))
+    }
 }
