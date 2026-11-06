@@ -123,6 +123,8 @@ object WidgetRenderer {
             return RemoteViews(
                 mapOf(
                     SizeF(40f, 40f) to tiny(c),
+                    SizeF(40f, 110f) to tall(c),
+                    SizeF(40f, WidgetLayout.COLUMN_MIN_HEIGHT_DP.toFloat()) to strip(c, R.layout.widget_column),
                     SizeF(110f, 110f) to small(c, pages, page),
                     SizeF(WidgetLayout.STRIP_MIN_WIDTH_DP.toFloat(), 40f) to strip(c),
                     SizeF(WidgetLayout.BIG_MIN_WIDTH_DP.toFloat(), 110f) to big(c),
@@ -136,6 +138,8 @@ object WidgetRenderer {
         )
         return when (size) {
             WidgetSize.TINY -> tiny(c)
+            WidgetSize.TALL -> tall(c)
+            WidgetSize.COLUMN -> strip(c, R.layout.widget_column)
             WidgetSize.SMALL -> small(c, pages, page)
             WidgetSize.STRIP -> strip(c)
             WidgetSize.BIG -> big(c)
@@ -191,38 +195,74 @@ object WidgetRenderer {
 
     // ---------- TINY (1×1) ----------
 
+    /** One number + its main action (TINY / TALL). */
+    private class Single(val value: String, val label: String, val button: String, val intent: PendingIntent, val description: String)
+
+    private fun single(c: Ctx): Single {
+        val context = c.context
+        if (c.hidden) {
+            return Single(
+                context.getString(R.string.widget_hidden), "", context.getString(R.string.widget_open),
+                openApp(context, false), context.getString(R.string.widget_open_app),
+            )
+        }
+        val page = WidgetContent.tiny(c.focus)
+        val value = value(c, page)
+        return when (page) {
+            WidgetPage.BEER -> if (c.canAdd) {
+                Single(value, context.getString(R.string.widget_page_beer), context.getString(R.string.plus_one), action(c, WidgetActionReceiver.ACTION_ADD), context.getString(R.string.add_beer))
+            } else {
+                Single(value, context.getString(R.string.widget_page_beer), context.getString(R.string.widget_open), openApp(context, false), context.getString(R.string.widget_open_app))
+            }
+            WidgetPage.WATER -> if (c.canWater) {
+                Single(value, context.getString(R.string.widget_page_water), context.getString(R.string.plus_one), action(c, WidgetActionReceiver.ACTION_WATER), context.getString(R.string.water_add))
+            } else {
+                Single(value, context.getString(R.string.widget_page_water), context.getString(R.string.widget_open), openApp(context, false), context.getString(R.string.widget_open_app))
+            }
+            WidgetPage.TAB -> Single(value, context.getString(R.string.widget_page_tab), context.getString(R.string.widget_open), openApp(context, true), context.getString(R.string.widget_open_tab))
+            WidgetPage.PROMILLE -> Single(value, context.getString(R.string.widget_promille_short), context.getString(R.string.widget_open), openApp(context, false), context.getString(R.string.widget_open_app))
+        }
+    }
+
+    // ---------- TINY (1×1): the count inside a round +1 ----------
+
     private fun tiny(c: Ctx): RemoteViews {
         val views = RemoteViews(c.context.packageName, R.layout.widget_tiny)
-        val page = WidgetContent.tiny(c.focus)
-        if (c.hidden) {
-            views.setTextViewText(R.id.widget_value, c.context.getString(R.string.widget_hidden))
-            views.setTextViewText(R.id.tiny_hint, c.context.getString(R.string.widget_open))
-            views.setContentDescription(R.id.tiny_tap, c.context.getString(R.string.widget_open_app))
-            views.setOnClickPendingIntent(R.id.tiny_tap, openApp(c.context, tab = false))
-        } else {
-            views.setTextViewText(R.id.widget_value, value(c, page))
-            val (hint, intent, description) = when (page) {
-                WidgetPage.BEER -> if (c.canAdd) {
-                    Triple(c.context.getString(R.string.plus_one), action(c, WidgetActionReceiver.ACTION_ADD), c.context.getString(R.string.add_beer))
-                } else {
-                    Triple(c.context.getString(R.string.widget_open), openApp(c.context, false), c.context.getString(R.string.widget_open_app))
-                }
-                WidgetPage.WATER -> if (c.canWater) {
-                    Triple(c.context.getString(R.string.widget_water_plus), action(c, WidgetActionReceiver.ACTION_WATER), c.context.getString(R.string.water_add))
-                } else {
-                    Triple(c.context.getString(R.string.widget_page_water), openApp(c.context, false), c.context.getString(R.string.widget_open_app))
-                }
-                WidgetPage.TAB -> Triple(c.context.getString(R.string.widget_page_tab), openApp(c.context, true), c.context.getString(R.string.widget_open_tab))
-                WidgetPage.PROMILLE -> Triple(c.context.getString(R.string.widget_promille_short), openApp(c.context, false), c.context.getString(R.string.widget_open_app))
-            }
-            views.setTextViewText(R.id.tiny_hint, hint)
-            views.setContentDescription(R.id.tiny_tap, value(c, page) + ", " + description)
-            views.setOnClickPendingIntent(R.id.tiny_tap, intent)
-        }
+        val one = single(c)
+        views.setOnClickPendingIntent(R.id.widget_bg, openApp(c.context, tab = false))
+        views.setTextViewText(R.id.widget_value, one.value)
+        views.setTextViewText(R.id.tiny_hint, one.button)
+        views.setContentDescription(R.id.tiny_tap, listOf(one.label, one.value, one.description).filter { it.isNotEmpty() }.joinToString(", "))
+        views.setOnClickPendingIntent(R.id.tiny_tap, one.intent)
         tint(c, views) { set ->
             set(R.id.widget_bg, "setColorFilter") { it.surface }
-            set(R.id.widget_value, "setTextColor") { it.onSurface }
-            set(R.id.tiny_hint, "setTextColor") { it.primary }
+            set(R.id.tiny_circle, "setColorFilter") { it.primary }
+            set(R.id.widget_value, "setTextColor") { it.onPrimary }
+            set(R.id.tiny_hint, "setTextColor") { it.onPrimary }
+        }
+        return views
+    }
+
+    // ---------- TALL (1×2): count on top, round +1 below ----------
+
+    private fun tall(c: Ctx): RemoteViews {
+        val context = c.context
+        val views = RemoteViews(context.packageName, R.layout.widget_tall)
+        val one = single(c)
+        views.setOnClickPendingIntent(R.id.widget_bg, openApp(context, tab = false))
+        views.setOnClickPendingIntent(R.id.tall_text, openApp(context, tab = WidgetContent.tiny(c.focus) == WidgetPage.TAB))
+        views.setTextViewText(R.id.tall_value, one.value)
+        views.setTextViewText(R.id.tall_label, one.label)
+        views.setViewVisibility(R.id.tall_label, if (one.label.isEmpty()) View.GONE else View.VISIBLE)
+        views.setTextViewText(R.id.tall_btn_label, one.button)
+        views.setContentDescription(R.id.tall_btn, one.description)
+        views.setOnClickPendingIntent(R.id.tall_btn, one.intent)
+        tint(c, views) { set ->
+            set(R.id.widget_bg, "setColorFilter") { it.surface }
+            set(R.id.tall_value, "setTextColor") { it.onSurface }
+            set(R.id.tall_label, "setTextColor") { it.muted }
+            set(R.id.tall_btn_bg, "setColorFilter") { it.primary }
+            set(R.id.tall_btn_label, "setTextColor") { it.onPrimary }
         }
         return views
     }
@@ -309,9 +349,10 @@ object WidgetRenderer {
 
     private class Cell(val label: String, val value: String, val button: Triple<String, PendingIntent, String>?, val tap: PendingIntent, val side: Side? = null)
 
-    private fun strip(c: Ctx): RemoteViews {
+    /** 4×1 row, or the same three cells stacked for 1×3+ ([layout] = widget_column). */
+    private fun strip(c: Ctx, layout: Int = R.layout.widget_strip): RemoteViews {
         val context = c.context
-        val views = RemoteViews(context.packageName, R.layout.widget_strip)
+        val views = RemoteViews(context.packageName, layout)
         views.setOnClickPendingIntent(R.id.widget_bg, openApp(context, tab = false))
         val cells = if (c.hidden) {
             listOf(Cell(context.getString(R.string.widget_open_app), context.getString(R.string.widget_hidden), null, openApp(context, false)))

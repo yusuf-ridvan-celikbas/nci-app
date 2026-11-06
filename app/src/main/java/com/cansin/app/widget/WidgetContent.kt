@@ -52,7 +52,7 @@ object WidgetContent {
             WidgetFocus.TAB -> listOf(WidgetBlock.TAB)
             WidgetFocus.PROMILLE -> listOf(WidgetBlock.PROMILLE)
             WidgetFocus.AUTO -> when (size) {
-                WidgetSize.STRIP -> if (mode == SessionMode.VERSUS) listOf(drinks, WidgetBlock.TAB) else listOf(drinks, WidgetBlock.WATER, WidgetBlock.TAB)
+                WidgetSize.STRIP, WidgetSize.COLUMN -> if (mode == SessionMode.VERSUS) listOf(drinks, WidgetBlock.TAB) else listOf(drinks, WidgetBlock.WATER, WidgetBlock.TAB)
                 WidgetSize.BIG -> listOfNotNull(drinks, WidgetBlock.WATER, WidgetBlock.TIMER, WidgetBlock.TAB, WidgetBlock.PROMILLE.takeIf { promille })
                 else -> listOf(drinks)
             }

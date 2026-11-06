@@ -144,6 +144,10 @@ Current phase: **P13–P30 approved on the phone (2026-11-06), merged into maste
   6. Counts in widget/stats/result card now mean all drinks, not only beer.
 - Known limits: the Stats "water per drink" in a group counts everyone's water; in a group, the counter's water bar duplicates my seat's water button.
 
+## P31c (2026-11-06) — 1-column widget designs (user disliked the old 1×1)
+- New size classes (width < 110 dp): TINY 1×1 = the count inside a round +1 button; TALL 1×2 = count + label on top, 52 dp round +1 below; COLUMN 1×3+ = drinks (+1), water (+1), tab total stacked (`widget_column.xml`, same ids/cells as the 4×1 strip; Versus: red/blue +1 + tab). API 31+ size map gains 40×110 and 40×200.
+- Lint clean, tests green; app starts on the phone. Not yet placed/resized by the user.
+
 ## P32 report (2026-11-06) — timer starts with +1 (user request, as a preference)
 - Settings → Drinks → "Start the timer with +1" (`timer_auto`, default on; shown when the timer is on). My +1 (Tonight, widget, tile, Versus my side, Together my seat, Tab line +1) starts that drink's timer via `SessionListener.onBeerAdded` → `DrinkTimer.autoStart`; a timer still running for the previous drink finishes that drink first (`TimerRules.autoStart`, unit-tested).
 - New `SessionListener.onBeerRemoved` (undo / −1 / widget −1 / Tab −1) clears a timer that pointed at the removed drink.

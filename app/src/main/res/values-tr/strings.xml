@@ -532,7 +532,6 @@
     <string name="widget_promille_value">≈%1$s‰</string>
     <string name="widget_promille_short">‰</string>
     <string name="widget_promille_note">%1$s · sadece tahmin, asla araç kullanma</string>
-    <string name="widget_water_plus">Su +1</string>
     <string name="widget_adds">+1: %1$s · %2$s cl</string>
     <string name="widget_people">masada %1$d kişi</string>
     <string name="widget_last_drink">Son içki %1$s</string>

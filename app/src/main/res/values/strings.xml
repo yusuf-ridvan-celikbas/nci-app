@@ -544,7 +544,6 @@
     <string name="widget_promille_value">≈%1$s‰</string>
     <string name="widget_promille_short">‰</string>
     <string name="widget_promille_note">%1$s · estimate only, never drive</string>
-    <string name="widget_water_plus">Water +1</string>
     <string name="widget_adds">+1: %1$s · %2$s cl</string>
     <string name="widget_people">%1$d at the table</string>
     <string name="widget_last_drink">Last drink %1$s</string>
