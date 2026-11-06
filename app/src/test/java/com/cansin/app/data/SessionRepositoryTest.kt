@@ -331,4 +331,21 @@ class SessionRepositoryTest {
         assertEquals(true, "removed:${first.id}" in listener.log)
         assertEquals(2, listener.log.count { it.startsWith("removed:") })
     }
+
+    @Test
+    fun draftAndBottleAreSeparateAndSwitchable() = runBlocking {
+        val priced = SessionRepository(sessions, beers, notes, water, clock = { now }, price = { _, _ -> 15_000L })
+        val draft = DrinkChoice(DrinkKind.BEER, BeerSize(500, 5.0), "Efes", Serving.DRAFT)
+        val bottle = draft.copy(serving = Serving.BOTTLE)
+        priced.addBeer(drink = draft)
+        priced.addBeer(drink = bottle)
+        priced.addBeer(drink = DrinkChoice(DrinkKind.WINE, BeerSize(150, 12.0), serving = Serving.BOTTLE)) // not beer → no serving
+        assertEquals(listOf(Serving.DRAFT, Serving.BOTTLE, null), beers.rows.value.map { it.serving })
+        priced.setDrinkPrice(DrinkKind.BEER, 500, Side.SOLO, 12_000, "Efes", Serving.BOTTLE)
+        assertEquals(listOf(15_000L, 12_000L), beers.rows.value.take(2).map { it.priceMinor })
+        priced.setServing(DrinkKind.BEER, 500, Side.SOLO, "Efes", Serving.DRAFT, Serving.BOTTLE)
+        assertEquals(listOf(Serving.BOTTLE, Serving.BOTTLE), beers.rows.value.take(2).map { it.serving })
+        priced.removeLatestDrink(DrinkKind.BEER, 500, Side.SOLO, "Efes", Serving.BOTTLE)
+        assertEquals(2, beers.rows.value.size)
+    }
 }

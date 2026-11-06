@@ -181,6 +181,11 @@ private fun NotesContent(viewModel: NotesViewModel, state: NotesState, onBack: (
             clearLabel = R.string.tab_price_remove,
             onSave = { viewModel.setPrice(line, it); pricing = null },
             onDismiss = { pricing = null },
+            extra = if (line.kind == com.cansin.app.data.DrinkKind.BEER) {
+                { ServingChips(line.serving) { s -> viewModel.setServing(line, s); pricing = null } }
+            } else {
+                null
+            },
         )
     }
 
@@ -258,7 +263,7 @@ private fun NoteRow(note: Note, state: NotesState, format: (Long) -> String, onC
 /** Tab drink line: "Beer · 50 cl ×3", price each, sum, −1/+1. Tap = price for tonight (this pub). */
 @Composable
 private fun DrinkLineRow(line: com.cansin.app.domain.DrinkLine, state: NotesState, format: (Long) -> String, onTap: () -> Unit, onRemove: () -> Unit, onAdd: () -> Unit) {
-    val name = line.brand ?: stringResource(drinkName(line.kind))
+    val name = listOfNotNull(line.brand ?: stringResource(drinkName(line.kind)), line.serving?.let { stringResource(servingName(it)) }).joinToString(" · ")
     Row(
         Modifier.fillMaxWidth().clickable(onClick = onTap).padding(start = 16.dp, end = 8.dp, top = 6.dp, bottom = 6.dp),
         verticalAlignment = Alignment.CenterVertically,

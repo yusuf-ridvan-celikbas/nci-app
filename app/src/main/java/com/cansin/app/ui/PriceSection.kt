@@ -73,6 +73,7 @@ internal fun PriceDialog(
     onDismiss: () -> Unit,
     @androidx.annotation.StringRes note: Int? = null,
     @androidx.annotation.StringRes clearLabel: Int = R.string.price_clear,
+    extra: (@Composable () -> Unit)? = null,
 ) {
     val plain = rememberPlainAmountFormat()
     var text by rememberSaveable { mutableStateOf(current?.let(plain).orEmpty()) }
@@ -96,6 +97,7 @@ internal fun PriceDialog(
                     singleLine = true,
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
                 )
+                extra?.invoke()
             }
         },
         confirmButton = {

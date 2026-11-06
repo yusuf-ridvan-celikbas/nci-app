@@ -108,4 +108,10 @@ class TabRulesTest {
         assertEquals(23_000L, all.sumOf { it.amountMinor ?: 0 })
         assertEquals(all.size, all.map { it.id }.toSet().size) // ids never clash
     }
+
+    @Test
+    fun draftAndBottleGetTheirOwnLines() {
+        val beers = listOf(beer(1).copy(serving = com.cansin.app.data.Serving.DRAFT), beer(2).copy(serving = com.cansin.app.data.Serving.BOTTLE), beer(3).copy(serving = com.cansin.app.data.Serving.DRAFT))
+        assertEquals(listOf(com.cansin.app.data.Serving.DRAFT to 2, com.cansin.app.data.Serving.BOTTLE to 1), TabRules.drinkLines(beers, SessionMode.SOLO).map { it.serving to it.count })
+    }
 }

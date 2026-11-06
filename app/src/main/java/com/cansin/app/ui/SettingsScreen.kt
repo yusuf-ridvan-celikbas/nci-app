@@ -92,6 +92,7 @@ class SettingsActions(
     val onCompressAfter: suspend (com.cansin.app.domain.CompressAfter) -> Unit,
     val onPrice: (com.cansin.app.domain.PriceSlot, Long?) -> Unit,
     val onDefaultBrand: (String?) -> Unit,
+    val onDefaultServing: (com.cansin.app.data.Serving) -> Unit,
     val onWidgetPromille: (Boolean) -> Unit,
 )
 
@@ -160,6 +161,8 @@ fun SettingsScreen(
                 SettingsPage.DRINKS -> {
                     BeerSection(settings.beerSize, actions.onBeerSize, settings.defaultDrink, actions.onDefaultDrink)
                     DefaultBrandRow(settings.defaultBrand, actions.onDefaultBrand)
+                    Text(stringResource(R.string.setting_default_serving), style = MaterialTheme.typography.titleSmall, modifier = Modifier.padding(top = 8.dp))
+                    ServingChips(settings.defaultServing, actions.onDefaultServing)
                     HorizontalDivider(Modifier.padding(vertical = 16.dp))
                     PriceSection(settings.prices, actions.onPrice)
                     HorizontalDivider(Modifier.padding(vertical = 16.dp))

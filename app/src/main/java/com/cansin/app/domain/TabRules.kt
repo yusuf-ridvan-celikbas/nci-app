@@ -22,6 +22,7 @@ data class DrinkLine(
     val unitMinor: Long? = null,
     val abv: Double = 5.0,
     val brand: String? = null,
+    val serving: com.cansin.app.data.Serving? = null,
 )
 
 /** P33 Tab water line for one seat (null side = solo/Versus). */
@@ -72,11 +73,11 @@ object TabRules {
     fun drinkLines(beers: List<BeerEvent>, mode: SessionMode?): List<DrinkLine> {
         val lines = LinkedHashMap<List<Any?>, DrinkLine>()
         beers.sortedWith(compareBy({ it.at }, { it.id })).forEach { b ->
-            val key = listOf(b.kind, b.sizeMl, b.side, b.brand)
+            val key = listOf(b.kind, b.sizeMl, b.side, b.brand, b.serving)
             val price = b.priceMinor?.takeIf { it > 0 }
             val line = lines[key]
             lines[key] = if (line == null) {
-                DrinkLine(b.kind, b.sizeMl, mode?.let { VersusRules.noteSide(b.side, it) }, 1, price ?: 0, b.side, price, b.abv, b.brand)
+                DrinkLine(b.kind, b.sizeMl, mode?.let { VersusRules.noteSide(b.side, it) }, 1, price ?: 0, b.side, price, b.abv, b.brand, b.serving)
             } else {
                 line.copy(count = line.count + 1, totalMinor = line.totalMinor + (price ?: 0), unitMinor = price ?: line.unitMinor, abv = b.abv)
             }

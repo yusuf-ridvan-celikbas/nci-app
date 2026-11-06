@@ -570,4 +570,7 @@
     <string name="setting_water_size">Water glass size</string>
     <string name="water_size_title">Glass size</string>
     <string name="price_water_label">Water (500 ml)</string>
+    <string name="serving_draft">Draft</string>
+    <string name="serving_bottle">Bottle</string>
+    <string name="setting_default_serving">Beer for +1: draft or bottle</string>
 </resources>

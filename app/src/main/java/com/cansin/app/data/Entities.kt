@@ -13,6 +13,9 @@ enum class SessionMode { SOLO, VERSUS, GROUP }
 /** RED/BLUE = versus sides; group seats use [com.cansin.app.domain.GroupRules.SIDES]. */
 enum class Side { SOLO, RED, BLUE, GREEN, PURPLE, AMBER, YELLOW, TEAL, PINK, ORANGE, GREY }
 
+/** P34 beer serving: draft (fıçı) or bottle (şişe). */
+enum class Serving { DRAFT, BOTTLE }
+
 /** P22: what was drunk. Table and class keep the "beer" name to avoid a risky rename. */
 enum class DrinkKind { BEER, WINE, RAKI, SHOT, COCKTAIL, CUSTOM }
 
@@ -66,6 +69,8 @@ data class BeerEvent(
     val priceMinor: Long? = null,
     /** P29: optional brand label, e.g. "Efes". */
     val brand: String? = null,
+    /** P34: draft or bottle (beer only; null = not said / other kinds). */
+    val serving: Serving? = null,
 ) {
     companion object {
         const val DEFAULT_SIZE_ML = 500

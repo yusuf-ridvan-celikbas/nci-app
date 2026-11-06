@@ -149,6 +149,13 @@ Current phase: **P13–P30 approved on the phone (2026-11-06), merged into maste
 - Lint clean, tests green; app starts on the phone. Not yet placed/resized by the user.
 - Phone feedback: widget numbers were tiny (autoSize + wrap_content picks the minimum) → fixed sizes. 1-row widgets (3×1/4×1) use the old pages look with −1/+1: `widget_pager.xml` ‹ label •∘∘ value (−1) (+1) › (Versus: red/blue +1). 2×1 keeps the round +1 (user preferred). Narrow widgets (1–2 columns, 2+ rows: 1×2, 2×2, 2×3, 1×4…) use the narrow pages look (`widget_small_narrow.xml`); 3×2/4×2 the regular pages look; both with −1 next to +1; the stacked Drinks/Water/Tab column was removed (user); the dashboard (BIG) is now 4×3, XL 4×4+. Narrow tall widgets: compact cells (label, then value + 36 dp +1) so 3 blocks fit; on this Samsung a 2-cell width counts as narrow.
 
+## P34 report (2026-11-06) — draft / bottle (user request)
+- DB v11 (AutoMigration 10→11): `BeerEvent.serving` (DRAFT/BOTTLE, beer only, null for other kinds/old rows). `DrinkChoice.serving`; Settings → Drinks "Beer for +1: draft or bottle" (default DRAFT, decided – confirm); picker chips Draft/Bottle for beer.
+- Tab: lines split by serving (own tonight's price; `latestPrice/setPrice/latestMatching` include serving); tapping a beer line shows Draft/Bottle chips to switch the line (`setServing`).
+- Labels "Efes · Draft · 50 cl · 5.0%"; widget "+1: Efes · Draft · 50 cl"; backup `serving`. Settings prices stay per size (not per serving).
+- Water: one price row "Water (500 ml)" (250 ml / 1 L scale from it).
+- Tests green, lint clean; phone: v10→v11 migration ran, app starts.
+
 ## P33 report (2026-11-06) — water price + glass sizes (user request)
 - DB v10 (AutoMigration 9→10): `WaterEvent.priceMinor` + `sizeMl` (default 500). Sizes 250 / 500 / 1000 ml (`WaterRules.SIZES_ML`); Settings → Health → Water glass size (default 500); Tonight water +1 long-press → size picker.
 - Prices: `PriceSlot.WATER_250 / WATER (500, key price_WATER) / WATER_1L`; `PriceRules.water` (exact size, else scaled from 500 ml). Tonight's water price per size sticks (set on the Tab).

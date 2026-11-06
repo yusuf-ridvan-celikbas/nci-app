@@ -183,7 +183,7 @@ class RestoreParserTest {
     @Test
     fun drinkPricesRoundTrip() {
         val priced = data.copy(
-            beers = data.beers.map { if (it.sessionId == 1L) it.copy(priceMinor = 15_000, brand = "Efes") else it },
+            beers = data.beers.map { if (it.sessionId == 1L) it.copy(priceMinor = 15_000, brand = "Efes", serving = com.cansin.app.data.Serving.BOTTLE) else it },
             water = listOf(WaterEvent(sessionId = 1, at = 12, priceMinor = 2_000, sizeMl = 1_000)),
             prices = mapOf(PriceSlot.BEER to 15_000L, PriceSlot.BEER_1L to 28_000L, PriceSlot.RAKI to 22_000L),
         )
@@ -191,6 +191,7 @@ class RestoreParserTest {
         val r = ok(j)
         assertEquals(15_000L, r.sessions[0].beers.single().priceMinor)
         assertEquals("Efes", r.sessions[0].beers.single().brand)
+        assertEquals(com.cansin.app.data.Serving.BOTTLE, r.sessions[0].beers.single().serving)
         assertEquals(2_000L, r.sessions[0].water.single().priceMinor)
         assertEquals(1_000, r.sessions[0].water.single().sizeMl)
         assertEquals(RestoreError.INVALID, fail(j.replace("\"sizeMl\":1000", "\"sizeMl\":333")))

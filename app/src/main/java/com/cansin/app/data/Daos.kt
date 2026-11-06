@@ -229,14 +229,18 @@ interface BeerDao {
     suspend fun count(sessionId: Long): Int
 
     /** P28: tonight's price for this drink (latest priced one), so a price edited on the Tab sticks. */
-    @Query("SELECT priceMinor FROM beer_event WHERE sessionId = :sessionId AND kind = :kind AND sizeMl = :sizeMl AND brand IS :brand AND priceMinor IS NOT NULL ORDER BY at DESC, id DESC LIMIT 1")
-    suspend fun latestPrice(sessionId: Long, kind: DrinkKind, sizeMl: Int, brand: String?): Long?
+    @Query("SELECT priceMinor FROM beer_event WHERE sessionId = :sessionId AND kind = :kind AND sizeMl = :sizeMl AND brand IS :brand AND serving IS :serving AND priceMinor IS NOT NULL ORDER BY at DESC, id DESC LIMIT 1")
+    suspend fun latestPrice(sessionId: Long, kind: DrinkKind, sizeMl: Int, brand: String?, serving: Serving?): Long?
 
-    @Query("UPDATE beer_event SET priceMinor = :priceMinor WHERE sessionId = :sessionId AND kind = :kind AND sizeMl = :sizeMl AND side = :side AND brand IS :brand")
-    suspend fun setPrice(sessionId: Long, kind: DrinkKind, sizeMl: Int, side: Side, brand: String?, priceMinor: Long?)
+    @Query("UPDATE beer_event SET priceMinor = :priceMinor WHERE sessionId = :sessionId AND kind = :kind AND sizeMl = :sizeMl AND side = :side AND brand IS :brand AND serving IS :serving")
+    suspend fun setPrice(sessionId: Long, kind: DrinkKind, sizeMl: Int, side: Side, brand: String?, serving: Serving?, priceMinor: Long?)
 
-    @Query("SELECT * FROM beer_event WHERE sessionId = :sessionId AND side = :side AND kind = :kind AND sizeMl = :sizeMl AND brand IS :brand ORDER BY at DESC, id DESC LIMIT 1")
-    suspend fun latestMatching(sessionId: Long, side: Side, kind: DrinkKind, sizeMl: Int, brand: String?): BeerEvent?
+    /** P34: switch one Tab line between draft and bottle. */
+    @Query("UPDATE beer_event SET serving = :to WHERE sessionId = :sessionId AND kind = :kind AND sizeMl = :sizeMl AND side = :side AND brand IS :brand AND serving IS :from")
+    suspend fun setServing(sessionId: Long, kind: DrinkKind, sizeMl: Int, side: Side, brand: String?, from: Serving?, to: Serving?)
+
+    @Query("SELECT * FROM beer_event WHERE sessionId = :sessionId AND side = :side AND kind = :kind AND sizeMl = :sizeMl AND brand IS :brand AND serving IS :serving ORDER BY at DESC, id DESC LIMIT 1")
+    suspend fun latestMatching(sessionId: Long, side: Side, kind: DrinkKind, sizeMl: Int, brand: String?, serving: Serving?): BeerEvent?
 
     /** P29: brands used lately, newest first (for the picker). */
     @Query("SELECT brand FROM beer_event WHERE brand IS NOT NULL GROUP BY brand ORDER BY MAX(at) DESC LIMIT 8")

@@ -31,6 +31,30 @@ import com.cansin.app.domain.DrinkChoice
 import com.cansin.app.domain.Drinks
 
 @StringRes
+fun servingName(serving: com.cansin.app.data.Serving): Int = when (serving) {
+    com.cansin.app.data.Serving.DRAFT -> R.string.serving_draft
+    com.cansin.app.data.Serving.BOTTLE -> R.string.serving_bottle
+}
+
+/** Draft / Bottle chips (beer). */
+@Composable
+fun ServingChips(selected: com.cansin.app.data.Serving?, onSelect: (com.cansin.app.data.Serving) -> Unit) {
+    androidx.compose.foundation.layout.FlowRow(
+        Modifier.fillMaxWidth().selectableGroup().padding(top = 8.dp),
+        horizontalArrangement = androidx.compose.foundation.layout.Arrangement.spacedBy(8.dp),
+    ) {
+        com.cansin.app.data.Serving.entries.forEach { s ->
+            androidx.compose.material3.FilterChip(
+                selected = s == selected,
+                onClick = { onSelect(s) },
+                label = { Text(stringResource(servingName(s))) },
+                modifier = Modifier.semantics { role = androidx.compose.ui.semantics.Role.RadioButton },
+            )
+        }
+    }
+}
+
+@StringRes
 fun drinkName(kind: DrinkKind): Int = when (kind) {
     DrinkKind.BEER -> R.string.drink_beer
     DrinkKind.WINE -> R.string.drink_wine
@@ -44,12 +68,9 @@ fun drinkName(kind: DrinkKind): Int = when (kind) {
 @Composable
 fun drinkLabel(event: BeerEvent): String {
     val size = beerSizeLabel(BeerSize(event.sizeMl, event.abv))
-    val brand = event.brand
-    return when {
-        brand != null -> "$brand · $size"
-        event.kind == DrinkKind.BEER -> size
-        else -> stringResource(drinkName(event.kind)) + " · " + size
-    }
+    val serving = event.serving?.let { stringResource(servingName(it)) }
+    val name = event.brand ?: if (event.kind == DrinkKind.BEER) null else stringResource(drinkName(event.kind))
+    return listOfNotNull(name, serving, size).joinToString(" · ")
 }
 
 /** "Beer: 2 · Wine: 1", only when not all beer. */
@@ -64,6 +85,7 @@ fun drinkBreakdown(kinds: List<DrinkKind>): String? {
 @Composable
 fun DrinkDialog(initial: DrinkChoice, beer: BeerSize, onConfirm: (DrinkChoice) -> Unit, onDismiss: () -> Unit) {
     var brand by rememberSaveable { mutableStateOf(initial.brand.orEmpty()) }
+    var serving by rememberSaveable { mutableStateOf(initial.serving ?: com.cansin.app.data.Serving.DRAFT) }
     val recentBrands = LocalRecentBrands.current
     val separator = rememberDecimalSeparator()
     var kind by rememberSaveable { mutableStateOf(initial.kind) }
@@ -109,13 +131,14 @@ fun DrinkDialog(initial: DrinkChoice, beer: BeerSize, onConfirm: (DrinkChoice) -
                 }
                 NumberField(clText, { clText = it }, R.string.size_custom_cl, R.string.invalid_size, sizeMl == null)
                 NumberField(abvText, { abvText = it }, R.string.abv_label, R.string.invalid_abv, abv == null)
+                if (kind == DrinkKind.BEER) ServingChips(serving) { serving = it }
                 BrandPicker(brand, { brand = it }, if (kind == DrinkKind.BEER) BrandRules.choices(recentBrands) else recentBrands)
             }
         },
         confirmButton = {
             TextButton(
                 enabled = sizeMl != null && abv != null,
-                onClick = { if (sizeMl != null && abv != null) onConfirm(DrinkChoice(kind, BeerSize(sizeMl, abv), BrandRules.clean(brand))) },
+                onClick = { if (sizeMl != null && abv != null) onConfirm(DrinkChoice(kind, BeerSize(sizeMl, abv), BrandRules.clean(brand), serving.takeIf { kind == DrinkKind.BEER })) },
             ) { Text(stringResource(R.string.action_add)) }
         },
         dismissButton = { TextButton(onClick = onDismiss) { Text(stringResource(R.string.action_cancel)) } },

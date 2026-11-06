@@ -126,7 +126,7 @@ object RestoreParser {
                 val abv = double(b["abv"]).also { if (it !in BeerRules.MIN_ABV..BeerRules.MAX_ABV) throw Bad() }
                 val kind = b["kind"]?.let { enum<DrinkKind>(it) } ?: DrinkKind.BEER
                 val price = b["priceMinor"]?.let { long(it) }?.also { if (it <= 0 || !NoteRules.isValidAmount(it)) throw Bad() }
-                BeerEvent(sessionId = 0, side = side, sizeMl = size, abv = abv, at = time(b["at"]), finishedAt = b["finishedAt"]?.let { time(it) }, kind = kind, priceMinor = price, brand = b["brand"]?.let { BrandRules.clean(str(it)) ?: throw Bad() })
+                BeerEvent(sessionId = 0, side = side, sizeMl = size, abv = abv, at = time(b["at"]), finishedAt = b["finishedAt"]?.let { time(it) }, kind = kind, priceMinor = price, brand = b["brand"]?.let { BrandRules.clean(str(it)) ?: throw Bad() }, serving = b["serving"]?.let { enum<com.cansin.app.data.Serving>(it) }?.also { if (kind != DrinkKind.BEER) throw Bad() })
             }
             val water = events(o["water"]).map { w ->
                 val side = w["side"]?.let { enum<Side>(it) }

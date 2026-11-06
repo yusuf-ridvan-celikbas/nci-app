@@ -310,7 +310,7 @@ class MainActivity : ComponentActivity() {
                     pinned = pinned,
                     onTogglePin = { togglePin(settings.pinInfoSeen) },
                     resumed = resumed,
-                    defaultDrink = com.cansin.app.domain.Drinks.default(settings.defaultDrink, settings.beerSize, settings.defaultBrand),
+                    defaultDrink = com.cansin.app.domain.Drinks.default(settings.defaultDrink, settings.beerSize, settings.defaultBrand, settings.defaultServing),
                     beerSize = settings.beerSize,
                     layout = settings.groupLayout,
                     onLayout = { layout -> update { setGroupLayout(layout) } },
@@ -328,7 +328,7 @@ class MainActivity : ComponentActivity() {
                 else -> CounterScreen(
                     viewModel = counter,
                     title = stringResource(R.string.name_salgam),
-                    defaultDrink = com.cansin.app.domain.Drinks.default(settings.defaultDrink, settings.beerSize, settings.defaultBrand),
+                    defaultDrink = com.cansin.app.domain.Drinks.default(settings.defaultDrink, settings.beerSize, settings.defaultBrand, settings.defaultServing),
                     beerSize = settings.beerSize,
                     onStartVersus = { choosingMode = true },
                     promilleCard = { CareSlot(); PromilleSlot(onOpen = { screen = Screen.PROMILLE }) },
@@ -503,6 +503,7 @@ class MainActivity : ComponentActivity() {
         onCompressAfter = { app.settingsStore.setCompressAfter(it) },
         onPrice = { slot, minor -> update { setPrice(slot, minor) } },
         onDefaultBrand = { brand -> update { setDefaultBrand(brand) } },
+        onDefaultServing = { serving -> update { setDefaultServing(serving) } },
         onWidgetPromille = { on -> lifecycleScope.launch { app.settingsStore.setWidgetPromille(on); CounterWidget.refreshAll(app) } },
     )
 

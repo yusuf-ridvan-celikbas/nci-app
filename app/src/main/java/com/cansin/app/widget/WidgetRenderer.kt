@@ -180,9 +180,9 @@ object WidgetRenderer {
 
     /** "+1: Efes · 50 cl" — what the widget's +1 adds. */
     private fun addsLabel(c: Ctx): String {
-        val d = Drinks.default(c.data.settings.defaultDrink, c.data.settings.beerSize, c.data.settings.defaultBrand)
+        val d = Drinks.default(c.data.settings.defaultDrink, c.data.settings.beerSize, c.data.settings.defaultBrand, c.data.settings.defaultServing)
         val sep = DecimalFormatSymbols.getInstance(c.context.resources.configuration.locales[0]).decimalSeparator
-        val name = d.brand ?: c.context.getString(drinkName(d.kind))
+        val name = listOfNotNull(d.brand ?: c.context.getString(drinkName(d.kind)), d.serving?.let { c.context.getString(if (it == com.cansin.app.data.Serving.DRAFT) R.string.serving_draft else R.string.serving_bottle) }).joinToString(" · ")
         return c.context.getString(R.string.widget_adds, name, BeerRules.formatCl(d.size.sizeMl, sep))
     }
 

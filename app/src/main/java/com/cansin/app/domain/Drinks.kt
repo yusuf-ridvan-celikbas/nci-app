@@ -3,7 +3,7 @@ package com.cansin.app.domain
 import com.cansin.app.data.DrinkKind
 
 /** What one +1 adds: the kind (for labels) and the real amount (for the ‰ estimate). */
-data class DrinkChoice(val kind: DrinkKind, val size: BeerSize, val brand: String? = null) {
+data class DrinkChoice(val kind: DrinkKind, val size: BeerSize, val brand: String? = null, val serving: com.cansin.app.data.Serving? = null) {
     companion object {
         val DEFAULT = DrinkChoice(DrinkKind.BEER, BeerSize.DEFAULT)
     }
@@ -23,8 +23,8 @@ object Drinks {
     }
 
     /** Default +1 with the optional default brand (beer only). */
-    fun default(kind: DrinkKind, beer: BeerSize, brand: String?): DrinkChoice =
-        default(kind, beer).let { d -> if (d.kind == DrinkKind.BEER) d.copy(brand = BrandRules.clean(brand)) else d }
+    fun default(kind: DrinkKind, beer: BeerSize, brand: String?, serving: com.cansin.app.data.Serving? = null): DrinkChoice =
+        default(kind, beer).let { d -> if (d.kind == DrinkKind.BEER) d.copy(brand = BrandRules.clean(brand), serving = serving) else d }
 
     fun default(kind: DrinkKind, beer: BeerSize): DrinkChoice {
         val k = kind.takeIf { it in DEFAULT_KINDS } ?: DrinkKind.BEER

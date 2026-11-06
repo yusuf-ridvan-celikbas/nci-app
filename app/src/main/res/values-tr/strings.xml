@@ -558,4 +558,7 @@
     <string name="setting_water_size">Su bardağı boyutu</string>
     <string name="water_size_title">Bardak boyutu</string>
     <string name="price_water_label">Su (500 ml)</string>
+    <string name="serving_draft">Fıçı</string>
+    <string name="serving_bottle">Şişe</string>
+    <string name="setting_default_serving">+1 birası: fıçı mı şişe mi</string>
 </resources>

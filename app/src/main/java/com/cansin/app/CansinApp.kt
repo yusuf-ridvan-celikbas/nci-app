@@ -67,7 +67,7 @@ class CansinApp : Application() {
                     groupTimers.clear()
                 }
             },
-            defaultDrink = { settingsStore.settings.first().let { Drinks.default(it.defaultDrink, it.beerSize, it.defaultBrand) } },
+            defaultDrink = { settingsStore.settings.first().let { Drinks.default(it.defaultDrink, it.beerSize, it.defaultBrand, it.defaultServing) } },
             seats = database.groupSeatDao(),
             price = { kind, sizeMl -> com.cansin.app.domain.PriceRules.lookup(settingsStore.settings.first().prices, kind, sizeMl) },
             waterPrice = { ml -> com.cansin.app.domain.PriceRules.water(settingsStore.settings.first().prices, ml) },
