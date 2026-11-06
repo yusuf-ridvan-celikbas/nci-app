@@ -123,7 +123,7 @@ object WidgetRenderer {
             return RemoteViews(
                 mapOf(
                     SizeF(40f, 40f) to tiny(c),
-                    SizeF(40f, 110f) to tall(c),
+                    SizeF(40f, 110f) to small(c, pages, page, narrow = true),
                     SizeF(40f, WidgetLayout.COLUMN_MIN_HEIGHT_DP.toFloat()) to strip(c, R.layout.widget_column),
                     SizeF(WidgetLayout.SMALL_MIN_DP.toFloat(), WidgetLayout.TWO_ROW_MIN_HEIGHT_DP.toFloat()) to small(c, pages, page),
                     SizeF(WidgetLayout.STRIP_MIN_WIDTH_DP.toFloat(), 40f) to pager(c, pages, page, compact = false),
@@ -138,7 +138,7 @@ object WidgetRenderer {
         )
         return when (size) {
             WidgetSize.TINY -> tiny(c)
-            WidgetSize.TALL -> tall(c)
+            WidgetSize.TALL -> small(c, pages, page, narrow = true)
             WidgetSize.COLUMN -> strip(c, R.layout.widget_column)
             WidgetSize.SMALL -> small(c, pages, page)
             WidgetSize.STRIP -> pager(c, pages, page, compact = false)
@@ -243,30 +243,6 @@ object WidgetRenderer {
         return views
     }
 
-    // ---------- TALL (1×2): count on top, round +1 below ----------
-
-    private fun tall(c: Ctx): RemoteViews {
-        val context = c.context
-        val views = RemoteViews(context.packageName, R.layout.widget_tall)
-        val one = single(c)
-        views.setOnClickPendingIntent(R.id.widget_bg, openApp(context, tab = false))
-        views.setOnClickPendingIntent(R.id.tall_text, openApp(context, tab = WidgetContent.tiny(c.focus) == WidgetPage.TAB))
-        views.setTextViewText(R.id.tall_value, one.value)
-        views.setTextViewText(R.id.tall_label, one.label)
-        views.setViewVisibility(R.id.tall_label, if (one.label.isEmpty()) View.GONE else View.VISIBLE)
-        views.setTextViewText(R.id.tall_btn_label, one.button)
-        views.setContentDescription(R.id.tall_btn, one.description)
-        views.setOnClickPendingIntent(R.id.tall_btn, one.intent)
-        tint(c, views) { set ->
-            set(R.id.widget_bg, "setColorFilter") { it.surface }
-            set(R.id.tall_value, "setTextColor") { it.onSurface }
-            set(R.id.tall_label, "setTextColor") { it.muted }
-            set(R.id.tall_btn_bg, "setColorFilter") { it.primary }
-            set(R.id.tall_btn_label, "setTextColor") { it.onPrimary }
-        }
-        return views
-    }
-
     // ---------- 1-row widgets: ‹ label •∘∘ value (−1) (+1) › ----------
 
     private val pagerDots = intArrayOf(R.id.pager_dot0, R.id.pager_dot1, R.id.pager_dot2, R.id.pager_dot3)
@@ -347,9 +323,10 @@ object WidgetRenderer {
 
     // ---------- SMALL (2×2): pages ----------
 
-    private fun small(c: Ctx, pages: List<WidgetPage>, page: WidgetPage): RemoteViews {
+    /** 2-row widgets: the pages look; [narrow] = 1×2 / skinny version (same ids). */
+    private fun small(c: Ctx, pages: List<WidgetPage>, page: WidgetPage, narrow: Boolean = false): RemoteViews {
         val context = c.context
-        val views = RemoteViews(context.packageName, R.layout.widget_small)
+        val views = RemoteViews(context.packageName, if (narrow) R.layout.widget_small_narrow else R.layout.widget_small)
         views.setOnClickPendingIntent(R.id.widget_bg, openApp(context, tab = false))
         val label = context.getString(pageLabel(page))
         val paged = pages.size > 1
@@ -363,7 +340,7 @@ object WidgetRenderer {
         views.setOnClickPendingIntent(R.id.widget_prev, action(c, WidgetActionReceiver.ACTION_PREV))
         views.setOnClickPendingIntent(R.id.widget_next, action(c, WidgetActionReceiver.ACTION_NEXT))
         views.setOnClickPendingIntent(R.id.widget_value, openApp(context, tab = page == WidgetPage.TAB))
-        views.setTextViewTextSize(R.id.widget_add_label, TypedValue.COMPLEX_UNIT_SP, 16f)
+        views.setTextViewTextSize(R.id.widget_add_label, TypedValue.COMPLEX_UNIT_SP, if (narrow) 13f else 16f)
         views.setTextViewText(R.id.widget_value, value(c, page))
         views.setContentDescription(R.id.widget_value, null)
         when (page) {
