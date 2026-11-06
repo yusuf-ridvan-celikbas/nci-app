@@ -501,6 +501,7 @@ class MainActivity : ComponentActivity() {
         onCompressAfter = { app.settingsStore.setCompressAfter(it) },
         onPrice = { slot, minor -> update { setPrice(slot, minor) } },
         onDefaultBrand = { brand -> update { setDefaultBrand(brand) } },
+        onWidgetPromille = { on -> lifecycleScope.launch { app.settingsStore.setWidgetPromille(on); CounterWidget.refreshAll(app) } },
     )
 
     private fun update(block: suspend SettingsStore.() -> Unit) {

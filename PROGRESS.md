@@ -144,6 +144,15 @@ Current phase: **P13–P30 approved on the phone (2026-11-06), merged into maste
   6. Counts in widget/stats/result card now mean all drinks, not only beer.
 - Known limits: the Stats "water per drink" in a group counts everyone's water; in a group, the counter's water bar duplicates my seat's water button.
 
+## P31 report (2026-11-06) — widget: one look per size (user request)
+- Sizes (`widget/WidgetLayout.sizeClass`; API 31+ RemoteViews size map 40×40 / 110×110 / 180×40 / 250×110): TINY 1×1 (one number, tap = +1), SMALL 2×2 (pages Drinks/Tab/Water + optional Estimate page), STRIP 4×1 (drinks · water · tab with +1, or red · blue · tab in Versus), BIG 4×2+ (dashboard: drinks −1/+1 with "+1: Efes · 50 cl", water −1/+1, timer, tab total + top 2 drink lines, ‰ line; Versus red/blue rows; Together "N at the table").
+- `widget/WidgetContent.kt` (pure): blocks per size × mode × focus × PIN; pages; promille needs switch + profile.
+- Per-widget settings: `widget/WidgetConfigActivity` (exported for launchers; checks the id belongs to CounterWidget; shows no data), Auto / Drinks / Water / Tab / Estimate only; `widgetFeatures="reconfigurable|configuration_optional"`; DataStore `widget_focus_<id>` (removed on delete).
+- New receiver actions: REMOVE, WATER_REMOVE, ADD_RED, ADD_BLUE; ADD now = my side (works in Together with a "me"). Snapshot adds mode, meSide, myBeers, top lines, seat count, side names.
+- Settings → Health: "Show ‰ estimate on widgets" (default off; needs profile; hidden by PIN). ‰ on the widget is as of the shown time (no periodic updates).
+- Release APK 1.99 MB (+26 KB). Permissions unchanged, no INTERNET. New exported component: WidgetConfigActivity (id check). Lint 0 errors. Tests green.
+- Not yet tried on the phone (needs placing/resizing widgets by hand).
+
 ## P30 report (2026-11-06) — History filters + multi-select delete (user request)
 - `domain/HistoryFilter.kt`: period (All / this month / last 3 months / this year / custom range, ends included), type (Solo/Versus/Together), search (Turkish-aware, letters folded: "isik" finds "Işık"; names, seat names, brands, notes, date text), "with tab" (spent > 0 incl. drink prices), sort (newest/oldest/most spent/most drinks, ties newest). List only; Stats stay complete.
 - Data: `SessionDao.deleteEnded(ids)` (ended only), `observeSearchText()` (UNION ALL of names/seats/brands/notes); `HistoryRepository.deleteMany` (chunks of 500), `searchText`.

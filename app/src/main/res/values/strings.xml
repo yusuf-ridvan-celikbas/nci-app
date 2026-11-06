@@ -540,4 +540,25 @@
     <string name="amount_each_hint">Each</string>
     <string name="select_short">Select</string>
     <string name="brand_type_other">Type another brand…</string>
+    <string name="widget_page_promille">Estimate</string>
+    <string name="widget_promille_value">≈%1$s‰</string>
+    <string name="widget_promille_short">‰</string>
+    <string name="widget_promille_note">%1$s · estimate only, never drive</string>
+    <string name="widget_water_plus">Water +1</string>
+    <string name="widget_adds">+1: %1$s · %2$s cl</string>
+    <string name="widget_people">%1$d at the table</string>
+    <string name="widget_last_drink">Last drink %1$s</string>
+    <string name="widget_remove_one">Remove one: %1$s</string>
+    <string name="widget_add_one">Add one: %1$s</string>
+    <string name="widget_side_count">%1$s: %2$d</string>
+    <string name="widget_tab_line">%1$s %2$s cl ×%3$d</string>
+    <string name="widget_config_title">Widget settings</string>
+    <string name="widget_config_note">Auto shows more as you make the widget bigger: 1×1 a number, 2×2 pages, 4×1 a row, 4×2 everything.</string>
+    <string name="widget_focus_auto">Auto (by size)</string>
+    <string name="widget_focus_drinks">Drinks only</string>
+    <string name="widget_focus_water">Water only</string>
+    <string name="widget_focus_tab">Tab only</string>
+    <string name="widget_focus_promille">Estimate (‰) only</string>
+    <string name="setting_widget_promille">Show ‰ estimate on widgets</string>
+    <string name="setting_widget_promille_note">Off by default: the home screen can be seen by others. Needs a body profile. Hidden when the PIN hides the widget.</string>
 </resources>

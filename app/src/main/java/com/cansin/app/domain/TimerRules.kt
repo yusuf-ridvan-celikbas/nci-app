@@ -6,7 +6,8 @@ data class TimerState(val beerId: Long? = null, val sessionId: Long? = null, val
     val running: Boolean get() = beerId != null && startedAt != null
 }
 
-enum class WidgetPage { BEER, TAB, WATER }
+/** Widget pages; which ones a widget shows comes from [com.cansin.app.widget.WidgetContent.pages]. */
+enum class WidgetPage { BEER, TAB, WATER, PROMILLE }
 
 object TimerRules {
     fun canStart(enabled: Boolean, state: TimerState, myLatestBeer: BeerEvent?): Boolean =
@@ -14,7 +15,5 @@ object TimerRules {
 
     fun isCurrent(state: TimerState, sessionId: Long?): Boolean = state.running && state.sessionId == sessionId
 
-    fun page(index: Int): WidgetPage = WidgetPage.entries[Math.floorMod(index, WidgetPage.entries.size)]
 
-    fun step(page: WidgetPage, delta: Int): WidgetPage = page(page.ordinal + delta)
 }

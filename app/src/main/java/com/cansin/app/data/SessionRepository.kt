@@ -11,6 +11,7 @@ import com.cansin.app.domain.SessionRules
 import com.cansin.app.domain.VersusRules
 import com.cansin.app.domain.VersusSetup
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 
@@ -27,6 +28,14 @@ data class CounterSnapshot(
     val hasMe: Boolean = false,
     val myLatestBeer: BeerEvent? = null,
     val group: Boolean = false,
+    /** P31 widget: mode, my side, my drinks (for ‰), top Tab drink lines, people at the table. */
+    val mode: SessionMode? = null,
+    val meSide: Side? = null,
+    val myBeers: List<BeerEvent> = emptyList(),
+    val lines: List<com.cansin.app.domain.DrinkLine> = emptyList(),
+    val seatCount: Int = 0,
+    val redName: String? = null,
+    val blueName: String? = null,
 )
 
 interface SessionListener {
@@ -43,6 +52,8 @@ object NoSeats : GroupSeatDao {
     override suspend fun insert(seats: List<GroupSeat>) {}
     override suspend fun clear(sessionId: Long) {}
 }
+
+private const val WIDGET_LINES = 2
 
 class SessionRepository(
     private val sessions: SessionDao,
@@ -96,6 +107,14 @@ class SessionRepository(
             hasMe = me != null,
             myLatestBeer = me?.let { beers.latestOnSide(session.id, it) },
             group = group,
+            mode = session.mode,
+            meSide = me,
+            myBeers = me?.let { side -> beers.observe(session.id).first().filter { it.side == side } }.orEmpty(),
+            lines = com.cansin.app.domain.TabRules.drinkLines(beers.observe(session.id).first(), session.mode)
+                .sortedByDescending { it.count }.take(WIDGET_LINES),
+            seatCount = if (group) seats.seats(session.id).size else 0,
+            redName = session.redName,
+            blueName = session.blueName,
         )
     }
 
@@ -253,6 +272,21 @@ class SessionRepository(
         }
         val event = WaterEvent(sessionId = session.id, at = clock(), side = seat)
         event.copy(id = water.insert(event))
+    }
+
+    /** Widget −1: my latest drink (solo, my Versus side or my seat). */
+    suspend fun removeMyLatest() = write {
+        val session = activeSession(clock()) ?: return@write
+        val me = VersusRules.meSide(session) ?: return@write
+        val latest = beers.latestOnSide(session.id, me) ?: return@write
+        beers.delete(latest.id)
+        deleteIfEmpty(session.id)
+    }
+
+    /** Widget water −1: my latest glass (my seat in Together). */
+    suspend fun removeMyLatestWater() {
+        val session = sessions.open() ?: return
+        removeLatestWater(if (session.mode == SessionMode.GROUP) session.meSide ?: return else null)
     }
 
     /** Water −1 on Tonight: removes my latest glass (solo/Versus water has no side). */

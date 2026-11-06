@@ -6,7 +6,6 @@ import android.content.ComponentName
 import android.content.Context
 import android.os.Bundle
 import com.cansin.app.CansinApp
-import com.cansin.app.domain.TimerRules
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 
@@ -37,8 +36,8 @@ class CounterWidget : AppWidgetProvider() {
             if (ids.isEmpty()) return
             val data = WidgetData(app.settingsStore.settings.first(), app.sessionRepository.snapshot(), app.settingsStore.timerState.first())
             for (id in ids) {
-                val page = TimerRules.page(app.settingsStore.widgetPage(id))
-                manager.updateAppWidget(id, WidgetRenderer.render(app, data, page, id, manager.getAppWidgetOptions(id)))
+                val config = WidgetConfig(app.settingsStore.widgetFocus(id), app.settingsStore.widgetPage(id))
+                manager.updateAppWidget(id, WidgetRenderer.render(app, data, config, id, manager.getAppWidgetOptions(id)))
             }
         }
     }

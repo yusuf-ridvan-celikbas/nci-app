@@ -90,6 +90,7 @@ class SettingsActions(
     val onCompressAfter: suspend (com.cansin.app.domain.CompressAfter) -> Unit,
     val onPrice: (com.cansin.app.domain.PriceSlot, Long?) -> Unit,
     val onDefaultBrand: (String?) -> Unit,
+    val onWidgetPromille: (Boolean) -> Unit,
 )
 
 /** Settings is a short list of groups; each opens its own page. */
@@ -174,6 +175,12 @@ fun SettingsScreen(
                     CareSection(settings, actions)
                     HorizontalDivider(Modifier.padding(vertical = 16.dp))
                     ProfileSection(settings.profile, actions.onProfile)
+                    SwitchRow(R.string.setting_widget_promille, settings.widgetPromille, actions.onWidgetPromille)
+                    Text(
+                        stringResource(R.string.setting_widget_promille_note),
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
                     HorizontalDivider(Modifier.padding(vertical = 16.dp))
                     ReminderSection(settings, notificationAccess, actions)
                 }

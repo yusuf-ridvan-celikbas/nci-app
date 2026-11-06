@@ -83,6 +83,8 @@ private val TIMER_BEER = longPreferencesKey("timer_beer_id")
 private val TIMER_SESSION = longPreferencesKey("timer_session_id")
 private val TIMER_STARTED = longPreferencesKey("timer_started_at")
 private const val WIDGET_PAGE_PREFIX = "widget_page_"
+private const val WIDGET_FOCUS_PREFIX = "widget_focus_"
+private val WIDGET_PROMILLE = booleanPreferencesKey("widget_promille")
 private val REMINDER_NEXT_AT = longPreferencesKey("reminder_next_at")
 private val REMINDER_SESSION = longPreferencesKey("reminder_session")
 private val REMINDER_STOPPED_SESSION = longPreferencesKey("reminder_stopped_session")
@@ -111,6 +113,7 @@ class SettingsStore(private val context: Context) {
             timerEnabled = p[TIMER_ENABLED] ?: true,
             groupLayout = enumOr(p[GROUP_LAYOUT], GroupLayout.ROWS),
             defaultBrand = com.cansin.app.domain.BrandRules.clean(p[DEFAULT_BRAND]),
+            widgetPromille = p[WIDGET_PROMILLE] == true,
             keepHistory = enumOr(p[KEEP_HISTORY], KeepHistory.FOREVER),
             compressAfter = enumOr(p[COMPRESS_AFTER], CompressAfter.NEVER),
             prices = PriceSlot.entries.mapNotNull { k -> p[priceKey(k)]?.takeIf { it > 0 && NoteRules.isValidAmount(it) }?.let { k to it } }.toMap(),
@@ -165,7 +168,23 @@ class SettingsStore(private val context: Context) {
 
     suspend fun setWidgetPage(id: Int, page: Int) = edit { it[intPreferencesKey(WIDGET_PAGE_PREFIX + id)] = page }
 
-    suspend fun removeWidgetPages(ids: IntArray) = edit { p -> ids.forEach { p.remove(intPreferencesKey(WIDGET_PAGE_PREFIX + it)) } }
+    suspend fun removeWidgetPages(ids: IntArray) = edit { p ->
+        ids.forEach {
+            p.remove(intPreferencesKey(WIDGET_PAGE_PREFIX + it))
+            p.remove(stringPreferencesKey(WIDGET_FOCUS_PREFIX + it))
+        }
+    }
+
+    /** P31 per-widget setting (Auto / one thing only). */
+    suspend fun widgetFocus(id: Int): com.cansin.app.widget.WidgetFocus =
+        enumOr(context.dataStore.data.first()[stringPreferencesKey(WIDGET_FOCUS_PREFIX + id)], com.cansin.app.widget.WidgetFocus.AUTO)
+
+    suspend fun setWidgetFocus(id: Int, focus: com.cansin.app.widget.WidgetFocus) = edit {
+        it[stringPreferencesKey(WIDGET_FOCUS_PREFIX + id)] = focus.name
+        it[intPreferencesKey(WIDGET_PAGE_PREFIX + id)] = 0
+    }
+
+    suspend fun setWidgetPromille(value: Boolean) = edit { it[WIDGET_PROMILLE] = value }
 
     val reminderState: Flow<ReminderState> = context.dataStore.data.map { p ->
         ReminderState(p[REMINDER_NEXT_AT], p[REMINDER_SESSION], p[REMINDER_STOPPED_SESSION])

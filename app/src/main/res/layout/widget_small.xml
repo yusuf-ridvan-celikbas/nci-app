@@ -77,6 +77,15 @@
                         android:layout_height="6dp"
                         android:layout_marginStart="4dp"
                         android:src="@drawable/widget_dot" />
+
+                    <ImageView
+                        android:id="@+id/widget_dot3"
+                        android:importantForAccessibility="no"
+                        android:layout_width="6dp"
+                        android:layout_height="6dp"
+                        android:layout_marginStart="4dp"
+                        android:src="@drawable/widget_dot"
+                        android:visibility="gone" />
                 </LinearLayout>
             </LinearLayout>
 

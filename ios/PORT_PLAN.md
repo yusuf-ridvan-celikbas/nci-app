@@ -47,3 +47,6 @@ The App/Shared/Widget code has never been compiled (P12). New enum cases (`Sessi
 
 ## P28 drinks on the Tab (Android 2026-11-06) — to port
 - `priceMinor` on the drink record + price per kind in settings; `TabRules` (charges/withDrinks/drinkLines) in CansinCore with tests mirroring `TabRulesTest.kt`; Tab "Drinks (automatic)" block; Tonight count rows with −1 for drinks and water.
+
+## P31 widget sizes (Android 2026-11-06) — to port
+- WidgetKit families: accessoryCircular/systemSmall ≈ TINY/SMALL, systemMedium ≈ STRIP, systemLarge ≈ BIG; per-widget "what it shows" via an AppIntent configuration; Versus red/blue +1 and −1 via AppIntents.

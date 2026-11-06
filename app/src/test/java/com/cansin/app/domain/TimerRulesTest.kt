@@ -24,11 +24,4 @@ class TimerRulesTest {
         assertEquals(false, TimerRules.isCurrent(TimerState(), 1))
     }
 
-    @Test
-    fun pagesWrapAround() {
-        assertEquals(WidgetPage.WATER, TimerRules.step(WidgetPage.BEER, -1))
-        assertEquals(WidgetPage.BEER, TimerRules.step(WidgetPage.WATER, 1))
-        assertEquals(WidgetPage.TAB, TimerRules.page(4))
-        assertEquals(WidgetPage.BEER, TimerRules.page(-3))
-    }
 }

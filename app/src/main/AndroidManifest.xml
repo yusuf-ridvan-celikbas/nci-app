@@ -61,6 +61,18 @@
             android:name=".widget.WidgetActionReceiver"
             android:exported="false" />
 
+        <!-- P31 widget settings: launchers start it, so it must be exported; it checks the widget id is ours. -->
+        <activity
+            android:name=".widget.WidgetConfigActivity"
+            android:excludeFromRecents="true"
+            android:exported="true"
+            android:label="@string/widget_config_title"
+            android:taskAffinity="">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_CONFIGURE" />
+            </intent-filter>
+        </activity>
+
         <receiver
             android:name=".reminder.ReminderReceiver"
             android:exported="false" />
