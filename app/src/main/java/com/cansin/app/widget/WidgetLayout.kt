@@ -1,7 +1,7 @@
 package com.cansin.app.widget
 
 /** P31: one look per widget size. */
-/** TINY 1×1, TALL 1×2, COLUMN 1×3+, SMALL 2×2, STRIP 4×1, BIG 4×2/4×3, XL 4×4+. */
+/** TINY 1×1 and 2×1 (round +1), TALL/COLUMN narrow and tall, SMALL 2×2, STRIP 3×1/4×1 (pages), BIG 4×2/4×3, XL 4×4+. */
 enum class WidgetSize { TINY, TALL, COLUMN, SMALL, STRIP, BIG, XL }
 
 object WidgetLayout {
@@ -18,7 +18,7 @@ object WidgetLayout {
         widthDp < SMALL_MIN_DP && heightDp >= SMALL_MIN_DP -> WidgetSize.TALL
         widthDp < SMALL_MIN_DP -> WidgetSize.TINY
         heightDp < STRIP_MAX_HEIGHT_DP && widthDp >= STRIP_MIN_WIDTH_DP -> WidgetSize.STRIP
-        heightDp < SMALL_MIN_DP - 30 -> WidgetSize.TINY
+        heightDp < STRIP_MAX_HEIGHT_DP -> WidgetSize.TINY
         widthDp >= BIG_MIN_WIDTH_DP && heightDp >= XL_MIN_HEIGHT_DP -> WidgetSize.XL
         widthDp >= BIG_MIN_WIDTH_DP -> WidgetSize.BIG
         else -> WidgetSize.SMALL

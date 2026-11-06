@@ -126,7 +126,7 @@ object WidgetRenderer {
                     SizeF(40f, 110f) to tall(c),
                     SizeF(40f, WidgetLayout.COLUMN_MIN_HEIGHT_DP.toFloat()) to strip(c, R.layout.widget_column),
                     SizeF(110f, 110f) to small(c, pages, page),
-                    SizeF(WidgetLayout.STRIP_MIN_WIDTH_DP.toFloat(), 40f) to strip(c),
+                    SizeF(WidgetLayout.STRIP_MIN_WIDTH_DP.toFloat(), 40f) to pager(c, pages, page, compact = false),
                     SizeF(WidgetLayout.BIG_MIN_WIDTH_DP.toFloat(), 110f) to big(c),
                     SizeF(WidgetLayout.BIG_MIN_WIDTH_DP.toFloat(), WidgetLayout.XL_MIN_HEIGHT_DP.toFloat()) to xl(c),
                 ),
@@ -141,7 +141,7 @@ object WidgetRenderer {
             WidgetSize.TALL -> tall(c)
             WidgetSize.COLUMN -> strip(c, R.layout.widget_column)
             WidgetSize.SMALL -> small(c, pages, page)
-            WidgetSize.STRIP -> strip(c)
+            WidgetSize.STRIP -> pager(c, pages, page, compact = false)
             WidgetSize.BIG -> big(c)
             WidgetSize.XL -> xl(c)
         }
@@ -267,6 +267,84 @@ object WidgetRenderer {
         return views
     }
 
+    // ---------- 1-row widgets: ‹ label •∘∘ value (−1) (+1) › ----------
+
+    private val pagerDots = intArrayOf(R.id.pager_dot0, R.id.pager_dot1, R.id.pager_dot2, R.id.pager_dot3)
+
+    /** [compact] (2×1): no label and no −1, just ‹ dots value (+1) ›. */
+    private fun pager(c: Ctx, pages: List<WidgetPage>, page: WidgetPage, compact: Boolean): RemoteViews {
+        val context = c.context
+        val views = RemoteViews(context.packageName, R.layout.widget_pager)
+        val label = context.getString(pageLabel(page))
+        val paged = pages.size > 1
+        views.setOnClickPendingIntent(R.id.widget_bg, openApp(context, tab = false))
+        views.setOnClickPendingIntent(R.id.pager_text, openApp(context, tab = page == WidgetPage.TAB))
+        views.setTextViewText(R.id.pager_label, label)
+        views.setViewVisibility(R.id.pager_label, if (compact) View.GONE else View.VISIBLE)
+        views.setContentDescription(R.id.pager_text, context.getString(R.string.widget_page_position, label, pages.indexOf(page) + 1, pages.size))
+        views.setViewVisibility(R.id.pager_prev, if (paged) View.VISIBLE else View.GONE)
+        views.setViewVisibility(R.id.pager_next, if (paged) View.VISIBLE else View.GONE)
+        views.setContentDescription(R.id.pager_prev, context.getString(R.string.widget_prev))
+        views.setContentDescription(R.id.pager_next, context.getString(R.string.widget_next))
+        views.setOnClickPendingIntent(R.id.pager_prev, action(c, WidgetActionReceiver.ACTION_PREV))
+        views.setOnClickPendingIntent(R.id.pager_next, action(c, WidgetActionReceiver.ACTION_NEXT))
+        pagerDots.forEachIndexed { i, id -> views.setViewVisibility(id, if (paged && i < pages.size) View.VISIBLE else View.GONE) }
+        views.setTextViewText(R.id.pager_value, if (c.hidden) context.getString(R.string.widget_hidden) else value(c, page))
+
+        // Buttons: (label, intent, description) for −1 and +1; null hides it.
+        val plusLabel = context.getString(R.string.plus_one)
+        val open = Triple(context.getString(R.string.widget_open), openApp(context, page == WidgetPage.TAB), context.getString(R.string.widget_open_app))
+        var versus = false
+        val (minus, plus) = when {
+            c.hidden -> null to open.copy(third = context.getString(R.string.widget_open_app))
+            page == WidgetPage.BEER && c.s.versus -> {
+                versus = true
+                Triple(plusLabel, action(c, WidgetActionReceiver.ACTION_ADD_RED), context.getString(R.string.versus_add, sideName(c, Side.RED))) to
+                    Triple(plusLabel, action(c, WidgetActionReceiver.ACTION_ADD_BLUE), context.getString(R.string.versus_add, sideName(c, Side.BLUE)))
+            }
+            page == WidgetPage.BEER && c.canAdd ->
+                Triple(context.getString(R.string.minus_one), action(c, WidgetActionReceiver.ACTION_REMOVE), context.getString(R.string.remove_beer)) to
+                    Triple(plusLabel, action(c, WidgetActionReceiver.ACTION_ADD), context.getString(R.string.add_beer))
+            page == WidgetPage.WATER && c.canWater ->
+                Triple(context.getString(R.string.minus_one), action(c, WidgetActionReceiver.ACTION_WATER_REMOVE), context.getString(R.string.water_remove)) to
+                    Triple(plusLabel, action(c, WidgetActionReceiver.ACTION_WATER), context.getString(R.string.water_add))
+            else -> null to open
+        }
+        val showMinus = minus != null && (!compact || versus)
+        views.setViewVisibility(R.id.pager_minus, if (showMinus) View.VISIBLE else View.GONE)
+        if (minus != null && showMinus) {
+            views.setTextViewText(R.id.pager_minus_label, minus.first)
+            views.setOnClickPendingIntent(R.id.pager_minus, minus.second)
+            views.setContentDescription(R.id.pager_minus, minus.third)
+        }
+        views.setTextViewText(R.id.pager_plus_label, plus.first)
+        views.setTextViewTextSize(R.id.pager_plus_label, TypedValue.COMPLEX_UNIT_SP, if (plus.first.length > 2) 11f else 15f)
+        views.setOnClickPendingIntent(R.id.pager_plus, plus.second)
+        views.setContentDescription(R.id.pager_plus, plus.third)
+
+        val current = pages.indexOf(page)
+        tint(c, views) { set ->
+            set(R.id.widget_bg, "setColorFilter") { it.surface }
+            set(R.id.pager_prev, "setColorFilter") { it.muted }
+            set(R.id.pager_next, "setColorFilter") { it.muted }
+            set(R.id.pager_label, "setTextColor") { it.muted }
+            set(R.id.pager_value, "setTextColor") { it.onSurface }
+            pagerDots.forEachIndexed { i, id -> set(id, "setColorFilter") { if (i == current) it.onSurface else it.muted } }
+            if (!versus) {
+                set(R.id.pager_minus_bg, "setColorFilter") { it.container }
+                set(R.id.pager_minus_label, "setTextColor") { it.onSurface }
+                set(R.id.pager_plus_bg, "setColorFilter") { it.primary }
+                set(R.id.pager_plus_label, "setTextColor") { it.onPrimary }
+            }
+        }
+        pagerDots.forEachIndexed { i, id -> views.setInt(id, "setImageAlpha", if (i == current) 255 else 110) }
+        if (versus) {
+            versusTint(views, R.id.pager_minus_bg, R.id.pager_minus_label, Side.RED)
+            versusTint(views, R.id.pager_plus_bg, R.id.pager_plus_label, Side.BLUE)
+        }
+        return views
+    }
+
     // ---------- SMALL (2×2): pages ----------
 
     private fun small(c: Ctx, pages: List<WidgetPage>, page: WidgetPage): RemoteViews {
@@ -349,8 +427,8 @@ object WidgetRenderer {
 
     private class Cell(val label: String, val value: String, val button: Triple<String, PendingIntent, String>?, val tap: PendingIntent, val side: Side? = null)
 
-    /** 4×1 row, or the same three cells stacked for 1×3+ ([layout] = widget_column). */
-    private fun strip(c: Ctx, layout: Int = R.layout.widget_strip): RemoteViews {
+    /** Three cells stacked for 1×3+ ([layout] = widget_column). */
+    private fun strip(c: Ctx, layout: Int): RemoteViews {
         val context = c.context
         val views = RemoteViews(context.packageName, layout)
         views.setOnClickPendingIntent(R.id.widget_bg, openApp(context, tab = false))

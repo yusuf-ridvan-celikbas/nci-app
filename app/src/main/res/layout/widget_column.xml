@@ -21,6 +21,7 @@
         android:orientation="vertical"
         android:paddingVertical="8dp">
 
+
         <LinearLayout
             android:id="@+id/strip_cell1"
             android:layout_width="match_parent"
@@ -29,53 +30,60 @@
             android:gravity="center"
             android:orientation="vertical">
 
-            <LinearLayout
-                android:id="@+id/strip_text1"
-                android:layout_width="match_parent"
+            <TextView
+                android:id="@+id/strip_label1"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:gravity="center"
-                android:orientation="vertical">
+                android:maxLines="1"
+                android:textSize="11sp" />
 
-                <TextView
-                    android:id="@+id/strip_label1"
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:baselineAligned="false"
+                android:gravity="center_vertical"
+                android:orientation="horizontal">
+
+                <LinearLayout
+                    android:id="@+id/strip_text1"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:maxLines="1"
-                    android:textSize="11sp" />
+                    android:orientation="vertical">
 
-                <TextView
-                    android:id="@+id/strip_value1"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:ellipsize="end"
-                    android:textSize="22sp"
-                    android:maxLines="1"
-                    android:textStyle="bold" />
+                    <TextView
+                        android:id="@+id/strip_value1"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:ellipsize="end"
+                        android:maxLines="1"
+                        android:textSize="20sp"
+                        android:textStyle="bold" />
+                </LinearLayout>
+
+                <FrameLayout
+                    android:id="@+id/strip_btn1"
+                    android:layout_width="36dp"
+                    android:layout_height="36dp"
+                    android:layout_marginStart="8dp">
+
+                    <ImageView
+                        android:id="@+id/strip_btn1_bg"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:importantForAccessibility="no"
+                        android:src="@drawable/widget_circle" />
+
+                    <TextView
+                        android:id="@+id/strip_btn1_label"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:gravity="center"
+                        android:importantForAccessibility="no"
+                        android:maxLines="1"
+                        android:textSize="14sp"
+                        android:textStyle="bold" />
+                </FrameLayout>
             </LinearLayout>
-
-            <FrameLayout
-                android:id="@+id/strip_btn1"
-                android:layout_width="40dp"
-                android:layout_height="40dp"
-                android:layout_marginTop="2dp">
-
-                <ImageView
-                    android:id="@+id/strip_btn1_bg"
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:importantForAccessibility="no"
-                    android:src="@drawable/widget_circle" />
-
-                <TextView
-                    android:id="@+id/strip_btn1_label"
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:gravity="center"
-                    android:importantForAccessibility="no"
-                    android:maxLines="1"
-                    android:textSize="15sp"
-                    android:textStyle="bold" />
-            </FrameLayout>
         </LinearLayout>
         <LinearLayout
             android:id="@+id/strip_cell2"
@@ -85,53 +93,60 @@
             android:gravity="center"
             android:orientation="vertical">
 
-            <LinearLayout
-                android:id="@+id/strip_text2"
-                android:layout_width="match_parent"
+            <TextView
+                android:id="@+id/strip_label2"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:gravity="center"
-                android:orientation="vertical">
+                android:maxLines="1"
+                android:textSize="11sp" />
 
-                <TextView
-                    android:id="@+id/strip_label2"
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:baselineAligned="false"
+                android:gravity="center_vertical"
+                android:orientation="horizontal">
+
+                <LinearLayout
+                    android:id="@+id/strip_text2"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:maxLines="1"
-                    android:textSize="11sp" />
+                    android:orientation="vertical">
 
-                <TextView
-                    android:id="@+id/strip_value2"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:ellipsize="end"
-                    android:textSize="22sp"
-                    android:maxLines="1"
-                    android:textStyle="bold" />
+                    <TextView
+                        android:id="@+id/strip_value2"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:ellipsize="end"
+                        android:maxLines="1"
+                        android:textSize="20sp"
+                        android:textStyle="bold" />
+                </LinearLayout>
+
+                <FrameLayout
+                    android:id="@+id/strip_btn2"
+                    android:layout_width="36dp"
+                    android:layout_height="36dp"
+                    android:layout_marginStart="8dp">
+
+                    <ImageView
+                        android:id="@+id/strip_btn2_bg"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:importantForAccessibility="no"
+                        android:src="@drawable/widget_circle" />
+
+                    <TextView
+                        android:id="@+id/strip_btn2_label"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:gravity="center"
+                        android:importantForAccessibility="no"
+                        android:maxLines="1"
+                        android:textSize="14sp"
+                        android:textStyle="bold" />
+                </FrameLayout>
             </LinearLayout>
-
-            <FrameLayout
-                android:id="@+id/strip_btn2"
-                android:layout_width="40dp"
-                android:layout_height="40dp"
-                android:layout_marginTop="2dp">
-
-                <ImageView
-                    android:id="@+id/strip_btn2_bg"
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:importantForAccessibility="no"
-                    android:src="@drawable/widget_circle" />
-
-                <TextView
-                    android:id="@+id/strip_btn2_label"
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:gravity="center"
-                    android:importantForAccessibility="no"
-                    android:maxLines="1"
-                    android:textSize="15sp"
-                    android:textStyle="bold" />
-            </FrameLayout>
         </LinearLayout>
         <LinearLayout
             android:id="@+id/strip_cell3"
@@ -141,53 +156,60 @@
             android:gravity="center"
             android:orientation="vertical">
 
-            <LinearLayout
-                android:id="@+id/strip_text3"
-                android:layout_width="match_parent"
+            <TextView
+                android:id="@+id/strip_label3"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:gravity="center"
-                android:orientation="vertical">
+                android:maxLines="1"
+                android:textSize="11sp" />
 
-                <TextView
-                    android:id="@+id/strip_label3"
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:baselineAligned="false"
+                android:gravity="center_vertical"
+                android:orientation="horizontal">
+
+                <LinearLayout
+                    android:id="@+id/strip_text3"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:maxLines="1"
-                    android:textSize="11sp" />
+                    android:orientation="vertical">
 
-                <TextView
-                    android:id="@+id/strip_value3"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:ellipsize="end"
-                    android:textSize="22sp"
-                    android:maxLines="1"
-                    android:textStyle="bold" />
+                    <TextView
+                        android:id="@+id/strip_value3"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:ellipsize="end"
+                        android:maxLines="1"
+                        android:textSize="20sp"
+                        android:textStyle="bold" />
+                </LinearLayout>
+
+                <FrameLayout
+                    android:id="@+id/strip_btn3"
+                    android:layout_width="36dp"
+                    android:layout_height="36dp"
+                    android:layout_marginStart="8dp">
+
+                    <ImageView
+                        android:id="@+id/strip_btn3_bg"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:importantForAccessibility="no"
+                        android:src="@drawable/widget_circle" />
+
+                    <TextView
+                        android:id="@+id/strip_btn3_label"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:gravity="center"
+                        android:importantForAccessibility="no"
+                        android:maxLines="1"
+                        android:textSize="14sp"
+                        android:textStyle="bold" />
+                </FrameLayout>
             </LinearLayout>
-
-            <FrameLayout
-                android:id="@+id/strip_btn3"
-                android:layout_width="40dp"
-                android:layout_height="40dp"
-                android:layout_marginTop="2dp">
-
-                <ImageView
-                    android:id="@+id/strip_btn3_bg"
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:importantForAccessibility="no"
-                    android:src="@drawable/widget_circle" />
-
-                <TextView
-                    android:id="@+id/strip_btn3_label"
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:gravity="center"
-                    android:importantForAccessibility="no"
-                    android:maxLines="1"
-                    android:textSize="15sp"
-                    android:textStyle="bold" />
-            </FrameLayout>
         </LinearLayout>
     </LinearLayout>
 </FrameLayout>
