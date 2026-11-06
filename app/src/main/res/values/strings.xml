@@ -573,4 +573,5 @@
     <string name="serving_draft">Draft</string>
     <string name="serving_bottle">Bottle</string>
     <string name="setting_default_serving">Beer for +1: draft or bottle</string>
+    <string name="brand_remove">Remove %1$s from the list</string>
 </resources>

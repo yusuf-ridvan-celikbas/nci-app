@@ -73,6 +73,8 @@ data class Settings(
     val prices: Map<com.cansin.app.domain.PriceSlot, Long> = emptyMap(),
     /** P29: optional brand the big +1 uses for beer. */
     val defaultBrand: String? = null,
+    /** P35: brands removed from the brand menu. */
+    val hiddenBrands: Set<String> = emptySet(),
     /** P34: draft or bottle for beer +1. */
     val defaultServing: com.cansin.app.data.Serving = com.cansin.app.data.Serving.DRAFT,
     /** P31: show the ‰ estimate on widgets (needs a body profile). Off by default. */

@@ -251,7 +251,11 @@ class MainActivity : ComponentActivity() {
         BackHandler(screen != Screen.COUNTER) { screen = if (screen == Screen.DETAIL) Screen.HISTORY else Screen.COUNTER }
 
         val recentBrands by app.sessionRepository.recentBrands.collectAsState(initial = emptyList())
-        CansinTheme(dark, settings.accent) { CompositionLocalProvider(LocalCurrency provides settings.currency, com.cansin.app.ui.LocalRecentBrands provides recentBrands) {
+        CansinTheme(dark, settings.accent) { CompositionLocalProvider(LocalCurrency provides settings.currency, com.cansin.app.ui.LocalRecentBrands provides recentBrands, com.cansin.app.ui.LocalBrandActions provides com.cansin.app.ui.BrandActions(
+            hidden = settings.hiddenBrands,
+            hide = { b -> lifecycleScope.launch { app.settingsStore.hideBrand(b) } },
+            unhide = { b -> lifecycleScope.launch { app.settingsStore.unhideBrand(b) } },
+        )) {
             val tab = screen.tab()
             val showBar = settings.ageConfirmed && !showLock && tab != null
             Scaffold(

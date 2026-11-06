@@ -561,4 +561,5 @@
     <string name="serving_draft">Fıçı</string>
     <string name="serving_bottle">Şişe</string>
     <string name="setting_default_serving">+1 birası: fıçı mı şişe mi</string>
+    <string name="brand_remove">%1$s listeden kaldır</string>
 </resources>

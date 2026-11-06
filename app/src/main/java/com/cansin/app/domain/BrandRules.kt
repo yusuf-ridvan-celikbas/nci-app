@@ -18,8 +18,17 @@ object BrandRules {
     }
 
     /** Recent first, then suggestions; duplicates (ignoring case) dropped. */
-    fun choices(recent: List<String>): List<String> {
+    fun choices(recent: List<String>, hidden: Set<String> = emptySet()): List<String> {
         val seen = HashSet<String>()
-        return (recent + SUGGESTED).mapNotNull { clean(it) }.filter { seen.add(it.lowercase()) }
+        val hide = hidden.map { it.lowercase() }.toSet()
+        return (recent + SUGGESTED).mapNotNull { clean(it) }.filter { it.lowercase() !in hide && seen.add(it.lowercase()) }
     }
+
+    /** P35: brands the user removed from the menu (case-insensitive), capped. */
+    const val MAX_HIDDEN = 100
+
+    fun hide(hidden: Set<String>, brand: String): Set<String> =
+        clean(brand)?.let { b -> (hidden.filterNot { it.equals(b, ignoreCase = true) } + b).takeLast(MAX_HIDDEN).toSet() } ?: hidden
+
+    fun unhide(hidden: Set<String>, brand: String?): Set<String> = hidden.filterNot { it.equals(brand?.trim(), ignoreCase = true) }.toSet()
 }

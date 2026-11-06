@@ -232,7 +232,7 @@ private fun DefaultBrandRow(brand: String?, onChange: (String?) -> Unit) {
         androidx.compose.material3.AlertDialog(
             onDismissRequest = { editing = false },
             title = { Text(stringResource(R.string.setting_default_brand)) },
-            text = { Column(Modifier.verticalScroll(rememberScrollState())) { BrandPicker(value, { value = it }, com.cansin.app.domain.BrandRules.choices(recent)) } },
+            text = { Column(Modifier.verticalScroll(rememberScrollState())) { BrandPicker(value, { value = it }, com.cansin.app.domain.BrandRules.choices(recent, LocalBrandActions.current.hidden)) } },
             confirmButton = {
                 TextButton(onClick = {
                     onChange(com.cansin.app.domain.BrandRules.clean(value))

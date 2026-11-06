@@ -348,4 +348,16 @@ class SessionRepositoryTest {
         priced.removeLatestDrink(DrinkKind.BEER, 500, Side.SOLO, "Efes", Serving.BOTTLE)
         assertEquals(2, beers.rows.value.size)
     }
+
+    @Test
+    fun wrongBrandCanBeChangedOnTheLine() = runBlocking {
+        val typo = DrinkChoice(DrinkKind.BEER, BeerSize(500, 5.0), "Efse", Serving.DRAFT)
+        repo.addBeer(drink = typo)
+        repo.addBeer(drink = typo)
+        repo.addBeer(drink = typo.copy(brand = "Tuborg"))
+        repo.setBrand(DrinkKind.BEER, 500, Side.SOLO, Serving.DRAFT, "Efse", " Efes ")
+        assertEquals(listOf("Efes", "Efes", "Tuborg"), beers.rows.value.map { it.brand })
+        repo.setBrand(DrinkKind.BEER, 500, Side.SOLO, Serving.DRAFT, "Tuborg", null)
+        assertEquals(listOf("Efes", "Efes", null), beers.rows.value.map { it.brand })
+    }
 }

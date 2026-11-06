@@ -149,6 +149,11 @@ Current phase: **P13–P30 approved on the phone (2026-11-06), merged into maste
 - Lint clean, tests green; app starts on the phone. Not yet placed/resized by the user.
 - Phone feedback: widget numbers were tiny (autoSize + wrap_content picks the minimum) → fixed sizes. 1-row widgets (3×1/4×1) use the old pages look with −1/+1: `widget_pager.xml` ‹ label •∘∘ value (−1) (+1) › (Versus: red/blue +1). 2×1 keeps the round +1 (user preferred). Narrow widgets (1–2 columns, 2+ rows: 1×2, 2×2, 2×3, 1×4…) use the narrow pages look (`widget_small_narrow.xml`); 3×2/4×2 the regular pages look; both with −1 next to +1; the stacked Drinks/Water/Tab column was removed (user); the dashboard (BIG) is now 4×3, XL 4×4+. Narrow tall widgets: compact cells (label, then value + 36 dp +1) so 3 blocks fit; on this Samsung a 2-cell width counts as narrow.
 
+## P35 (2026-11-06) — fix a wrong brand (user request)
+- Tab line dialog (`DrinkLineDialog`): tonight's price + Draft/Bottle + Brand, one Save (price on the old line, then serving, then brand via `BeerDao.setBrand`); "Remove from tab" clears the price.
+- Brand menu: ✕ on each brand hides it from the menu (Settings `hidden_brands`, case-insensitive, max 100; also hides suggestions); drinks keep their brand. Adding a drink with a hidden brand typed again un-hides it.
+- Also found on the phone: only the Versus (#27) and Together (#31) nights remain; solo nights #32–#55 are gone (most likely History "Select all → Delete" with the Solo filter during the P30 test). Offered: undo / recently deleted / stronger warning — user hasn't chosen yet.
+
 ## P34 report (2026-11-06) — draft / bottle (user request)
 - DB v11 (AutoMigration 10→11): `BeerEvent.serving` (DRAFT/BOTTLE, beer only, null for other kinds/old rows). `DrinkChoice.serving`; Settings → Drinks "Beer for +1: draft or bottle" (default DRAFT, decided – confirm); picker chips Draft/Bottle for beer.
 - Tab: lines split by serving (own tonight's price; `latestPrice/setPrice/latestMatching` include serving); tapping a beer line shows Draft/Bottle chips to switch the line (`setServing`).

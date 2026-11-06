@@ -87,6 +87,7 @@ fun DrinkDialog(initial: DrinkChoice, beer: BeerSize, onConfirm: (DrinkChoice) -
     var brand by rememberSaveable { mutableStateOf(initial.brand.orEmpty()) }
     var serving by rememberSaveable { mutableStateOf(initial.serving ?: com.cansin.app.data.Serving.DRAFT) }
     val recentBrands = LocalRecentBrands.current
+    val brandActions = LocalBrandActions.current
     val separator = rememberDecimalSeparator()
     var kind by rememberSaveable { mutableStateOf(initial.kind) }
     var clText by rememberSaveable { mutableStateOf(BeerRules.formatCl(initial.size.sizeMl, separator)) }
@@ -132,13 +133,16 @@ fun DrinkDialog(initial: DrinkChoice, beer: BeerSize, onConfirm: (DrinkChoice) -
                 NumberField(clText, { clText = it }, R.string.size_custom_cl, R.string.invalid_size, sizeMl == null)
                 NumberField(abvText, { abvText = it }, R.string.abv_label, R.string.invalid_abv, abv == null)
                 if (kind == DrinkKind.BEER) ServingChips(serving) { serving = it }
-                BrandPicker(brand, { brand = it }, if (kind == DrinkKind.BEER) BrandRules.choices(recentBrands) else recentBrands)
+                BrandPicker(brand, { brand = it }, if (kind == DrinkKind.BEER) BrandRules.choices(recentBrands, brandActions.hidden) else recentBrands.filterNot { r -> brandActions.hidden.any { it.equals(r, true) } })
             }
         },
         confirmButton = {
             TextButton(
                 enabled = sizeMl != null && abv != null,
-                onClick = { if (sizeMl != null && abv != null) onConfirm(DrinkChoice(kind, BeerSize(sizeMl, abv), BrandRules.clean(brand), serving.takeIf { kind == DrinkKind.BEER })) },
+                onClick = { if (sizeMl != null && abv != null) {
+                    BrandRules.clean(brand)?.let { b -> if (brandActions.hidden.any { it.equals(b, true) }) brandActions.unhide(b) }
+                    onConfirm(DrinkChoice(kind, BeerSize(sizeMl, abv), BrandRules.clean(brand), serving.takeIf { kind == DrinkKind.BEER }))
+                } },
             ) { Text(stringResource(R.string.action_add)) }
         },
         dismissButton = { TextButton(onClick = onDismiss) { Text(stringResource(R.string.action_cancel)) } },
@@ -147,6 +151,11 @@ fun DrinkDialog(initial: DrinkChoice, beer: BeerSize, onConfirm: (DrinkChoice) -
 
 /** Brands used lately (newest first), provided by MainActivity for the pickers. */
 val LocalRecentBrands = androidx.compose.runtime.staticCompositionLocalOf { emptyList<String>() }
+
+/** P35: hidden brands + hide/unhide, provided by MainActivity. */
+class BrandActions(val hidden: Set<String> = emptySet(), val hide: (String) -> Unit = {}, val unhide: (String) -> Unit = {})
+
+val LocalBrandActions = androidx.compose.runtime.staticCompositionLocalOf { BrandActions() }
 
 /** "Brand (optional)": None + quick picks + free text. */
 @Composable
@@ -201,12 +210,25 @@ fun BrandPicker(value: String, onChange: (String) -> Unit, choices: List<String>
                     typing = true
                 },
             )
+            val actions = LocalBrandActions.current
             choices.forEach { option ->
                 androidx.compose.material3.DropdownMenuItem(
                     text = { Text(option) },
                     onClick = {
                         onChange(option)
                         expanded = false
+                    },
+                    trailingIcon = {
+                        // ✕ = remove this brand from the menu (drinks keep their brand).
+                        androidx.compose.material3.IconButton(onClick = {
+                            actions.hide(option)
+                            if (value.trim().equals(option, ignoreCase = true)) onChange("")
+                        }) {
+                            androidx.compose.material3.Icon(
+                                androidx.compose.ui.res.painterResource(R.drawable.ic_close),
+                                stringResource(R.string.brand_remove, option),
+                            )
+                        }
                     },
                 )
             }

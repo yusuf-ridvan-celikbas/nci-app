@@ -215,6 +215,12 @@ class SessionRepository(
         beers.setPrice(session.id, kind, sizeMl, side, BrandRules.clean(brand), serving, priceMinor?.takeIf { it > 0 && NoteRules.isValidAmount(it) })
     }
 
+    /** Tab: change the brand of a drink line (wrong brand typed); null = no brand. */
+    suspend fun setBrand(kind: DrinkKind, sizeMl: Int, side: Side, serving: Serving?, from: String?, to: String?) = write {
+        val session = activeSession(clock()) ?: return@write
+        beers.setBrand(session.id, kind, sizeMl, side, serving, BrandRules.clean(from), BrandRules.clean(to))
+    }
+
     /** Tab: switch a drink line between draft and bottle (beer only). */
     suspend fun setServing(kind: DrinkKind, sizeMl: Int, side: Side, brand: String?, from: Serving?, to: Serving?) = write {
         if (kind != DrinkKind.BEER) return@write

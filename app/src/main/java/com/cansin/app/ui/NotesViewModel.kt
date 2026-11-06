@@ -80,6 +80,16 @@ class NotesViewModel(private val repository: SessionRepository) : ViewModel() {
 
     fun setWaterPrice(line: com.cansin.app.domain.WaterLine, minor: Long?) = viewModelScope.launch { repository.setWaterPrice(line.side, line.sizeMl, minor) }
 
+    /** One Save in the line dialog: price (old line), then draft/bottle, then brand. */
+    fun saveLine(line: DrinkLine, priceMinor: Long?, priceChanged: Boolean, serving: com.cansin.app.data.Serving?, brand: String?) = viewModelScope.launch {
+        if (priceChanged) repository.setDrinkPrice(line.kind, line.sizeMl, line.beerSide, priceMinor, line.brand, line.serving)
+        if (serving != line.serving && line.kind == com.cansin.app.data.DrinkKind.BEER) {
+            repository.setServing(line.kind, line.sizeMl, line.beerSide, line.brand, line.serving, serving)
+        }
+        val newBrand = com.cansin.app.domain.BrandRules.clean(brand)
+        if (newBrand != line.brand) repository.setBrand(line.kind, line.sizeMl, line.beerSide, serving, line.brand, newBrand)
+    }
+
     fun setServing(line: DrinkLine, to: com.cansin.app.data.Serving) =
         viewModelScope.launch { repository.setServing(line.kind, line.sizeMl, line.beerSide, line.brand, line.serving, to) }
 

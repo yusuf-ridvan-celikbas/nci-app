@@ -235,6 +235,10 @@ interface BeerDao {
     @Query("UPDATE beer_event SET priceMinor = :priceMinor WHERE sessionId = :sessionId AND kind = :kind AND sizeMl = :sizeMl AND side = :side AND brand IS :brand AND serving IS :serving")
     suspend fun setPrice(sessionId: Long, kind: DrinkKind, sizeMl: Int, side: Side, brand: String?, serving: Serving?, priceMinor: Long?)
 
+    /** P35: change the brand of one Tab line (null = no brand). */
+    @Query("UPDATE beer_event SET brand = :to WHERE sessionId = :sessionId AND kind = :kind AND sizeMl = :sizeMl AND side = :side AND brand IS :from AND serving IS :serving")
+    suspend fun setBrand(sessionId: Long, kind: DrinkKind, sizeMl: Int, side: Side, serving: Serving?, from: String?, to: String?)
+
     /** P34: switch one Tab line between draft and bottle. */
     @Query("UPDATE beer_event SET serving = :to WHERE sessionId = :sessionId AND kind = :kind AND sizeMl = :sizeMl AND side = :side AND brand IS :brand AND serving IS :from")
     suspend fun setServing(sessionId: Long, kind: DrinkKind, sizeMl: Int, side: Side, brand: String?, from: Serving?, to: Serving?)

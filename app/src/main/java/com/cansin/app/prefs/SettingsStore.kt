@@ -65,6 +65,7 @@ private val GROUP_LAYOUT = stringPreferencesKey("group_layout")
 private val KEEP_HISTORY = stringPreferencesKey("keep_history")
 private val WATER_SIZE = intPreferencesKey("water_size_ml")
 private val DEFAULT_BRAND = stringPreferencesKey("default_brand")
+private val HIDDEN_BRANDS = androidx.datastore.preferences.core.stringSetPreferencesKey("hidden_brands")
 private val DEFAULT_SERVING = stringPreferencesKey("default_serving")
 /** "price_BEER" = beer 50 cl (P28 key kept), "price_BEER_33", "price_BEER_1L", "price_WINE", … */
 private fun priceKey(slot: PriceSlot) = longPreferencesKey("price_" + slot.name)
@@ -118,6 +119,7 @@ class SettingsStore(private val context: Context) {
             timerAuto = p[TIMER_AUTO] ?: true,
             groupLayout = enumOr(p[GROUP_LAYOUT], GroupLayout.ROWS),
             defaultBrand = com.cansin.app.domain.BrandRules.clean(p[DEFAULT_BRAND]),
+            hiddenBrands = p[HIDDEN_BRANDS].orEmpty().mapNotNull { com.cansin.app.domain.BrandRules.clean(it) }.toSet(),
             defaultServing = enumOr(p[DEFAULT_SERVING], com.cansin.app.data.Serving.DRAFT),
             widgetPromille = p[WIDGET_PROMILLE] == true,
             keepHistory = enumOr(p[KEEP_HISTORY], KeepHistory.FOREVER),
@@ -274,6 +276,9 @@ class SettingsStore(private val context: Context) {
     suspend fun setPrice(slot: PriceSlot, minor: Long?) = edit { it.putOrRemove(priceKey(slot), minor?.takeIf { m -> m > 0 && NoteRules.isValidAmount(m) }) }
 
     suspend fun setDefaultServing(value: com.cansin.app.data.Serving) = edit { it[DEFAULT_SERVING] = value.name }
+
+    suspend fun hideBrand(brand: String) = edit { it[HIDDEN_BRANDS] = com.cansin.app.domain.BrandRules.hide(it[HIDDEN_BRANDS].orEmpty(), brand) }
+    suspend fun unhideBrand(brand: String?) = edit { it[HIDDEN_BRANDS] = com.cansin.app.domain.BrandRules.unhide(it[HIDDEN_BRANDS].orEmpty(), brand) }
 
     suspend fun setDefaultBrand(value: String?) = edit { it.putOrRemove(DEFAULT_BRAND, com.cansin.app.domain.BrandRules.clean(value)) }
 

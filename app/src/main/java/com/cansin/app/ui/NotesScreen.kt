@@ -54,6 +54,8 @@ import androidx.compose.foundation.gestures.draggable
 import androidx.compose.foundation.layout.size
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableFloatStateOf
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import com.cansin.app.R
 import com.cansin.app.data.Note
 import com.cansin.app.data.Side
@@ -174,18 +176,13 @@ private fun NotesContent(viewModel: NotesViewModel, state: NotesState, onBack: (
         )
     }
     pricing?.let { line ->
-        PriceDialog(
-            title = stringResource(R.string.tab_price_title, (line.brand ?: stringResource(drinkName(line.kind))) + " · " + sizeText(line.sizeMl)),
-            current = line.unitMinor,
-            note = R.string.tab_price_note,
-            clearLabel = R.string.tab_price_remove,
-            onSave = { viewModel.setPrice(line, it); pricing = null },
-            onDismiss = { pricing = null },
-            extra = if (line.kind == com.cansin.app.data.DrinkKind.BEER) {
-                { ServingChips(line.serving) { s -> viewModel.setServing(line, s); pricing = null } }
-            } else {
-                null
+        DrinkLineDialog(
+            line = line,
+            onSave = { price, priceChanged, serving, brand ->
+                viewModel.saveLine(line, price, priceChanged, serving, brand)
+                pricing = null
             },
+            onDismiss = { pricing = null },
         )
     }
 
@@ -336,6 +333,59 @@ private fun QuantityStepper(value: Int, onChange: (Int) -> Unit) {
             Icon(painterResource(R.drawable.ic_expand_more), stringResource(R.string.qty_down))
         }
     }
+}
+
+/** Tab line: tonight's price, draft/bottle (beer) and brand, saved together. "Remove from tab" clears the price. */
+@Composable
+private fun DrinkLineDialog(
+    line: com.cansin.app.domain.DrinkLine,
+    onSave: (price: Long?, priceChanged: Boolean, serving: com.cansin.app.data.Serving?, brand: String?) -> Unit,
+    onDismiss: () -> Unit,
+) {
+    val plain = rememberPlainAmountFormat()
+    var text by rememberSaveable { mutableStateOf(line.unitMinor?.let(plain).orEmpty()) }
+    var serving by rememberSaveable { mutableStateOf(line.serving) }
+    var brand by rememberSaveable { mutableStateOf(line.brand.orEmpty()) }
+    val parsed = NoteRules.parseAmount(text)
+    val beer = line.kind == com.cansin.app.data.DrinkKind.BEER
+    val recent = LocalRecentBrands.current
+    val hidden = LocalBrandActions.current.hidden
+    androidx.compose.material3.AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text(stringResource(R.string.tab_price_title, (line.brand ?: stringResource(drinkName(line.kind))) + " · " + sizeText(line.sizeMl))) },
+        text = {
+            Column(Modifier.verticalScroll(rememberScrollState())) {
+                Text(stringResource(R.string.tab_price_note), style = MaterialTheme.typography.bodySmall, modifier = Modifier.padding(bottom = 8.dp))
+                OutlinedTextField(
+                    value = text,
+                    onValueChange = { text = it.take(13) },
+                    label = { Text(stringResource(R.string.note_amount)) },
+                    isError = parsed == AmountInput.Invalid,
+                    singleLine = true,
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
+                )
+                if (beer) ServingChips(serving) { serving = it }
+                BrandPicker(brand, { brand = it }, com.cansin.app.domain.BrandRules.choices(recent, hidden).let { if (beer) it else recent })
+            }
+        },
+        confirmButton = {
+            TextButton(
+                enabled = parsed != AmountInput.Invalid,
+                onClick = {
+                    val price = (parsed as? AmountInput.Valid)?.minor?.takeIf { it > 0 }
+                    onSave(price, price != line.unitMinor, serving, brand)
+                },
+            ) { Text(stringResource(R.string.action_save)) }
+        },
+        dismissButton = {
+            Row {
+                if (line.unitMinor != null) {
+                    TextButton(onClick = { onSave(null, true, line.serving, line.brand) }) { Text(stringResource(R.string.tab_price_remove)) }
+                }
+                TextButton(onClick = onDismiss) { Text(stringResource(R.string.action_cancel)) }
+            }
+        },
+    )
 }
 
 /** P33 Tab water line: "Water ×2", price each, sum, −1/+1. Tap = tonight's water price. */

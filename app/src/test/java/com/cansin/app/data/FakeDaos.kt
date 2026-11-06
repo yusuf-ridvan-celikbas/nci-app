@@ -67,6 +67,9 @@ class FakeBeerDao : BeerDao {
     override suspend fun setPrice(sessionId: Long, kind: DrinkKind, sizeMl: Int, side: Side, brand: String?, serving: Serving?, priceMinor: Long?) {
         rows.value = rows.value.map { if (it.isLine(sessionId, kind, sizeMl, side, brand, serving)) it.copy(priceMinor = priceMinor) else it }
     }
+    override suspend fun setBrand(sessionId: Long, kind: DrinkKind, sizeMl: Int, side: Side, serving: Serving?, from: String?, to: String?) {
+        rows.value = rows.value.map { if (it.isLine(sessionId, kind, sizeMl, side, from, serving)) it.copy(brand = to) else it }
+    }
     override suspend fun setServing(sessionId: Long, kind: DrinkKind, sizeMl: Int, side: Side, brand: String?, from: Serving?, to: Serving?) {
         rows.value = rows.value.map { if (it.isLine(sessionId, kind, sizeMl, side, brand, from)) it.copy(serving = to) else it }
     }
