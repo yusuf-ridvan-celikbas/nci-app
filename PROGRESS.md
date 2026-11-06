@@ -1,6 +1,6 @@
 # Progress
 
-Current phase: **NEXT: P37 tutorials (planned, not started) on branch feature/p37-tutorials (from p36). Local chain not pushed: p27→…→p36 (feature/p31-widget … feature/p36-no-brands); master on GitHub = P13–P30. iOS: rules up to P26 only.**
+Current phase: **P37 tutorials = spotlight tours (installed for the user's test, not committed) on branch feature/p37-tutorials (from p36). Local chain not pushed: p27→…→p36 (feature/p31-widget … feature/p36-no-brands); master on GitHub = P13–P30. iOS: rules up to P26 only.**
 
 ## Phases
 - [x] Setup (project, wrapper, git, CLAUDE.md)
@@ -155,12 +155,16 @@ Current phase: **NEXT: P37 tutorials (planned, not started) on branch feature/p3
 - Together unchanged (user choice). iOS Versus: do the same 3 pages later.
 - Strings: `versus_page_sides`, `versus_page_water` (EN/TR); game tab reuses `nav_game`. Not yet tested on the phone (user to check).
 
-## P37 plan (2026-11-06, approved, NOT started) — tutorials
-- Swipe-card tutorials (full-screen Dialog + HorizontalPager: icon, title, 1–2 lines, dots, Skip/Next/Done; Back = Skip).
-- Topics: GENERAL (6 pages), TONIGHT (5), TAB (4), GAME (4), HISTORY (3), FRIENDS = Versus/Together (3), WIDGET (3); content outline in ~/.claude/plans/so-i-want-to-proud-fox.md.
-- Auto: GENERAL once after the 18+ gate; each section's tutorial on its first visit (after GENERAL); never while PIN-locked. DataStore `tutorials_seen` (string set).
-- Replay: Settings → General & look → Tutorials (row per topic + "Show all again" reset) and a "?" (new ic_help) in the top bars of Tonight, Versus/Together, Tab, Game, History.
-- Files: new domain/Tutorials.kt (+TutorialRules.autoShow, tests), ui/TutorialSheet.kt; wire in MainActivity (Screen → topic), Settings/SettingsStore, strings EN+TR. No new dependency.
+## P37 report (2026-11-06) — tutorials (scope re-confirmed by the user before building)
+- User tested the first version (swipe cards everywhere) and asked for something more interactive, "show the functions in app". Chosen: **spotlight tours** over the real screen (nothing is pressed, no fake drinks), cards only for GENERAL (intro) and WIDGET (no screen), stops whose button isn't on screen are skipped.
+- `domain/Tutorials.kt`: `TutorialTopic`; `TourStep` (32 stops, enum order = tour order, each with its topic); `TutorialRules.autoShow` (GENERAL first after the 18+ gate, then a section's guide on its first visit; never behind PIN/age gate or over another guide; WIDGET only from Settings), `isCards`, `tour(topic, present)`, `available` (Tonight tour only without Versus/Together, Friends tour only with one), name codec. Tests: `TutorialRulesTest` (9).
+- `ui/Tour.kt`: `TourTargets` (step → bounds in root, state map) via `LocalTourTargets`; `Modifier.tourTarget(step)` on the real buttons; `TourOverlay` = offscreen-composited scrim with a cleared rounded hole + primary ring, bubble card (title, body, Skip, n/m, Next/Done) placed below the hole if it fits, else above, inside safe insets. Taps anywhere = Next and never reach the app; Back = close. Starts 350 ms after opening so the screen is laid out; a stop that disappears mid-tour is skipped.
+- Targets: Tonight (+1, drinks row, timer, water, ‰/care card, "with friends", End session, bottom bar), Tab (drinks section, quick add, totals, Settle up), Game (play-with-table card, first player, packs, My questions, Start; playing: glass, spin/truth-dare row, Players), History (tabs, filter bar, first night, Select), Versus (page tabs, red half), Together (first seat, rows/grid, game toggle), both (edit, pin, End). `PromilleCard`, `WaterBar`, `TimerBar` got an optional `modifier` so they're only tagged when shown.
+- `ui/TutorialSheet.kt`: cards for GENERAL (6) and WIDGET (3); `LocalTutorial` + `HelpButton(topic)` "?" (`ic_help`) in the top bars of Tonight, Versus, Together, Tab, Game, History. Opening a tour (also from Settings) first switches to its screen.
+- Seen set: DataStore `tutorials_seen` → `Settings.tutorialsSeen`; closing a guide in any way marks it seen; "Delete all data" clears it. After GENERAL closes, the current screen's tour waits for its next visit (no two guides back to back).
+- Settings → General & look → Guides: a row per topic (Tonight / Versus & Together rows disabled with a hint when not possible right now) + "Show all guides again".
+- Strings: `tut_*` (cards, buttons, topics) + `tour_*` (32 stops) EN + TR. No new dependency, no permission change. Release APK 2.06 MB (+33 KB vs before P37).
+- Not committed; installed on the phone for the user's test.
 
 ## P36 (2026-11-06) — no brands at all (user decision after the legal-risk talk)
 - Brand feature removed: no brand field in the picker, Tab line dialog, Settings, widget or labels; no built-in names; DrinkChoice/DrinkLine/DAO queries without brand; `BrandRules` deleted. Column `beer_event.brand` kept for the schema but cleared on every start (`StorageDao.clearBrands`); `default_brand` / `hidden_brands` prefs removed. Backup no longer writes `brand` (restore ignores it).

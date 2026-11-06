@@ -48,6 +48,7 @@ import com.cansin.app.data.FriendProfile
 import com.cansin.app.domain.BeerSize
 import com.cansin.app.domain.BodyProfile
 import com.cansin.app.domain.Currency
+import com.cansin.app.domain.TutorialTopic
 import com.cansin.app.domain.WaterRules
 import com.cansin.app.prefs.Accent
 import com.cansin.app.prefs.Language
@@ -93,6 +94,7 @@ class SettingsActions(
     val onPrice: (com.cansin.app.domain.PriceSlot, Long?) -> Unit,
     val onDefaultServing: (com.cansin.app.data.Serving) -> Unit,
     val onWidgetPromille: (Boolean) -> Unit,
+    val onResetTutorials: () -> Unit,
 )
 
 /** Settings is a short list of groups; each opens its own page. */
@@ -113,6 +115,7 @@ fun SettingsScreen(
     notificationAccess: NotificationAccess,
     friends: List<FriendProfile>,
     actions: SettingsActions,
+    tutorialAvailable: (TutorialTopic) -> Boolean = { true },
 ) {
     var page by rememberSaveable { mutableStateOf<SettingsPage?>(null) }
     BackHandler(page != null) { page = null }
@@ -156,6 +159,8 @@ fun SettingsScreen(
                     ChoiceGroup(R.string.setting_theme_mode, ThemeMode.entries, settings.themeMode, { it.label }, actions.onThemeMode)
                     val accents = Accent.entries.filter { it != Accent.DYNAMIC || dynamicAvailable }
                     ChoiceGroup(R.string.setting_color, accents, settings.accent, { it.label }, actions.onAccent)
+                    HorizontalDivider(Modifier.padding(vertical = 16.dp))
+                    GuidesSection(tutorialAvailable, actions.onResetTutorials)
                 }
                 SettingsPage.DRINKS -> {
                     BeerSection(settings.beerSize, actions.onBeerSize, settings.defaultDrink, actions.onDefaultDrink)
@@ -254,6 +259,36 @@ private fun BeerSection(
                 editing = false
             },
             onDismiss = { editing = false },
+        )
+    }
+}
+
+/** P37: replay any guide, or show them all again on each screen. */
+@Composable
+private fun GuidesSection(available: (TutorialTopic) -> Boolean, onReset: () -> Unit) {
+    val open = LocalTutorial.current
+    var reset by rememberSaveable { mutableStateOf(false) }
+    SectionHeader(R.string.tut_settings_title)
+    TutorialTopic.entries.forEach { topic ->
+        val enabled = available(topic)
+        val hint = when {
+            enabled -> null
+            topic == TutorialTopic.FRIENDS -> R.string.tut_needs_shared
+            else -> R.string.tut_needs_solo
+        }
+        ListItem(
+            headlineContent = { Text(stringResource(tutorialTitle(topic))) },
+            supportingContent = hint?.let { { Text(stringResource(it)) } },
+            trailingContent = { if (enabled) Icon(painterResource(R.drawable.ic_chevron_right), null) },
+            modifier = Modifier.clickable(enabled = enabled, role = Role.Button) { open(topic) },
+        )
+    }
+    TextButton(onClick = { onReset(); reset = true }) { Text(stringResource(R.string.tut_reset)) }
+    if (reset) {
+        Text(
+            stringResource(R.string.tut_reset_done),
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
         )
     }
 }

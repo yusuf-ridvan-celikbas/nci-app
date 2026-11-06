@@ -62,6 +62,8 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.cansin.app.R
+import com.cansin.app.domain.TourStep
+import com.cansin.app.domain.TutorialTopic
 import com.cansin.app.data.Session
 import com.cansin.app.data.Side
 import com.cansin.app.domain.BeerSize
@@ -116,23 +118,24 @@ fun GroupScreen(
                 TopAppBar(
                     title = { Text(stringResource(R.string.group_title)) },
                     actions = {
+                        HelpButton(TutorialTopic.FRIENDS)
                         if (!gameOn) {
                             val grid = layout == GroupLayout.GRID
-                            IconButton(onClick = { onLayout(if (grid) GroupLayout.ROWS else GroupLayout.GRID) }) {
+                            IconButton(onClick = { onLayout(if (grid) GroupLayout.ROWS else GroupLayout.GRID) }, modifier = Modifier.tourTarget(TourStep.GROUP_LAYOUT)) {
                                 Icon(
                                     painterResource(if (grid) R.drawable.ic_rows else R.drawable.ic_grid),
                                     stringResource(if (grid) R.string.group_show_rows else R.string.group_show_grid),
                                 )
                             }
                         }
-                        GameToggle(gameOn, game::setShownInSession)
-                        IconButton(onClick = onTogglePin) {
+                        Box(Modifier.tourTarget(TourStep.GROUP_GAME)) { GameToggle(gameOn, game::setShownInSession) }
+                        IconButton(onClick = onTogglePin, modifier = Modifier.tourTarget(TourStep.FRIENDS_PIN)) {
                             Icon(
                                 painterResource(if (pinned) R.drawable.ic_lock else R.drawable.ic_lock_open),
                                 stringResource(if (pinned) R.string.unpin_screen else R.string.pin_screen),
                             )
                         }
-                        IconButton(onClick = onEditSeats) {
+                        IconButton(onClick = onEditSeats, modifier = Modifier.tourTarget(TourStep.FRIENDS_EDIT)) {
                             Icon(painterResource(R.drawable.ic_versus), stringResource(R.string.group_edit))
                         }
                     },
@@ -142,7 +145,7 @@ fun GroupScreen(
             bottomBar = {
                 OutlinedButton(
                     onClick = { viewModel.endSession() },
-                    modifier = Modifier.fillMaxWidth().navigationBarsPadding().padding(16.dp),
+                    modifier = Modifier.fillMaxWidth().navigationBarsPadding().padding(16.dp).tourTarget(TourStep.FRIENDS_END),
                 ) { Text(stringResource(R.string.end_session)) }
             },
         ) { padding ->
@@ -173,7 +176,8 @@ fun GroupScreen(
                     item { GamePanel(game, gameState, showPacks = true) }
                 }
                 if (!gameOn && layout == GroupLayout.GRID) items(state.times.chunked(2), key = { "g" + it.first().side.name }) { pair ->
-                    Row(Modifier.height(IntrinsicSize.Min), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    val first = pair.first().side == state.times.firstOrNull()?.side
+                    Row(Modifier.height(IntrinsicSize.Min).then(if (first) Modifier.tourTarget(TourStep.GROUP_SEATS) else Modifier), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                         pair.forEach { t ->
                             SeatCell(
                                 session = session,
@@ -189,7 +193,7 @@ fun GroupScreen(
                     }
                 }
                 if (!gameOn && layout == GroupLayout.ROWS) items(state.times, key = { it.side.name }) { t ->
-                    SeatRow(
+                    Box(if (t.side == state.times.firstOrNull()?.side) Modifier.tourTarget(TourStep.GROUP_SEATS) else Modifier) { SeatRow(
                         session = session,
                         times = t,
                         now = now,
@@ -202,7 +206,7 @@ fun GroupScreen(
                         onWater = { viewModel.addWater(t.side) },
                         onStart = { viewModel.startTimer(t.side) },
                         onStop = { viewModel.stopTimer(t.side) },
-                    )
+                    ) }
                 }
                 item {
                     Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {

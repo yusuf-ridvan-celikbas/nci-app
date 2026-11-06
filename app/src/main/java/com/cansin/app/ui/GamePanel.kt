@@ -37,6 +37,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.cansin.app.R
+import com.cansin.app.domain.TourStep
 import com.cansin.app.data.QuestionKind
 import com.cansin.app.data.Session
 import com.cansin.app.domain.GamePack
@@ -117,7 +118,7 @@ fun GamePanel(viewModel: GameViewModel, state: GameState, showPacks: Boolean) {
     Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(12.dp)) {
         if (showPacks) PackChips(state.pack, viewModel::setPack)
         if (state.players.size < GameRules.MIN_PLAYERS) return@Column
-        SpinGlass(state, onSpin = viewModel::spin, onSpinDone = viewModel::spinDone)
+        Box(Modifier.tourTarget(TourStep.GAME_GLASS)) { SpinGlass(state, onSpin = viewModel::spin, onSpinDone = viewModel::spinDone) }
         val turn = state.turn?.let { state.players.getOrNull(it) }
         val asker = state.asker?.let { state.players.getOrNull(it) }
         Text(
@@ -141,10 +142,10 @@ fun GamePanel(viewModel: GameViewModel, state: GameState, showPacks: Boolean) {
         }
         when {
             state.spinning -> Unit
-            turn == null -> Button(onClick = viewModel::spin, modifier = Modifier.fillMaxWidth().heightIn(min = 52.dp)) {
+            turn == null -> Button(onClick = viewModel::spin, modifier = Modifier.fillMaxWidth().heightIn(min = 52.dp).tourTarget(TourStep.GAME_ACTIONS)) {
                 Text(stringResource(R.string.game_spin))
             }
-            card == null -> Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+            card == null -> Row(Modifier.tourTarget(TourStep.GAME_ACTIONS), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
                 Button(onClick = { viewModel.draw(QuestionKind.TRUTH, truths) }, modifier = Modifier.weight(1f).heightIn(min = 56.dp)) {
                     Text(stringResource(R.string.game_truth))
                 }

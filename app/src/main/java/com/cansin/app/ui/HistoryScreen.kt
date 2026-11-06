@@ -2,6 +2,7 @@ package com.cansin.app.ui
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -44,6 +45,8 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import com.cansin.app.R
+import com.cansin.app.domain.TourStep
+import com.cansin.app.domain.TutorialTopic
 import com.cansin.app.data.SessionMode
 import com.cansin.app.data.SessionSummary
 import com.cansin.app.domain.DaySession
@@ -94,8 +97,9 @@ fun HistoryScreen(viewModel: HistoryViewModel, onBack: () -> Unit, onOpen: (Long
                 TopAppBar(
                     title = { Text(stringResource(R.string.history_title)) },
                     actions = {
+                        HelpButton(TutorialTopic.HISTORY)
                         if (tab == 0 && !summaries.isNullOrEmpty()) {
-                            TextButton(onClick = { viewModel.startSelecting() }) { Text(stringResource(R.string.select_short)) }
+                            TextButton(onClick = { viewModel.startSelecting() }, modifier = Modifier.tourTarget(TourStep.HISTORY_SELECT)) { Text(stringResource(R.string.select_short)) }
                         }
                     },
                 )
@@ -103,7 +107,7 @@ fun HistoryScreen(viewModel: HistoryViewModel, onBack: () -> Unit, onOpen: (Long
         },
     ) { padding ->
         Column(Modifier.fillMaxSize().padding(padding)) {
-            PrimaryTabRow(selectedTabIndex = tab) {
+            PrimaryTabRow(selectedTabIndex = tab, modifier = Modifier.tourTarget(TourStep.HISTORY_TABS)) {
                 Tab(selected = tab == 0, onClick = { tab = 0 }, text = { Text(stringResource(R.string.history_sessions)) })
                 Tab(selected = tab == 1, onClick = { tab = 1; viewModel.stopSelecting() }, text = { Text(stringResource(R.string.history_stats)) })
                 Tab(selected = tab == 2, onClick = { tab = 2; viewModel.stopSelecting() }, text = { Text(stringResource(R.string.history_friends)) })
@@ -117,7 +121,7 @@ fun HistoryScreen(viewModel: HistoryViewModel, onBack: () -> Unit, onOpen: (Long
                         Text(stringResource(R.string.history_empty), Modifier.padding(16.dp), color = MaterialTheme.colorScheme.onSurfaceVariant)
                     } else {
                         filtered?.let { list ->
-                            HistoryFilterBar(filter, list.size, viewModel::setFilter)
+                            Box(Modifier.tourTarget(TourStep.HISTORY_FILTER)) { HistoryFilterBar(filter, list.size, viewModel::setFilter) }
                             SessionList(
                                 list,
                                 selecting = selecting,
@@ -180,6 +184,7 @@ private fun SessionList(
             Row(
                 Modifier
                     .fillMaxWidth()
+                    .then(if (summary === summaries.first()) Modifier.tourTarget(TourStep.HISTORY_LIST) else Modifier)
                     .combinedClickable(
                         onClick = { if (selecting) onToggle(session.id) else onOpen(session.id) },
                         onLongClick = { if (selecting) onToggle(session.id) else onLongPress(session.id) },

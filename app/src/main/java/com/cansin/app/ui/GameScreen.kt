@@ -53,6 +53,8 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import com.cansin.app.R
+import com.cansin.app.domain.TourStep
+import com.cansin.app.domain.TutorialTopic
 import com.cansin.app.data.FriendProfile
 import com.cansin.app.data.GroupSeat
 import com.cansin.app.data.QuestionKind
@@ -102,7 +104,8 @@ fun GameScreen(viewModel: GameViewModel, session: Session?, seats: List<GroupSea
                 TopAppBar(
                     title = { if (state.playing) Text(stringResource(packName(state.pack))) else GameTitle() },
                     actions = {
-                        if (state.playing) TextButton(onClick = viewModel::backToSetup) { Text(stringResource(R.string.game_change_players)) }
+                        HelpButton(TutorialTopic.GAME)
+                        if (state.playing) TextButton(onClick = viewModel::backToSetup, modifier = Modifier.tourTarget(TourStep.GAME_CHANGE)) { Text(stringResource(R.string.game_change_players)) }
                     },
                 )
             },
@@ -123,7 +126,7 @@ fun GameScreen(viewModel: GameViewModel, session: Session?, seats: List<GroupSea
 private fun Setup(viewModel: GameViewModel, state: GameState, ownCount: Int, session: Session?, onManage: () -> Unit) {
     val linked = GameRules.linkedSides(session, LocalSeats.current).map { GamePlayer(sideName(session, it), it) }
     if (linked.size >= GameRules.MIN_PLAYERS) {
-        OutlinedCard(Modifier.fillMaxWidth()) {
+        OutlinedCard(Modifier.fillMaxWidth().tourTarget(TourStep.GAME_LINKED)) {
             Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
                 Text(stringResource(R.string.game_play_with), style = MaterialTheme.typography.titleMedium)
                 Text(linked.joinToString(", ") { it.name })
@@ -134,7 +137,7 @@ private fun Setup(viewModel: GameViewModel, state: GameState, ownCount: Int, ses
     val names = rememberSaveable(saver = playersSaver) { mutableStateListOf("", "") }
     Text(stringResource(R.string.game_players), Modifier.fillMaxWidth(), style = MaterialTheme.typography.titleMedium)
     names.forEachIndexed { i, name ->
-        Row(verticalAlignment = Alignment.CenterVertically) {
+        Row(if (i == 0) Modifier.tourTarget(TourStep.GAME_PLAYERS) else Modifier, verticalAlignment = Alignment.CenterVertically) {
             OutlinedTextField(
                 value = name,
                 onValueChange = { names[i] = it.take(FriendProfile.MAX_NAME) },
@@ -154,7 +157,7 @@ private fun Setup(viewModel: GameViewModel, state: GameState, ownCount: Int, ses
     }
 
     Text(stringResource(R.string.game_pack), Modifier.fillMaxWidth(), style = MaterialTheme.typography.titleMedium)
-    FlowRow(Modifier.fillMaxWidth().selectableGroup(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+    FlowRow(Modifier.fillMaxWidth().tourTarget(TourStep.GAME_PACKS).selectableGroup(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
         GamePack.entries.forEach { pack ->
             FilterChip(
                 selected = pack == state.pack,
@@ -166,7 +169,7 @@ private fun Setup(viewModel: GameViewModel, state: GameState, ownCount: Int, ses
     }
     SwitchRow(R.string.game_include_builtin, state.includeBuiltIn) { viewModel.setIncludeBuiltIn(it) }
     SwitchRow(R.string.game_include_own, state.includeOwn) { viewModel.setIncludeOwn(it) }
-    OutlinedButton(onClick = onManage, modifier = Modifier.fillMaxWidth()) { Text(stringResource(R.string.game_my_questions, ownCount)) }
+    OutlinedButton(onClick = onManage, modifier = Modifier.fillMaxWidth().tourTarget(TourStep.GAME_MINE)) { Text(stringResource(R.string.game_my_questions, ownCount)) }
     SwitchRow(R.string.game_avoid_repeat, state.avoidRepeat, viewModel::setAvoidRepeat)
     Text(
         stringResource(R.string.game_skip_note),
@@ -177,6 +180,6 @@ private fun Setup(viewModel: GameViewModel, state: GameState, ownCount: Int, ses
     Button(
         onClick = { viewModel.start(players.map { GamePlayer(it) }) },
         enabled = GameRules.canStart(players),
-        modifier = Modifier.fillMaxWidth().heightIn(min = 52.dp),
+        modifier = Modifier.fillMaxWidth().heightIn(min = 52.dp).tourTarget(TourStep.GAME_START),
     ) { Text(stringResource(R.string.game_start)) }
 }

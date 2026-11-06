@@ -48,6 +48,8 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.cansin.app.R
+import com.cansin.app.domain.TourStep
+import com.cansin.app.domain.TutorialTopic
 import com.cansin.app.data.Session
 import com.cansin.app.data.Side
 
@@ -78,13 +80,14 @@ fun VersusScreen(
             TopAppBar(
                 title = { Text(stringResource(R.string.versus_title)) },
                 actions = {
-                    IconButton(onClick = onTogglePin) {
+                    HelpButton(TutorialTopic.FRIENDS)
+                    IconButton(onClick = onTogglePin, modifier = Modifier.tourTarget(TourStep.FRIENDS_PIN)) {
                         Icon(
                             painterResource(if (pinned) R.drawable.ic_lock else R.drawable.ic_lock_open),
                             stringResource(if (pinned) R.string.unpin_screen else R.string.pin_screen),
                         )
                     }
-                    IconButton(onClick = onEditSides) {
+                    IconButton(onClick = onEditSides, modifier = Modifier.tourTarget(TourStep.FRIENDS_EDIT)) {
                         Icon(painterResource(R.drawable.ic_versus), stringResource(R.string.versus_edit))
                     }
                 },
@@ -94,13 +97,13 @@ fun VersusScreen(
         bottomBar = {
             OutlinedButton(
                 onClick = { viewModel.endSession() },
-                modifier = Modifier.fillMaxWidth().navigationBarsPadding().padding(16.dp),
+                modifier = Modifier.fillMaxWidth().navigationBarsPadding().padding(16.dp).tourTarget(TourStep.FRIENDS_END),
             ) { Text(stringResource(R.string.end_session)) }
         },
     ) { padding ->
         // Three pages: the sides alone, then water + ‰, then the game. The game page open = game "shown in session".
         Column(Modifier.fillMaxSize().padding(padding)) {
-            PrimaryTabRow(selectedTabIndex = pager.currentPage) {
+            PrimaryTabRow(selectedTabIndex = pager.currentPage, modifier = Modifier.tourTarget(TourStep.VS_PAGES)) {
                 listOf(R.string.versus_page_sides, R.string.versus_page_water, R.string.nav_game).forEachIndexed { i, label ->
                     Tab(
                         selected = pager.currentPage == i,
@@ -149,7 +152,7 @@ private fun ColumnScope.SideHalf(
     val addDescription = stringResource(R.string.versus_add, name)
     val removeDescription = stringResource(R.string.versus_remove, name)
     Column(
-        Modifier.fillMaxWidth().weight(1f).background(bg).padding(16.dp),
+        Modifier.fillMaxWidth().weight(1f).then(if (side == Side.RED) Modifier.tourTarget(TourStep.VS_SIDES) else Modifier).background(bg).padding(16.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.spacedBy(8.dp, Alignment.CenterVertically),
     ) {

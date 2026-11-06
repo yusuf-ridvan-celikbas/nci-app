@@ -16,6 +16,8 @@ import com.cansin.app.data.DrinkKind
 import com.cansin.app.domain.BeerRules
 import com.cansin.app.domain.Drinks
 import com.cansin.app.domain.ResultCards
+import com.cansin.app.domain.TutorialRules
+import com.cansin.app.domain.TutorialTopic
 import com.cansin.app.domain.BeerSize
 import com.cansin.app.domain.BodyProfile
 import com.cansin.app.domain.CareRules
@@ -67,6 +69,7 @@ private val WATER_SIZE = intPreferencesKey("water_size_ml")
 private val DEFAULT_BRAND = stringPreferencesKey("default_brand")
 private val HIDDEN_BRANDS = androidx.datastore.preferences.core.stringSetPreferencesKey("hidden_brands")
 private val DEFAULT_SERVING = stringPreferencesKey("default_serving")
+private val TUTORIALS_SEEN = androidx.datastore.preferences.core.stringSetPreferencesKey("tutorials_seen")
 /** "price_BEER" = beer 50 cl (P28 key kept), "price_BEER_33", "price_BEER_1L", "price_WINE", … */
 private fun priceKey(slot: PriceSlot) = longPreferencesKey("price_" + slot.name)
 private val COMPRESS_AFTER = stringPreferencesKey("compress_after")
@@ -132,6 +135,7 @@ class SettingsStore(private val context: Context) {
             budgetMinor = CareRules.cleanBudget(p[BUDGET_MINOR]),
             pinSet = p[PIN_HASH] != null,
             pinHidesWidget = p[PIN_HIDES_WIDGET] ?: true,
+            tutorialsSeen = TutorialRules.decode(p[TUTORIALS_SEEN]),
         )
     }
 
@@ -295,6 +299,12 @@ class SettingsStore(private val context: Context) {
     suspend fun dismissProfilePrompt() = edit { it[PROFILE_PROMPT_DISMISSED] = true }
 
     suspend fun markPinInfoSeen() = edit { it[PIN_INFO_SEEN] = true }
+
+    suspend fun markTutorialSeen(topic: TutorialTopic) = edit {
+        it[TUTORIALS_SEEN] = TutorialRules.encode(TutorialRules.decode(it[TUTORIALS_SEEN]) + topic)
+    }
+
+    suspend fun resetTutorials() = edit { it.remove(TUTORIALS_SEEN) }
 
     /** Never both off: turning one source off turns the other on. */
     suspend fun setGameSources(builtIn: Boolean, own: Boolean) = edit {

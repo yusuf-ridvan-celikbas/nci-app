@@ -4,6 +4,7 @@ import android.text.format.DateFormat
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
@@ -57,6 +58,8 @@ import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import com.cansin.app.R
+import com.cansin.app.domain.TourStep
+import com.cansin.app.domain.TutorialTopic
 import com.cansin.app.data.Note
 import com.cansin.app.data.Side
 import com.cansin.app.domain.AmountInput
@@ -85,16 +88,17 @@ private fun NotesContent(viewModel: NotesViewModel, state: NotesState, onBack: (
             TopAppBar(
                 title = { Text(stringResource(R.string.tab_title)) },
                 actions = {
-                    TextButton(onClick = { settling = true }, enabled = state.totals.total > 0) { Text(stringResource(R.string.settle_title)) }
+                    HelpButton(TutorialTopic.TAB)
+                    TextButton(onClick = { settling = true }, enabled = state.totals.total > 0, modifier = Modifier.tourTarget(TourStep.TAB_SETTLE)) { Text(stringResource(R.string.settle_title)) }
                 },
             )
         },
-        bottomBar = { QuickAdd(state, onAdd = viewModel::add) },
+        bottomBar = { Box(Modifier.tourTarget(TourStep.TAB_ADD)) { QuickAdd(state, onAdd = viewModel::add) } },
     ) { padding ->
         Column(Modifier.fillMaxSize().padding(padding)) {
             if (state.drinkLines.isEmpty() && state.waterLines.isEmpty()) {
                 // Count section placeholder: shows where tonight's drinks will appear.
-                Column(Modifier.padding(horizontal = 16.dp, vertical = 8.dp)) {
+                Column(Modifier.tourTarget(TourStep.TAB_DRINKS).padding(horizontal = 16.dp, vertical = 8.dp)) {
                     Text(stringResource(R.string.tab_drinks_auto), style = MaterialTheme.typography.titleSmall)
                     Text(
                         stringResource(R.string.tab_drinks_empty),
@@ -114,7 +118,7 @@ private fun NotesContent(viewModel: NotesViewModel, state: NotesState, onBack: (
             LazyColumn(Modifier.weight(1f)) {
                 if (state.drinkLines.isNotEmpty() || state.waterLines.isNotEmpty()) {
                     item(key = "drinks_header") {
-                        Column(Modifier.padding(horizontal = 16.dp, vertical = 8.dp)) {
+                        Column(Modifier.tourTarget(TourStep.TAB_DRINKS).padding(horizontal = 16.dp, vertical = 8.dp)) {
                             Text(stringResource(R.string.tab_drinks_auto), style = MaterialTheme.typography.titleSmall)
                             Text(
                                 stringResource(if (state.showPriceHint) R.string.tab_price_hint else R.string.tab_drinks_hint),
@@ -146,7 +150,7 @@ private fun NotesContent(viewModel: NotesViewModel, state: NotesState, onBack: (
                     HorizontalDivider()
                 }
             }
-            Column(Modifier.fillMaxWidth().padding(16.dp)) {
+            Column(Modifier.fillMaxWidth().tourTarget(TourStep.TAB_TOTAL).padding(16.dp)) {
                 if (state.versus) {
                     val totals = state.totals
                     listOf(Side.RED to totals.red, Side.BLUE to totals.blue, null to totals.shared).forEach { (side, amount) ->

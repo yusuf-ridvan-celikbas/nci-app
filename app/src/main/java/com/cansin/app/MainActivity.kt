@@ -87,6 +87,17 @@ import com.cansin.app.domain.PinRules
 import com.cansin.app.ui.LockScreen
 import com.cansin.app.ui.theme.dynamicColorAvailable
 import com.cansin.app.widget.CounterWidget
+import com.cansin.app.domain.TutorialRules
+import com.cansin.app.domain.TutorialTopic
+import com.cansin.app.ui.LocalTutorial
+import com.cansin.app.ui.TutorialSheet
+import com.cansin.app.ui.TourOverlay
+import com.cansin.app.ui.TourTargets
+import com.cansin.app.ui.LocalTourTargets
+import com.cansin.app.ui.tourTarget
+import com.cansin.app.domain.TourStep
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberUpdatedState
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
@@ -248,15 +259,49 @@ class MainActivity : ComponentActivity() {
                 openTabRequest = false
             }
         }
+        // P37: GENERAL once after the age gate, then each section's guide on its first visit.
+        var tutorial by rememberSaveable { mutableStateOf<TutorialTopic?>(null) }
+        val section = when {
+            !versusState.loaded || !groupState.loaded -> null
+            screen == Screen.COUNTER -> if (versusState.session != null || groupState.session != null) TutorialTopic.FRIENDS else TutorialTopic.TONIGHT
+            screen == Screen.TAB -> TutorialTopic.TAB
+            screen == Screen.GAME -> TutorialTopic.GAME
+            screen == Screen.HISTORY -> TutorialTopic.HISTORY
+            else -> null
+        }
+        val seen by rememberUpdatedState(settings.tutorialsSeen)
+        val tourTargets = remember { TourTargets() }
+        val shared = versusState.session != null || groupState.session != null
+        // Tours point at a real screen, so opening one (e.g. from Settings) goes there first.
+        val openTutorial: (TutorialTopic) -> Unit = { topic ->
+            when (topic) {
+                TutorialTopic.TONIGHT, TutorialTopic.FRIENDS -> screen = Screen.COUNTER
+                TutorialTopic.TAB -> screen = Screen.TAB
+                TutorialTopic.GAME -> screen = Screen.GAME
+                TutorialTopic.HISTORY -> screen = Screen.HISTORY
+                TutorialTopic.GENERAL, TutorialTopic.WIDGET -> Unit
+            }
+            gameSheet = false
+            tutorial = topic
+        }
+        LaunchedEffect(section, settings.ageConfirmed, showLock) {
+            TutorialRules.autoShow(seen, section, settings.ageConfirmed, showLock, tutorial != null)?.let { tutorial = it }
+        }
         BackHandler(screen != Screen.COUNTER) { screen = if (screen == Screen.DETAIL) Screen.HISTORY else Screen.COUNTER }
 
-        CansinTheme(dark, settings.accent) { CompositionLocalProvider(LocalCurrency provides settings.currency) {
+        CansinTheme(dark, settings.accent) { CompositionLocalProvider(
+            LocalCurrency provides settings.currency,
+            LocalTutorial provides openTutorial,
+            LocalTourTargets provides tourTargets,
+        ) {
             val tab = screen.tab()
             val showBar = settings.ageConfirmed && !showLock && tab != null
             Scaffold(
                 bottomBar = {
-                    if (showBar && tab != null) AppNavBar(tab, NAV_TABS) {
-                        if (it == RootTab.GAME) gameSheet = !gameSheet else { gameSheet = false; screen = it.screen() }
+                    if (showBar && tab != null) Box(Modifier.tourTarget(TourStep.TONIGHT_NAV)) {
+                        AppNavBar(tab, NAV_TABS) {
+                            if (it == RootTab.GAME) gameSheet = !gameSheet else { gameSheet = false; screen = it.screen() }
+                        }
                     }
                 },
                 contentWindowInsets = WindowInsets(0),
@@ -281,6 +326,7 @@ class MainActivity : ComponentActivity() {
                     notificationAccess = notificationAccess,
                     friends = friends,
                     actions = settingsActions(onBack = { screen = Screen.COUNTER }),
+                    tutorialAvailable = { TutorialRules.available(it, shared) },
                 )
                 screen == Screen.GAME -> GameScreen(
                     game,
@@ -345,7 +391,6 @@ class MainActivity : ComponentActivity() {
             )
             }
             }
-            val shared = versusState.session != null || groupState.session != null
             LaunchedEffect(shared, versusState.loaded, groupState.loaded) {
                 if (versusState.loaded && groupState.loaded && !shared) game.sessionClosed()
             }
@@ -369,6 +414,14 @@ class MainActivity : ComponentActivity() {
                     },
                     dismissButton = { TextButton(onClick = { pinInfo = false }) { Text(stringResource(R.string.action_cancel)) } },
                 )
+            }
+            tutorial?.takeIf { settings.ageConfirmed && !showLock }?.let { topic ->
+                val close = {
+                    tutorial = null
+                    lifecycleScope.launch { store.markTutorialSeen(topic) }
+                    Unit
+                }
+                if (TutorialRules.isCards(topic)) TutorialSheet(topic, onClose = close) else TourOverlay(topic, onClose = close)
             }
             if (choosingMode && settings.ageConfirmed) {
                 ModeChooserDialog(
@@ -431,10 +484,18 @@ class MainActivity : ComponentActivity() {
                 resumed = resumed,
                 onStart = { app.appScope.launch { app.drinkTimer.start(); CounterWidget.refreshAll(app) } },
                 onStop = { app.appScope.launch { app.drinkTimer.stop(); CounterWidget.refreshAll(app) } },
+                modifier = Modifier.tourTarget(TourStep.TONIGHT_TIMER),
             )
         }
         UndoEffect(water.waterAdded, snackbar, water::undo, R.string.water_added)
-        WaterBar(state, onAdd = { water.add() }, onRemove = water::removeLatest, onDismiss = water::dismiss, onAddSize = { water.add(it) })
+        WaterBar(
+            state,
+            onAdd = { water.add() },
+            onRemove = water::removeLatest,
+            onDismiss = water::dismiss,
+            onAddSize = { water.add(it) },
+            modifier = Modifier.tourTarget(TourStep.TONIGHT_WATER),
+        )
     }
 
     @Composable
@@ -442,7 +503,13 @@ class MainActivity : ComponentActivity() {
         val state by promille.state.collectAsState()
         var settingUp by rememberSaveable { mutableStateOf(false) }
         PromilleTicker(promille, resumed)
-        PromilleCard(state, onOpen, onSetUp = { settingUp = true }, onDismissPrompt = { promille.dismissPrompt() })
+        PromilleCard(
+            state,
+            onOpen,
+            onSetUp = { settingUp = true },
+            onDismissPrompt = { promille.dismissPrompt() },
+            modifier = Modifier.tourTarget(TourStep.TONIGHT_PROMILLE),
+        )
         if (settingUp) {
             ProfileDialog(
                 initial = null,
@@ -503,6 +570,7 @@ class MainActivity : ComponentActivity() {
         onPrice = { slot, minor -> update { setPrice(slot, minor) } },
         onDefaultServing = { serving -> update { setDefaultServing(serving) } },
         onWidgetPromille = { on -> lifecycleScope.launch { app.settingsStore.setWidgetPromille(on); CounterWidget.refreshAll(app) } },
+        onResetTutorials = { lifecycleScope.launch { store.resetTutorials() } },
     )
 
     private fun update(block: suspend SettingsStore.() -> Unit) {

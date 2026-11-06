@@ -48,6 +48,8 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.layout.heightIn
 import com.cansin.app.R
+import com.cansin.app.domain.TourStep
+import com.cansin.app.domain.TutorialTopic
 import com.cansin.app.domain.BeerSize
 import com.cansin.app.domain.DrinkChoice
 import kotlinx.coroutines.coroutineScope
@@ -79,8 +81,9 @@ fun CounterScreen(
             TopAppBar(
                 title = { Text(title) },
                 actions = {
+                    HelpButton(TutorialTopic.TONIGHT)
                     // Small question + people icon: opens Versus / Together.
-                    TextButton(onClick = onStartVersus) {
+                    TextButton(onClick = onStartVersus, modifier = Modifier.tourTarget(TourStep.TONIGHT_FRIENDS)) {
                         Text(stringResource(R.string.with_friends_question), style = MaterialTheme.typography.labelMedium)
                         Icon(
                             painterResource(R.drawable.ic_versus),
@@ -96,7 +99,7 @@ fun CounterScreen(
             OutlinedButton(
                 onClick = { viewModel.endSession() },
                 enabled = state.sessionActive,
-                modifier = Modifier.fillMaxWidth().navigationBarsPadding().padding(16.dp),
+                modifier = Modifier.fillMaxWidth().navigationBarsPadding().padding(16.dp).tourTarget(TourStep.TONIGHT_END),
             ) { Text(stringResource(R.string.end_session)) }
         },
     ) { padding ->
@@ -121,7 +124,7 @@ fun CounterScreen(
             drinkBreakdown(state.kinds)?.let {
                 Text(it, style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
             }
-            AddButton(onClick = { viewModel.add() }, onLongClick = { pickingSize = true })
+            Box(Modifier.tourTarget(TourStep.TONIGHT_PLUS)) { AddButton(onClick = { viewModel.add() }, onLongClick = { pickingSize = true }) }
             Text(
                 text = stringResource(R.string.counter_prompt),
                 style = MaterialTheme.typography.bodyMedium,
@@ -129,14 +132,14 @@ fun CounterScreen(
                 textAlign = TextAlign.Center,
             )
             // Same row style as water: count · −1 · +1 (the big circle stays the main +).
-            CountRow(
+            Box(Modifier.tourTarget(TourStep.TONIGHT_DRINKS)) { CountRow(
                 label = stringResource(R.string.detail_beers, state.count),
                 count = state.count,
                 removeDescription = stringResource(R.string.remove_beer),
                 addDescription = stringResource(R.string.add_beer),
                 onRemove = { viewModel.removeLatest() },
                 onAdd = { viewModel.add() },
-            )
+            ) }
             waterBar(snackbar)
         }
         }

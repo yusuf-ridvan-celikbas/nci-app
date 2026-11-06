@@ -30,11 +30,11 @@ import androidx.compose.runtime.setValue
 import com.cansin.app.R
 
 @Composable
-fun WaterBar(state: WaterState, onAdd: () -> Unit, onRemove: () -> Unit, onDismiss: () -> Unit, onAddSize: (Int) -> Unit = {}) {
+fun WaterBar(state: WaterState, onAdd: () -> Unit, onRemove: () -> Unit, onDismiss: () -> Unit, modifier: Modifier = Modifier, onAddSize: (Int) -> Unit = {}) {
     if (!state.available) return
     var picking by androidx.compose.runtime.saveable.rememberSaveable { androidx.compose.runtime.mutableStateOf(false) }
     if (picking) WaterSizeDialog(onPick = { picking = false; onAddSize(it) }, onDismiss = { picking = false })
-    Column(Modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+    Column(modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(8.dp)) {
         if (state.nudge) {
             Card(
                 colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.secondaryContainer),

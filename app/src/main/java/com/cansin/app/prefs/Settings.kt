@@ -84,6 +84,8 @@ data class Settings(
     val budgetMinor: Long? = null,
     val pinSet: Boolean = false,
     val pinHidesWidget: Boolean = true,
+    /** P37: guides already shown (or skipped). */
+    val tutorialsSeen: Set<com.cansin.app.domain.TutorialTopic> = emptySet(),
 ) {
     companion object {
         const val DEFAULT_REMINDER_INTERVAL_MIN = 10

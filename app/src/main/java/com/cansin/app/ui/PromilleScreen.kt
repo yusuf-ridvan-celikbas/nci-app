@@ -84,12 +84,12 @@ private fun warningsFor(state: PromilleState): List<Warning> {
 }
 
 @Composable
-fun PromilleCard(state: PromilleState, onOpen: () -> Unit, onSetUp: () -> Unit, onDismissPrompt: () -> Unit) {
+fun PromilleCard(state: PromilleState, onOpen: () -> Unit, onSetUp: () -> Unit, onDismissPrompt: () -> Unit, modifier: Modifier = Modifier) {
     if (!state.loaded) return
     val profile = state.profile
     if (profile == null) {
         if (state.promptDismissed) return
-        Card(Modifier.fillMaxWidth()) {
+        Card(modifier.fillMaxWidth()) {
             Column(Modifier.padding(16.dp)) {
                 Text(stringResource(R.string.promille_title), style = MaterialTheme.typography.titleSmall)
                 Text(stringResource(R.string.profile_prompt_body), style = MaterialTheme.typography.bodyMedium)
@@ -103,7 +103,7 @@ fun PromilleCard(state: PromilleState, onOpen: () -> Unit, onSetUp: () -> Unit, 
     }
     val estimate = state.estimate ?: return
     val openDescription = stringResource(R.string.promille_open)
-    Card(Modifier.fillMaxWidth().clickable(onClickLabel = openDescription, onClick = onOpen)) {
+    Card(modifier.fillMaxWidth().clickable(onClickLabel = openDescription, onClick = onOpen)) {
         Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
             Text(stringResource(R.string.promille_current), style = MaterialTheme.typography.labelMedium)
             Text(

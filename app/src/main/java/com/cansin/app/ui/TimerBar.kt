@@ -19,9 +19,9 @@ import com.cansin.app.R
 import kotlinx.coroutines.delay
 
 @Composable
-fun TimerBar(startedAt: Long?, canStart: Boolean, resumed: Boolean, onStart: () -> Unit, onStop: () -> Unit) {
+fun TimerBar(startedAt: Long?, canStart: Boolean, resumed: Boolean, onStart: () -> Unit, onStop: () -> Unit, modifier: Modifier = Modifier) {
     if (startedAt == null && !canStart) return
-    Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+    Row(modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
         if (startedAt != null) {
             var now by remember { mutableLongStateOf(System.currentTimeMillis()) }
             LaunchedEffect(startedAt, resumed) {
