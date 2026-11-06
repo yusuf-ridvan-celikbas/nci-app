@@ -1,6 +1,6 @@
 # Progress
 
-Current phase: **P13–P30 approved on the phone (2026-11-06), merged into master and pushed. iOS: rules up to P26 in CansinCore (uncompiled); P27–P30 still to port (see ios/PORT_PLAN.md, needs a Mac).**
+Current phase: **NEXT: P37 tutorials (planned, not started) on branch feature/p37-tutorials (from p36). Local chain not pushed: p27→…→p36 (feature/p31-widget … feature/p36-no-brands); master on GitHub = P13–P30. iOS: rules up to P26 only.**
 
 ## Phases
 - [x] Setup (project, wrapper, git, CLAUDE.md)
@@ -148,6 +148,13 @@ Current phase: **P13–P30 approved on the phone (2026-11-06), merged into maste
 - New size classes (width < 110 dp): TINY 1×1 = the count inside a round +1 button; TALL 1×2 = count + label on top, 52 dp round +1 below; COLUMN 1×3+ = drinks (+1), water (+1), tab total stacked (`widget_column.xml`, same ids/cells as the 4×1 strip; Versus: red/blue +1 + tab). API 31+ size map gains 40×110 and 40×200.
 - Lint clean, tests green; app starts on the phone. Not yet placed/resized by the user.
 - Phone feedback: widget numbers were tiny (autoSize + wrap_content picks the minimum) → fixed sizes. 1-row widgets (3×1/4×1) use the old pages look with −1/+1: `widget_pager.xml` ‹ label •∘∘ value (−1) (+1) › (Versus: red/blue +1). 2×1 keeps the round +1 (user preferred). Narrow widgets (1–2 columns, 2+ rows: 1×2, 2×2, 2×3, 1×4…) use the narrow pages look (`widget_small_narrow.xml`); 3×2/4×2 the regular pages look; both with −1 next to +1; the stacked Drinks/Water/Tab column was removed (user); the dashboard (BIG) is now 4×3, XL 4×4+. Narrow tall widgets: compact cells (label, then value + 36 dp +1) so 3 blocks fit; on this Samsung a 2-cell width counts as narrow.
+
+## P37 plan (2026-11-06, approved, NOT started) — tutorials
+- Swipe-card tutorials (full-screen Dialog + HorizontalPager: icon, title, 1–2 lines, dots, Skip/Next/Done; Back = Skip).
+- Topics: GENERAL (6 pages), TONIGHT (5), TAB (4), GAME (4), HISTORY (3), FRIENDS = Versus/Together (3), WIDGET (3); content outline in ~/.claude/plans/so-i-want-to-proud-fox.md.
+- Auto: GENERAL once after the 18+ gate; each section's tutorial on its first visit (after GENERAL); never while PIN-locked. DataStore `tutorials_seen` (string set).
+- Replay: Settings → General & look → Tutorials (row per topic + "Show all again" reset) and a "?" (new ic_help) in the top bars of Tonight, Versus/Together, Tab, Game, History.
+- Files: new domain/Tutorials.kt (+TutorialRules.autoShow, tests), ui/TutorialSheet.kt; wire in MainActivity (Screen → topic), Settings/SettingsStore, strings EN+TR. No new dependency.
 
 ## P36 (2026-11-06) — no brands at all (user decision after the legal-risk talk)
 - Brand feature removed: no brand field in the picker, Tab line dialog, Settings, widget or labels; no built-in names; DrinkChoice/DrinkLine/DAO queries without brand; `BrandRules` deleted. Column `beer_event.brand` kept for the schema but cleared on every start (`StorageDao.clearBrands`); `default_brand` / `hidden_brands` prefs removed. Backup no longer writes `brand` (restore ignores it).
