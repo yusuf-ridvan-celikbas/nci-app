@@ -6,21 +6,21 @@
 
 <p align="center">
   An offline, privacy-first night-out tracker for Android.<br>
-  Drinks, water and the bar tab — everything stays on your phone.
+  Drinks, water and the bar tab: everything stays on your phone.
 </p>
 
 ---
 
 ## What it does
 
-- **Tonight** — one big +1 for your drink, a water counter next to it, an optional drink timer.
-- **Tab** — who had what and what it costs; split and settle at the end of the night.
-- **Versus & Together** — track a night with one friend (red vs blue) or a whole table.
-- **Game** — a Truth or Dare style table game, with your own questions.
-- **History** — past nights, filters and simple stats.
-- **Health** — water reminders, a care check late at night and a rough blood-alcohol *estimate* (never use it to decide whether you can drive).
-- **Widgets, quick tile and shortcuts** — +1 from the home screen.
-- **Privacy** — PIN lock, local JSON backup & restore, "delete all data". English and Turkish.
+- **Tonight**: one big +1 for your drink, a water counter next to it, an optional drink timer.
+- **Tab**: who had what and what it costs; split and settle at the end of the night.
+- **Versus & Together**: track a night with one friend (red vs blue) or a whole table.
+- **Game**: a Truth or Dare style table game, with your own questions.
+- **History**: past nights, filters and simple stats.
+- **Health**: water reminders, a care check late at night and a rough blood-alcohol *estimate* (never use it to decide whether you can drive).
+- **Widgets, quick tile and shortcuts**: +1 from the home screen.
+- **Privacy**: PIN lock, local JSON backup & restore, "delete all data". English and Turkish.
 
 ## Privacy
 
