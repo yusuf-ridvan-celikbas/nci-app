@@ -670,4 +670,17 @@
     <string name="setting_plus_picture_note">Büyük +1\'in arkasında bir fotoğraf: takımın ya da bir arkadaşın gibi.</string>
     <string name="setting_widget_picture">Widget\'ta da göster</string>
     <string name="setting_widget_picture_note">Varsayılan olarak kapalı, çünkü ana ekranını başkaları görebilir. PIN sayıları gizlediğinde resim de gizlenir.</string>
+    <string name="settings_about">Hakkında ve iletişim</string>
+    <string name="settings_about_summary">İstekler, sorunlar, sürüm, haklar</string>
+    <string name="about_contact">İletişim</string>
+    <string name="about_contact_note">Bir fikrin, isteğin ya da eklemek istediğin bir şey mi var? Bir sorun mu buldun? Bana e-posta gönder.</string>
+    <string name="about_request">İstek gönder</string>
+    <string name="about_problem">Sorun bildir</string>
+    <string name="about_subject_request">%1$s – İstek</string>
+    <string name="about_subject_problem">%1$s – Sorun</string>
+    <string name="about_mail_body">\n\n\n—\nUygulama sürümü: %1$s\nAndroid: %2$s</string>
+    <string name="about_no_mail_app">E-posta uygulaması bulunamadı. Yukarıdaki adrese uzun basarak kopyalayabilirsin.</string>
+    <string name="about_version">Sürüm %1$s</string>
+    <string name="about_made_by">%1$s tarafından yapıldı</string>
+    <string name="about_rights">© 2026 %1$s. Tüm hakları saklıdır.</string>
 </resources>

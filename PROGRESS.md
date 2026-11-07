@@ -155,6 +155,11 @@ Current phase: **P38 pictures on +1 done and committed on branch feature/p38-pic
 - Together unchanged (user choice). iOS Versus: do the same 3 pages later.
 - Strings: `versus_page_sides`, `versus_page_water` (EN/TR); game tab reuses `nav_game`. Not yet tested on the phone (user to check).
 
+## P40 (2026-11-07) — About & contact (user request)
+- Settings → new last page "About & contact" (`SettingsPage.ABOUT`, `ui/AboutSection.kt`): app name + version (from PackageManager), Contact (address in a SelectionContainer for long-press copy; "Send a request" / "Report a problem" open a `mailto:` ACTION_SENDTO draft with subject "Salgam – Request/Problem" and a body with app + Android version; no mail app → hint), footer "Made by Yusuf Ridvan Celikbas" + "© 2026 Yusuf Ridvan Celikbas. All rights reserved." (EN/TR).
+- `about_email` / `about_owner` are non-translatable strings. The mail app does the network; nothing is sent automatically. No clipboard code.
+- Release APK 2.13 MB. Permissions unchanged (POST_NOTIFICATIONS, RECEIVE_BOOT_COMPLETED); no INTERNET. No new dependency. Lint 0 errors (2 version notices). Tests 254 pass. Trade-off: the address is in the APK (public on purpose, spam risk only). Not yet tested on the phone. iOS: same page later.
+
 ## P39 (2026-11-06) — release signing (user request)
 - Release key: PKCS12 `C:/Users/ridvn/keys/salgambalgam-release.jks` (outside the repo), alias `salgambalgam`, RSA 4096, ~27 years, DN `CN=SalgamBalgam, O=SalgamBalgam`. Cert SHA-256 `ff55c77c…3657b68`.
 - Password + paths in repo-root `signing.properties` (gitignored, like `*.jks`); `app/build.gradle.kts` signs release only when that file exists (else unsigned, as before). Never print or commit the password.

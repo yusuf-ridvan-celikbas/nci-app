@@ -108,6 +108,7 @@ enum class SettingsPage(@StringRes val title: Int, @StringRes val summary: Int, 
     HEALTH(R.string.settings_health, R.string.settings_health_summary, R.drawable.ic_shortcut_water),
     FRIENDS(R.string.settings_friends, R.string.settings_friends_summary, R.drawable.ic_versus),
     PRIVACY(R.string.settings_privacy, R.string.settings_privacy_summary, R.drawable.ic_lock),
+    ABOUT(R.string.settings_about, R.string.settings_about_summary, R.drawable.ic_help),
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -220,6 +221,7 @@ fun SettingsScreen(
                     HorizontalDivider(Modifier.padding(vertical = 16.dp))
                     StorageSection(settings, actions.storage, actions.onKeepHistory, actions.onCompressAfter, actions.onExport)
                 }
+                SettingsPage.ABOUT -> AboutSection()
             }
         }
     }

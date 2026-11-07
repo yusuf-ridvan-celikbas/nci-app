@@ -682,4 +682,19 @@
     <string name="setting_plus_picture_note">A photo behind your big +1, like your team or a friend.</string>
     <string name="setting_widget_picture">Show it on the widget</string>
     <string name="setting_widget_picture_note">Off by default, because others can see your home screen. Hidden when the PIN hides your counts.</string>
+    <string name="about_email" translatable="false">yusufridvancelikbas@gmail.com</string>
+    <string name="about_owner" translatable="false">Yusuf Ridvan Celikbas</string>
+    <string name="settings_about">About &amp; contact</string>
+    <string name="settings_about_summary">Requests, problems, version, rights</string>
+    <string name="about_contact">Contact</string>
+    <string name="about_contact_note">Have an idea, a request or something to add? Found a problem? Send me an email.</string>
+    <string name="about_request">Send a request</string>
+    <string name="about_problem">Report a problem</string>
+    <string name="about_subject_request">%1$s – Request</string>
+    <string name="about_subject_problem">%1$s – Problem</string>
+    <string name="about_mail_body">\n\n\n—\nApp version: %1$s\nAndroid: %2$s</string>
+    <string name="about_no_mail_app">No mail app found. You can copy the address above by long-pressing it.</string>
+    <string name="about_version">Version %1$s</string>
+    <string name="about_made_by">Made by %1$s</string>
+    <string name="about_rights">© 2026 %1$s. All rights reserved.</string>
 </resources>
