@@ -16,8 +16,8 @@ android {
         applicationId = "com.cansin.app"
         minSdk = 26
         targetSdk = 37
-        versionCode = 1
-        versionName = "0.1.0"
+        versionCode = 2
+        versionName = "0.2.0"
     }
 
     // Release signing from the gitignored signing.properties (repo root); without it, release stays unsigned.
@@ -81,3 +81,12 @@ dependencies {
 ksp {
     arg("room.schemaLocation", "$projectDir/schemas")
 }
+
+// Easy name for the APK shared with friends: <repo>/release/Salgam-v<versionName>.apk (gitignored).
+val copyShareApk = tasks.register<Copy>("copyShareApk") {
+    val shareName = "Salgam-v${android.defaultConfig.versionName}.apk"
+    from(layout.buildDirectory.file("outputs/apk/release/app-release.apk"))
+    into(rootProject.layout.projectDirectory.dir("release"))
+    rename("app-release.apk", shareName)
+}
+tasks.matching { it.name == "assembleRelease" }.configureEach { finalizedBy(copyShareApk) }

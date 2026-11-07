@@ -162,6 +162,8 @@ Current phase: **P38 pictures on +1 done and committed on branch feature/p38-pic
 
 - Shared names (user): friend result codes are now `Salgam-<payload>` (was `cansin:1:`), backup file `Salgam-backup.json` with format `salgam-backup` (was `cansin-export`). Old codes and old backups are still read (`ResultCards` regex, `ExportJson.FORMATS`); decode tries every match so a "Salgam-…" word in a chat doesn't hide the code. Package id `com.cansin.app` and `cansin.db` kept (changing them = new app / lost data for friends).
 
+- Release 0.2.0 (versionCode 2, same key): `assembleRelease` now also copies the APK to `<repo>/release/Salgam-v<versionName>.apk` (task `copyShareApk`, folder gitignored) — that's the file to send to friends. APK 2.13 MB, AAB 5.4 MB.
+
 ## P39 (2026-11-06) — release signing (user request)
 - Release key: PKCS12 `C:/Users/ridvn/keys/salgambalgam-release.jks` (outside the repo), alias `salgambalgam`, RSA 4096, ~27 years, DN `CN=SalgamBalgam, O=SalgamBalgam`. Cert SHA-256 `ff55c77c…3657b68`.
 - Password + paths in repo-root `signing.properties` (gitignored, like `*.jks`); `app/build.gradle.kts` signs release only when that file exists (else unsigned, as before). Never print or commit the password.
