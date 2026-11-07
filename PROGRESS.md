@@ -160,6 +160,8 @@ Current phase: **P38 pictures on +1 done and committed on branch feature/p38-pic
 - `about_email` / `about_owner` are non-translatable strings. The mail app does the network; nothing is sent automatically. No clipboard code.
 - Release APK 2.13 MB. Permissions unchanged (POST_NOTIFICATIONS, RECEIVE_BOOT_COMPLETED); no INTERNET. No new dependency. Lint 0 errors (2 version notices). Tests 254 pass. Trade-off: the address is in the APK (public on purpose, spam risk only). Not yet tested on the phone. iOS: same page later.
 
+- Shared names (user): friend result codes are now `Salgam-<payload>` (was `cansin:1:`), backup file `Salgam-backup.json` with format `salgam-backup` (was `cansin-export`). Old codes and old backups are still read (`ResultCards` regex, `ExportJson.FORMATS`); decode tries every match so a "Salgam-…" word in a chat doesn't hide the code. Package id `com.cansin.app` and `cansin.db` kept (changing them = new app / lost data for friends).
+
 ## P39 (2026-11-06) — release signing (user request)
 - Release key: PKCS12 `C:/Users/ridvn/keys/salgambalgam-release.jks` (outside the repo), alias `salgambalgam`, RSA 4096, ~27 years, DN `CN=SalgamBalgam, O=SalgamBalgam`. Cert SHA-256 `ff55c77c…3657b68`.
 - Password + paths in repo-root `signing.properties` (gitignored, like `*.jks`); `app/build.gradle.kts` signs release only when that file exists (else unsigned, as before). Never print or commit the password.

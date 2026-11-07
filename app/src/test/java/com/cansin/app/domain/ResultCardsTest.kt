@@ -16,9 +16,12 @@ class ResultCardsTest {
     @Test
     fun roundTripsInsideAChatMessage() {
         val code = ResultCards.encode(card)
-        assertTrue(code.startsWith("cansin:1:"))
+        assertTrue(code.startsWith("Salgam-"))
         assertEquals(card, ResultCards.decode("Here's mine 🍺\n$code\nsee you!", today))
-        assertEquals(card, ResultCards.decode("CANSIN:1:" + code.removePrefix(ResultCards.PREFIX), today))
+        assertEquals(card, ResultCards.decode("SALGAM-" + code.removePrefix(ResultCards.PREFIX), today))
+        // Old codes still work, and an ordinary "Salgam-..." word before the code doesn't hide it.
+        assertEquals(card, ResultCards.decode("cansin:1:" + code.removePrefix(ResultCards.PREFIX), today))
+        assertEquals(card, ResultCards.decode("Salgam-balgam-night!! $code", today))
     }
 
     @Test
@@ -30,7 +33,7 @@ class ResultCardsTest {
 
     @Test
     fun rejectsGarbage() {
-        listOf("", "hello", "cansin:1:", "cansin:1:!!!!!!!!!!", "cansin:2:" + ResultCards.encode(card).substringAfter("1:"), "x".repeat(6_000))
+        listOf("", "hello", "Salgam-", "Salgam-!!!!!!!!!!", "cansin:1:", "cansin:2:" + ResultCards.encode(card).removePrefix(ResultCards.PREFIX), "x".repeat(6_000))
             .forEach { assertNull(it.take(40), ResultCards.decode(it, today)) }
     }
 

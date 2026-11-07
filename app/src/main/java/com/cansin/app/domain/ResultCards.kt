@@ -10,14 +10,15 @@ import java.util.Base64
 data class ResultCard(val name: String, val day: LocalDate, val beers: Int, val durationMin: Int, val water: Int)
 
 object ResultCards {
-    const val PREFIX = "cansin:1:"
+    const val PREFIX = "Salgam-"
     const val MAX_BEERS = 100
     const val MAX_WATER = 100
     const val MAX_DURATION_MIN = 72 * 60
     private const val MAX_TEXT = 5_000
     private const val MAX_PAYLOAD = 400
     private val EARLIEST: LocalDate = LocalDate.of(2020, 1, 1)
-    private val CODE = Regex("""cansin:1:([A-Za-z0-9_-]{8,$MAX_PAYLOAD})""", RegexOption.IGNORE_CASE)
+    /** "Salgam-<payload>"; codes from before P40 ("cansin:1:<payload>") are still read. */
+    private val CODE = Regex("""(?:Salgam-|cansin:1:)([A-Za-z0-9_-]{8,$MAX_PAYLOAD})""", RegexOption.IGNORE_CASE)
 
     /** Name is user-typed: trimmed, ≤30 chars, no control or bidi-override characters (anti-spoofing). */
     fun cleanName(raw: String?): String? = VersusRules.cleanName(raw)?.takeIf { name -> name.none(::isUnsafe) }
@@ -41,7 +42,11 @@ object ResultCards {
     /** Finds the first code anywhere in pasted text (e.g. a whole chat message). Null if missing or invalid. */
     fun decode(text: String, today: LocalDate): ResultCard? {
         if (text.length > MAX_TEXT) return null
-        val payload = CODE.find(text)?.groupValues?.get(1) ?: return null
+        // "Salgam-" can also start ordinary words in a chat message, so try each match.
+        return CODE.findAll(text).firstNotNullOfOrNull { decodePayload(it.groupValues[1], today) }
+    }
+
+    private fun decodePayload(payload: String, today: LocalDate): ResultCard? {
         val bytes = try {
             Base64.getUrlDecoder().decode(payload)
         } catch (_: IllegalArgumentException) {

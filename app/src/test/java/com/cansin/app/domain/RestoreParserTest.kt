@@ -87,6 +87,7 @@ class RestoreParserTest {
         assertEquals(RestoreError.INVALID, fail(json.dropLast(1)))
         assertEquals(RestoreError.INVALID, fail("""{"format":"cansin-export","format":"cansin-export","version":1,"sessions":[]}"""))
         assertTrue(ok("""{"format":"cansin-export","version":1,"sessions":[]}""").sessions.isEmpty())
+        assertTrue(ok("""{"format":"salgam-backup","version":1,"sessions":[]}""").sessions.isEmpty())
     }
 
     @Test

@@ -136,7 +136,7 @@ class DataManager(
     companion object {
         private const val BOM = 0xFEFF
         private const val EXPORT_DIR = "export"
-        private const val EXPORT_FILE = "cansin-export.json"
+        private const val EXPORT_FILE = "Salgam-backup.json"
         private const val MIME_JSON = "application/json"
         const val AUTHORITY_SUFFIX = ".export"
     }

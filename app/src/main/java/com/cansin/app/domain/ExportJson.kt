@@ -27,6 +27,10 @@ data class ExportData(
 
 object ExportJson {
     const val FORMAT_VERSION = 1
+    const val FORMAT = "salgam-backup"
+
+    /** Restore accepts our current name and the one written before P40. */
+    val FORMATS = setOf(FORMAT, "cansin-export")
 
     fun build(data: ExportData, includeProfile: Boolean, exportedAt: Long): String {
         val beers = data.beers.groupBy { it.sessionId }
@@ -34,7 +38,7 @@ object ExportJson {
         val notes = data.notes.groupBy { it.sessionId }
         val seats = data.seats.groupBy { it.sessionId }
         val root = linkedMapOf<String, Any?>(
-            "format" to "cansin-export",
+            "format" to FORMAT,
             "version" to FORMAT_VERSION,
             "exportedAt" to exportedAt,
             "sessions" to data.sessions.sortedBy { it.startedAt }.map { s ->

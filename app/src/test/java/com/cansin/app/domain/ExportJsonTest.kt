@@ -43,7 +43,7 @@ class ExportJsonTest {
     @Test
     fun nestsEventsUnderSessions() {
         val json = ExportJson.build(data, false, 99)
-        assertTrue(json.startsWith("{\"format\":\"cansin-export\",\"version\":1,\"exportedAt\":99,"))
+        assertTrue(json.startsWith("{\"format\":\"salgam-backup\",\"version\":1,\"exportedAt\":99,"))
         assertTrue(json.contains("\"beers\":[{\"side\":\"SOLO\",\"sizeMl\":500,\"abv\":5.0,\"at\":11,\"finishedAt\":null}]"))
         assertTrue(json.contains("\"water\":[{\"at\":12}]"))
         assertTrue(json.contains("\"friends\":[{\"id\":4,\"name\":\"Ali\"}]"))
@@ -53,6 +53,6 @@ class ExportJsonTest {
     @Test
     fun emptyExport() {
         val json = ExportJson.build(ExportData(emptyList(), emptyList(), emptyList(), emptyList(), emptyList(), null), true, 0)
-        assertEquals("{\"format\":\"cansin-export\",\"version\":1,\"exportedAt\":0,\"sessions\":[],\"friends\":[],\"friendResults\":[]}", json)
+        assertEquals("{\"format\":\"salgam-backup\",\"version\":1,\"exportedAt\":0,\"sessions\":[],\"friends\":[],\"friendResults\":[]}", json)
     }
 }

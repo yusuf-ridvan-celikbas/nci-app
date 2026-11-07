@@ -45,7 +45,7 @@ sealed interface RestoreResult {
     data class Fail(val error: RestoreError) : RestoreResult
 }
 
-/** Reads our own export (format "cansin-export" v1). Strict: one bad item rejects the whole file. */
+/** Reads our own export (format "salgam-backup" v1; "cansin-export" from before P40 too). Strict: one bad item rejects the whole file. */
 object RestoreParser {
     const val MAX_BYTES = 8 * 1024 * 1024
     const val MAX_SESSIONS = 10_000
@@ -60,7 +60,7 @@ object RestoreParser {
         if (text.length > MAX_BYTES) return RestoreResult.Fail(RestoreError.TOO_LARGE)
         return try {
             val root = (MiniJson.parse(text) as? Map<*, *>) ?: throw Bad(RestoreError.NOT_OURS)
-            if (root["format"] != "cansin-export") throw Bad(RestoreError.NOT_OURS)
+            if (root["format"] !in ExportJson.FORMATS) throw Bad(RestoreError.NOT_OURS)
             val version = root["version"] as? Long ?: throw Bad()
             if (version > ExportJson.FORMAT_VERSION) throw Bad(RestoreError.NEWER_VERSION)
             if (version < 1) throw Bad()
